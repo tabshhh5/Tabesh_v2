@@ -21,6 +21,9 @@ yarn-error.log
 # /assets/js/build/*.asset.php
 /assets/js/build/*.js.map
 
+# Duplicated CSS in src (original is in assets/css/)
+/assets/js/src/admin.css
+
 # IDE files
 .vscode/
 .idea/
