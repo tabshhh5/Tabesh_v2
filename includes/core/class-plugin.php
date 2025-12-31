@@ -108,6 +108,9 @@ class Plugin {
 		// Initialize REST API.
 		$this->rest_api = new \Tabesh_v2\Api\Rest_Api();
 
+		// Initialize Shortcodes.
+		new \Tabesh_v2\Shortcodes\Super_Dashboard_Shortcode();
+
 		// Initialize Admin (only in admin area).
 		if ( is_admin() ) {
 			$this->admin = new \Tabesh_v2\Admin\Admin();
