@@ -368,7 +368,17 @@ class Rest_Api {
 	 * @return \WP_REST_Response
 	 */
 	public function get_settings() {
+		$settings_panel = new \Tabesh_v2\Panels\Settings_Panel();
 		$settings = get_option( 'tabesh_v2_settings', array() );
+		
+		// Merge with defaults to ensure all settings exist.
+		if ( empty( $settings ) ) {
+			$settings = $settings_panel->get_default_settings();
+		} else {
+			$defaults = $settings_panel->get_default_settings();
+			$settings = array_replace_recursive( $defaults, $settings );
+		}
+		
 		return new \WP_REST_Response( $settings, 200 );
 	}
 
