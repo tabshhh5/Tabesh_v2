@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabesh Super Dashboard - Live Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .super-dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .dashboard-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .title-icon {
+            font-size: 36px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .dashboard-subtitle {
+            font-size: 16px;
+            color: #718096;
+            margin-top: 8px;
+        }
+
+        .layout-controls {
+            display: flex;
+            gap: 10px;
+            background: #f7fafc;
+            padding: 5px;
+            border-radius: 12px;
+        }
+
+        .layout-btn {
+            padding: 10px 16px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 20px;
+            color: #718096;
+        }
+
+        .layout-btn:hover, .layout-btn.active {
+            background: #667eea;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .module-selector {
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .selector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .selector-header h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .active-count {
+            padding: 6px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .module-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 20px;
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .module-card.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .module-icon {
+            font-size: 32px;
+            transition: transform 0.3s ease;
+        }
+
+        .module-card:hover .module-icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .module-title {
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .module-status {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .module-card.active .module-status {
+            background: rgba(255, 255, 255, 0.3);
+            color: #fff;
+        }
+
+        .modules-workspace {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .module-panel {
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: scaleIn 0.4s ease-out;
+        }
+
+        .module-panel:hover {
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            transform: translateY(-3px);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: #fff;
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .panel-icon {
+            font-size: 20px;
+        }
+
+        .panel-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #fff;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .panel-content {
+            padding: 24px;
+        }
+
+        .currency-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .currency-card {
+            padding: 20px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 12px;
+            border-right: 4px solid #48bb78;
+        }
+
+        .currency-name {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        .currency-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .currency-change {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #48bb78;
+        }
+
+        .empty-workspace {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .empty-content {
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .empty-icon {
+            font-size: 80px;
+            display: block;
+            margin-bottom: 20px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .empty-content h2 {
+            font-size: 24px;
+            color: #2d3748;
+            margin-bottom: 12px;
+        }
+
+        .empty-content p {
+            font-size: 16px;
+            color: #718096;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @media (max-width: 768px) {
+            .super-dashboard-header {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .module-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            .modules-workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="super-dashboard-header">
+        <div>
+            <div class="dashboard-title">
+                <span class="title-icon">✨</span>
+                استودیوی مدیریت تابش
+            </div>
+            <div class="dashboard-subtitle">خوش آمدید به پنل مدیریت حرفه‌ای</div>
+        </div>
+        <div class="layout-controls">
+            <button class="layout-btn active">⊞</button>
+            <button class="layout-btn">☰</button>
+        </div>
+    </div>
+
+    <div class="module-selector">
+        <div class="selector-header">
+            <h3>ماژول‌های موجود</h3>
+            <span class="active-count">2 فعال</span>
+        </div>
+        <div class="module-grid">
+            <div class="module-card active" onclick="toggleModule(this)">
+                <span class="module-icon">📊</span>
+                <span class="module-title">تاریخچه قیمت</span>
+                <span class="module-status">✓</span>
+            </div>
+            <div class="module-card" onclick="toggleModule(this)">
+                <span class="module-icon">📰</span>
+                <span class="module-title">مقالات جدید</span>
+                <span class="module-status">+</span>
+            </div>
+            <div class="module-card active" onclick="toggleModule(this)">
+                <span class="module-icon">➕</span>
+                <span class="module-title">ثبت سفارش جدید</span>
+                <span class="module-status">✓</span>
+            </div>
+            <div class="module-card" onclick="toggleModule(this)">
+                <span class="module-icon">📋</span>
+                <span class="module-title">تاریخچه سفارشات</span>
+                <span class="module-status">+</span>
+            </div>
+            <div class="module-card" onclick="toggleModule(this)">
+                <span class="module-icon">🔄</span>
+                <span class="module-title">سفارشات در حال انجام</span>
+                <span class="module-status">+</span>
+            </div>
+            <div class="module-card" onclick="toggleModule(this)">
+                <span class="module-icon">💰</span>
+                <span class="module-title">گزارش مالی</span>
+                <span class="module-status">+</span>
+            </div>
+            <div class="module-card" onclick="toggleModule(this)">
+                <span class="module-icon">📁</span>
+                <span class="module-title">مدیریت فایلها</span>
+                <span class="module-status">+</span>
+            </div>
+            <div class="module-card" onclick="toggleModule(this)">
+                <span class="module-icon">🤖</span>
+                <span class="module-title">چتبات هوش مصنوعی</span>
+                <span class="module-status">+</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modules-workspace" id="workspace">
+        <div class="module-panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span class="panel-icon">📊</span>
+                    <span>تاریخچه قیمت</span>
+                </div>
+                <div class="panel-controls">
+                    <button class="control-btn">−</button>
+                    <button class="control-btn">⛶</button>
+                    <button class="control-btn">×</button>
+                </div>
+            </div>
+            <div class="panel-content">
+                <div class="currency-grid">
+                    <div class="currency-card">
+                        <div class="currency-name">کاغذ</div>
+                        <div class="currency-value">125,000</div>
+                        <div class="currency-change">
+                            <span>↗</span>
+                            <span>+2.5%</span>
+                        </div>
+                    </div>
+                    <div class="currency-card">
+                        <div class="currency-name">طلا</div>
+                        <div class="currency-value">2,450,000</div>
+                        <div class="currency-change">
+                            <span>↗</span>
+                            <span>+1.2%</span>
+                        </div>
+                    </div>
+                    <div class="currency-card">
+                        <div class="currency-name">دلار</div>
+                        <div class="currency-value">52,300</div>
+                        <div class="currency-change">
+                            <span>↗</span>
+                            <span>+0.8%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="module-panel">
+            <div class="panel-header" style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);">
+                <div class="panel-title">
+                    <span class="panel-icon">➕</span>
+                    <span>ثبت سفارش جدید</span>
+                </div>
+                <div class="panel-controls">
+                    <button class="control-btn">−</button>
+                    <button class="control-btn">⛶</button>
+                    <button class="control-btn">×</button>
+                </div>
+            </div>
+            <div class="panel-content">
+                <div style="padding: 20px; text-align: center; color: #718096;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
+                    <p>فرم ثبت سفارش جدید</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleModule(card) {
+            const status = card.querySelector('.module-status');
+            if (card.classList.contains('active')) {
+                card.classList.remove('active');
+                status.textContent = '+';
+            } else {
+                card.classList.add('active');
+                status.textContent = '✓';
+            }
+            updateActiveCount();
+        }
+
+        function updateActiveCount() {
+            const activeCount = document.querySelectorAll('.module-card.active').length;
+            document.querySelector('.active-count').textContent = activeCount + ' فعال';
+        }
+    </script>
+</body>
+</html>

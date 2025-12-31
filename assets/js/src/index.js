@@ -5,6 +5,7 @@ import CustomersPanel from './panels/CustomersPanel';
 import ManagersPanel from './panels/ManagersPanel';
 import EmployeesPanel from './panels/EmployeesPanel';
 import SettingsPanel from './panels/SettingsPanel';
+import SuperDashboard from './components/SuperDashboard';
 import './admin.css';
 
 /**
@@ -39,6 +40,12 @@ const initApp = () => {
 	const settingsRoot = document.getElementById( 'tabesh-v2-settings' );
 	if ( settingsRoot ) {
 		render( <SettingsPanel />, settingsRoot );
+	}
+
+	// Super Dashboard (shortcode)
+	const superDashboardRoot = document.getElementById( 'tabesh-super-dashboard' );
+	if ( superDashboardRoot ) {
+		render( <SuperDashboard />, superDashboardRoot );
 	}
 };
 
