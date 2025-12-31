@@ -227,8 +227,7 @@ class Plugin {
 	 */
 	private static function set_default_options() {
 		// Get comprehensive default settings from Settings_Panel.
-		$settings_panel = new \Tabesh_v2\Panels\Settings_Panel();
-		$default_settings = $settings_panel->get_default_settings();
+		$default_settings = \Tabesh_v2\Panels\Settings_Panel::get_default_settings();
 
 		add_option( 'tabesh_v2_settings', $default_settings );
 	}
