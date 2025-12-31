@@ -47,9 +47,15 @@ class Super_Dashboard_Shortcode {
 			'tabesh_super_dashboard'
 		);
 
-		// Check if user is logged in.
+		// Check if user is logged in and has appropriate permissions.
 		if ( ! is_user_logged_in() ) {
 			return '<div class="tabesh-super-dashboard-notice">' . __( 'شما باید وارد حساب کاربری خود شوید تا به پنل دسترسی داشته باشید.', 'tabesh-v2' ) . '</div>';
+		}
+
+		// Check if user has customer role or admin capabilities.
+		$current_user = wp_get_current_user();
+		if ( ! in_array( 'tabesh_customer', $current_user->roles, true ) && ! current_user_can( 'manage_options' ) ) {
+			return '<div class="tabesh-super-dashboard-notice">' . __( 'شما دسترسی لازم برای مشاهده این پنل را ندارید.', 'tabesh-v2' ) . '</div>';
 		}
 
 		// Enqueue assets for this specific instance.
@@ -69,9 +75,23 @@ class Super_Dashboard_Shortcode {
 	 * @return void
 	 */
 	public function enqueue_assets() {
-		// Only enqueue if shortcode is being used on the page.
+		// Check if we're rendering the shortcode.
+		// This handles post content, widgets, and template usage.
 		global $post;
-		if ( ! is_a( $post, 'WP_Post' ) || ! has_shortcode( $post->post_content, 'tabesh_super_dashboard' ) ) {
+		
+		// Check in post content.
+		$has_shortcode = false;
+		if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'tabesh_super_dashboard' ) ) {
+			$has_shortcode = true;
+		}
+		
+		// Check if we're in a shortcode execution context.
+		if ( ! $has_shortcode && ! did_action( 'wp_footer' ) && doing_action( 'the_content' ) ) {
+			// We might be in a widget or other dynamic content area.
+			$has_shortcode = true;
+		}
+		
+		if ( ! $has_shortcode ) {
 			return;
 		}
 

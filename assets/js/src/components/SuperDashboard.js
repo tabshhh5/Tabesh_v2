@@ -221,6 +221,8 @@ const ModulePanel = ({ module, onClose, layout }) => {
 
 // Price History Module
 const PriceHistoryModule = () => {
+	// TODO: Phase 2 - Replace with API call to fetch real-time pricing data
+	// This is static placeholder data for UI/UX demonstration only
 	const currencies = [
 		{ id: 'paper', name: __('کاغذ', 'tabesh-v2'), value: '125,000', change: '+2.5%', trend: 'up' },
 		{ id: 'gold', name: __('طلا', 'tabesh-v2'), value: '2,450,000', change: '+1.2%', trend: 'up' },
@@ -282,6 +284,8 @@ const NewArticlesModule = () => {
 // New Order Module
 const NewOrderModule = () => {
 	const [selectedProduct, setSelectedProduct] = useState('');
+	// TODO: Phase 2 - Fetch product list from API/WordPress settings
+	// This is static placeholder data for UI/UX demonstration only
 	const products = ['کتاب', 'بروشور', 'کارت ویزیت', 'تراکت', 'کاتالوگ'];
 
 	return (
