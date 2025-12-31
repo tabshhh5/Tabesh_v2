@@ -1,0 +1,164 @@
+<?php
+/**
+ * Assets Management Class.
+ *
+ * @package Tabesh_v2\Core
+ */
+
+namespace Tabesh_v2\Core;
+
+/**
+ * Assets Class.
+ *
+ * Handles enqueuing and management of JavaScript and CSS assets.
+ */
+class Assets {
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_assets' ) );
+	}
+
+	/**
+	 * Enqueue admin assets.
+	 *
+	 * @param string $hook Current admin page hook.
+	 * @return void
+	 */
+	public function enqueue_admin_assets( $hook ) {
+		// Only load on our plugin pages.
+		if ( ! $this->is_tabesh_page( $hook ) ) {
+			return;
+		}
+
+		// Enqueue React and ReactDOM from WordPress core.
+		wp_enqueue_script( 'wp-element' );
+
+		// Enqueue our React app.
+		$this->enqueue_react_app();
+
+		// Enqueue admin styles.
+		wp_enqueue_style(
+			'tabesh-v2-admin',
+			TABESH_V2_PLUGIN_URL . 'assets/css/admin.css',
+			array(),
+			TABESH_V2_VERSION
+		);
+	}
+
+	/**
+	 * Enqueue React application.
+	 *
+	 * @return void
+	 */
+	private function enqueue_react_app() {
+		$asset_file = TABESH_V2_PLUGIN_DIR . 'assets/js/build/index.asset.php';
+
+		// Check if build file exists.
+		if ( file_exists( $asset_file ) ) {
+			$asset = require $asset_file;
+		} else {
+			$asset = array(
+				'dependencies' => array( 'wp-element', 'wp-api-fetch', 'wp-i18n' ),
+				'version'      => TABESH_V2_VERSION,
+			);
+		}
+
+		wp_enqueue_script(
+			'tabesh-v2-app',
+			TABESH_V2_PLUGIN_URL . 'assets/js/build/index.js',
+			$asset['dependencies'],
+			$asset['version'],
+			true
+		);
+
+		// Localize script with settings and translations.
+		wp_localize_script(
+			'tabesh-v2-app',
+			'tabeshV2',
+			array(
+				'apiUrl'    => rest_url( 'tabesh/v2/' ),
+				'nonce'     => wp_create_nonce( 'wp_rest' ),
+				'pluginUrl' => TABESH_V2_PLUGIN_URL,
+				'settings'  => $this->get_script_settings(),
+				'i18n'      => $this->get_translations(),
+			)
+		);
+
+		// Set script translations.
+		wp_set_script_translations( 'tabesh-v2-app', 'tabesh-v2' );
+	}
+
+	/**
+	 * Enqueue frontend assets.
+	 *
+	 * @return void
+	 */
+	public function enqueue_frontend_assets() {
+		// Frontend assets can be added here if needed.
+	}
+
+	/**
+	 * Check if current page is a Tabesh plugin page.
+	 *
+	 * @param string $hook Current admin page hook.
+	 * @return bool
+	 */
+	private function is_tabesh_page( $hook ) {
+		$tabesh_pages = array(
+			'toplevel_page_tabesh-v2',
+			'tabesh-v2_page_tabesh-customers',
+			'tabesh-v2_page_tabesh-managers',
+			'tabesh-v2_page_tabesh-employees',
+			'tabesh-v2_page_tabesh-settings',
+		);
+
+		return in_array( $hook, $tabesh_pages, true );
+	}
+
+	/**
+	 * Get settings for JavaScript.
+	 *
+	 * @return array
+	 */
+	private function get_script_settings() {
+		$settings = get_option( 'tabesh_v2_settings', array() );
+
+		return array(
+			'currency'        => $settings['currency'] ?? 'IRR',
+			'dateFormat'      => $settings['date_format'] ?? 'Y-m-d',
+			'timeFormat'      => $settings['time_format'] ?? 'H:i:s',
+			'ordersPerPage'   => $settings['orders_per_page'] ?? 20,
+			'enableCustomers' => $settings['enable_customers'] ?? true,
+			'enableManagers'  => $settings['enable_managers'] ?? true,
+			'enableEmployees' => $settings['enable_employees'] ?? true,
+		);
+	}
+
+	/**
+	 * Get translations for JavaScript.
+	 *
+	 * @return array
+	 */
+	private function get_translations() {
+		return array(
+			'appName'        => __( 'Tabesh v2', 'tabesh-v2' ),
+			'printOrders'    => __( 'Print Orders', 'tabesh-v2' ),
+			'customers'      => __( 'Customers', 'tabesh-v2' ),
+			'managers'       => __( 'Managers', 'tabesh-v2' ),
+			'employees'      => __( 'Employees', 'tabesh-v2' ),
+			'settings'       => __( 'Settings', 'tabesh-v2' ),
+			'loading'        => __( 'Loading...', 'tabesh-v2' ),
+			'save'           => __( 'Save', 'tabesh-v2' ),
+			'cancel'         => __( 'Cancel', 'tabesh-v2' ),
+			'delete'         => __( 'Delete', 'tabesh-v2' ),
+			'edit'           => __( 'Edit', 'tabesh-v2' ),
+			'add'            => __( 'Add', 'tabesh-v2' ),
+			'search'         => __( 'Search', 'tabesh-v2' ),
+			'filter'         => __( 'Filter', 'tabesh-v2' ),
+		);
+	}
+}
