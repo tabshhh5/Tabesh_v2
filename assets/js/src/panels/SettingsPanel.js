@@ -1,15 +1,27 @@
 import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import TabPanel from '../components/TabPanel';
+import AISettingsTab from '../components/AISettingsTab';
+import ProductParametersTab from '../components/ProductParametersTab';
+import PricingSettingsTab from '../components/PricingSettingsTab';
+import SMSSettingsTab from '../components/SMSSettingsTab';
+import {
+	FirewallSettingsTab,
+	FileSettingsTab,
+	AccessLevelSettingsTab,
+	ImportExportSettingsTab,
+} from '../components/AdditionalSettingsTabs';
 
 /**
- * Settings Panel Component.
+ * Settings Panel Component - Super Configuration Panel.
  */
 const SettingsPanel = () => {
 	const [settings, setSettings] = useState({});
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
 	const [message, setMessage] = useState('');
+	const [messageType, setMessageType] = useState('success');
 
 	useEffect(() => {
 		loadSettings();
@@ -28,16 +40,11 @@ const SettingsPanel = () => {
 		}
 	};
 
-	const handleChange = (e) => {
-		const { name, value, type, checked } = e.target;
-		setSettings({
-			...settings,
-			[name]: type === 'checkbox' ? checked : value,
-		});
+	const handleSettingsChange = (newSettings) => {
+		setSettings(newSettings);
 	};
 
-	const handleSave = async (e) => {
-		e.preventDefault();
+	const handleSave = async () => {
 		setSaving(true);
 		setMessage('');
 
@@ -47,11 +54,13 @@ const SettingsPanel = () => {
 				method: 'POST',
 				data: settings,
 			});
-			setMessage(__('Settings saved successfully!', 'tabesh-v2'));
+			setMessage(__('تنظیمات با موفقیت ذخیره شد!', 'tabesh-v2'));
+			setMessageType('success');
 			setSaving(false);
 		} catch (error) {
 			console.error('Error saving settings:', error);
-			setMessage(__('Error saving settings.', 'tabesh-v2'));
+			setMessage(__('خطا در ذخیره تنظیمات.', 'tabesh-v2'));
+			setMessageType('error');
 			setSaving(false);
 		}
 	};
@@ -59,52 +68,132 @@ const SettingsPanel = () => {
 	if (loading) {
 		return (
 			<div className="tabesh-v2-app">
-				<div className="loading">{__('Loading...', 'tabesh-v2')}</div>
+				<div className="loading">{__('در حال بارگذاری...', 'tabesh-v2')}</div>
 			</div>
 		);
 	}
 
+	const tabs = [
+		{
+			id: 'ai',
+			title: __('تنظیمات هوش مصنوعی', 'tabesh-v2'),
+			content: (
+				<AISettingsTab
+					settings={settings}
+					onChange={handleSettingsChange}
+				/>
+			),
+		},
+		{
+			id: 'products',
+			title: __('پارامترهای محصولات', 'tabesh-v2'),
+			content: (
+				<ProductParametersTab
+					settings={settings}
+					onChange={handleSettingsChange}
+				/>
+			),
+		},
+		{
+			id: 'pricing',
+			title: __('قیمت‌گذاری', 'tabesh-v2'),
+			content: (
+				<PricingSettingsTab
+					settings={settings}
+					onChange={handleSettingsChange}
+				/>
+			),
+		},
+		{
+			id: 'sms',
+			title: __('تنظیمات پیامک', 'tabesh-v2'),
+			content: (
+				<SMSSettingsTab
+					settings={settings}
+					onChange={handleSettingsChange}
+				/>
+			),
+		},
+		{
+			id: 'firewall',
+			title: __('تنظیمات فایروال', 'tabesh-v2'),
+			content: (
+				<FirewallSettingsTab
+					settings={settings}
+					onChange={handleSettingsChange}
+				/>
+			),
+		},
+		{
+			id: 'file',
+			title: __('تنظیمات فایل', 'tabesh-v2'),
+			content: (
+				<FileSettingsTab
+					settings={settings}
+					onChange={handleSettingsChange}
+				/>
+			),
+		},
+		{
+			id: 'access',
+			title: __('سطح دسترسی', 'tabesh-v2'),
+			content: (
+				<AccessLevelSettingsTab
+					settings={settings}
+					onChange={handleSettingsChange}
+				/>
+			),
+		},
+		{
+			id: 'import_export',
+			title: __('برون‌ریزی و درون‌ریزی', 'tabesh-v2'),
+			content: (
+				<ImportExportSettingsTab
+					settings={settings}
+					onChange={handleSettingsChange}
+				/>
+			),
+		},
+	];
+
 	return (
-		<div className="tabesh-v2-app">
-			<h1>{__('Settings', 'tabesh-v2')}</h1>
-			<div className="card">
-				<h2>{__('Plugin Settings', 'tabesh-v2')}</h2>
-				{message && <div className="success">{message}</div>}
-				<form onSubmit={handleSave}>
-					<div className="form-group">
-						<label htmlFor="currency">
-							{__('Currency', 'tabesh-v2')}
-						</label>
-						<input
-							type="text"
-							id="currency"
-							name="currency"
-							value={settings.currency || ''}
-							onChange={handleChange}
-						/>
-					</div>
-					<div className="form-group">
-						<label htmlFor="orders_per_page">
-							{__('Orders Per Page', 'tabesh-v2')}
-						</label>
-						<input
-							type="number"
-							id="orders_per_page"
-							name="orders_per_page"
-							value={settings.orders_per_page || 20}
-							onChange={handleChange}
-						/>
-					</div>
-					<button
-						type="submit"
-						className="button-primary"
-						disabled={saving}
-					>
-						{saving
-							? __('Saving...', 'tabesh-v2')
-							: __('Save Settings', 'tabesh-v2')}
-					</button>
-				</form>
+		<div className="tabesh-v2-app tabesh-settings-panel">
+			<div className="settings-header">
+				<h1>{__('پنل پیکربندی تابش', 'tabesh-v2')}</h1>
+				<p className="description">
+					{__('تنظیمات جامع افزونه مدیریت سفارشات چاپ', 'tabesh-v2')}
+				</p>
+			</div>
+
+			{message && (
+				<div className={`notice notice-${messageType} is-dismissible`}>
+					<p>{message}</p>
+				</div>
+			)}
+
+			<div className="settings-content">
+				<TabPanel tabs={tabs} />
+			</div>
+
+			<div className="settings-footer">
+				<button
+					type="button"
+					className="button button-primary button-large"
+					onClick={handleSave}
+					disabled={saving}
+				>
+					{saving
+						? __('در حال ذخیره...', 'tabesh-v2')
+						: __('ذخیره تنظیمات', 'tabesh-v2')}
+				</button>
+				<button
+					type="button"
+					className="button button-secondary button-large"
+					onClick={loadSettings}
+					disabled={saving}
+				>
+					{__('بازنشانی', 'tabesh-v2')}
+				</button>
 			</div>
 		</div>
 	);
