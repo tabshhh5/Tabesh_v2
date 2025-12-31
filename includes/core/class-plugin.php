@@ -226,16 +226,8 @@ class Plugin {
 	 * @return void
 	 */
 	private static function set_default_options() {
-		$default_settings = array(
-			'version'           => TABESH_V2_VERSION,
-			'currency'          => 'IRR',
-			'date_format'       => 'Y-m-d',
-			'time_format'       => 'H:i:s',
-			'orders_per_page'   => 20,
-			'enable_customers'  => true,
-			'enable_managers'   => true,
-			'enable_employees'  => true,
-		);
+		// Get comprehensive default settings from Settings_Panel.
+		$default_settings = \Tabesh_v2\Panels\Settings_Panel::get_default_settings();
 
 		add_option( 'tabesh_v2_settings', $default_settings );
 	}

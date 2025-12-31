@@ -15,9 +15,11 @@ npm-debug.log
 yarn-error.log
 
 # Build files
-/assets/js/build/*.js
+# Note: Build files are committed for production use
+# /assets/js/build/*.js
+# /assets/js/build/*.js.map
+# /assets/js/build/*.asset.php
 /assets/js/build/*.js.map
-/assets/js/build/*.asset.php
 
 # IDE files
 .vscode/

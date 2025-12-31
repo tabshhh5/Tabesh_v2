@@ -55,7 +55,7 @@ class Settings_Panel {
 	 *
 	 * @return array
 	 */
-	public function get_default_settings() {
+	public static function get_default_settings() {
 		return array(
 			'currency'          => 'IRR',
 			'date_format'       => 'Y-m-d',
@@ -149,6 +149,6 @@ class Settings_Panel {
 	 * @return bool
 	 */
 	public function reset_settings() {
-		return $this->update_settings( $this->get_default_settings() );
+		return $this->update_settings( self::get_default_settings() );
 	}
 }
