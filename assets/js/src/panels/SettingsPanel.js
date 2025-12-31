@@ -6,6 +6,7 @@ import AISettingsTab from '../components/AISettingsTab';
 import ProductParametersTab from '../components/ProductParametersTab';
 import PricingSettingsTab from '../components/PricingSettingsTab';
 import SMSSettingsTab from '../components/SMSSettingsTab';
+import LoadingSpinner from '../components/LoadingSpinner';
 import {
 	FirewallSettingsTab,
 	FileSettingsTab,
@@ -68,9 +69,10 @@ const SettingsPanel = () => {
 	if ( loading ) {
 		return (
 			<div className="tabesh-v2-app">
-				<div className="loading">
-					{ __( 'در حال بارگذاری...', 'tabesh-v2' ) }
-				</div>
+				<LoadingSpinner
+					message={ __( 'در حال بارگذاری تنظیمات...', 'tabesh-v2' ) }
+					size="large"
+				/>
 			</div>
 		);
 	}

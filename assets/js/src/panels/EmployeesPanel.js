@@ -1,6 +1,7 @@
 import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 /**
  * Employees Panel Component.
@@ -29,9 +30,10 @@ const EmployeesPanel = () => {
 	if ( loading ) {
 		return (
 			<div className="tabesh-v2-app">
-				<div className="loading">
-					{ __( 'Loading...', 'tabesh-v2' ) }
-				</div>
+				<LoadingSpinner
+					message={ __( 'در حال بارگذاری سفارشات...', 'tabesh-v2' ) }
+					size="medium"
+				/>
 			</div>
 		);
 	}
