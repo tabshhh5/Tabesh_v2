@@ -22,6 +22,7 @@ const BookPrintingParametersTab = () => {
 	const [coverWeights, setCoverWeights] = useState([]);
 	const [laminationTypes, setLaminationTypes] = useState([]);
 	const [additionalServices, setAdditionalServices] = useState([]);
+	const [bindingTypes, setBindingTypes] = useState([]);
 
 	// Loading states
 	const [loading, setLoading] = useState(true);
@@ -35,6 +36,7 @@ const BookPrintingParametersTab = () => {
 	const [newCoverWeight, setNewCoverWeight] = useState({ weight: '', prompt_master: '' });
 	const [newLaminationType, setNewLaminationType] = useState({ name: '', prompt_master: '' });
 	const [newAdditionalService, setNewAdditionalService] = useState({ name: '', prompt_master: '' });
+	const [newBindingType, setNewBindingType] = useState({ name: '', prompt_master: '' });
 
 	// Load all data on mount
 	useEffect(() => {
@@ -56,6 +58,7 @@ const BookPrintingParametersTab = () => {
 				coversData,
 				laminationsData,
 				servicesData,
+				bindingsData,
 			] = await Promise.all([
 				apiFetch({ path: '/tabesh/v2/book-params/book-sizes' }),
 				apiFetch({ path: '/tabesh/v2/book-params/paper-types' }),
@@ -65,6 +68,7 @@ const BookPrintingParametersTab = () => {
 				apiFetch({ path: '/tabesh/v2/book-params/cover-weights' }),
 				apiFetch({ path: '/tabesh/v2/book-params/lamination-types' }),
 				apiFetch({ path: '/tabesh/v2/book-params/additional-services' }),
+				apiFetch({ path: '/tabesh/v2/book-params/binding-types' }),
 			]);
 
 			setBookSizes(sizesData.data || []);
@@ -75,6 +79,7 @@ const BookPrintingParametersTab = () => {
 			setCoverWeights(coversData.data || []);
 			setLaminationTypes(laminationsData.data || []);
 			setAdditionalServices(servicesData.data || []);
+			setBindingTypes(bindingsData.data || []);
 		} catch (error) {
 			console.error('Error loading parameters:', error);
 		}
@@ -529,6 +534,61 @@ const BookPrintingParametersTab = () => {
 						disabled={!newLaminationType.name}
 					>
 						{__('افزودن نوع سلفون', 'tabesh-v2')}
+					</button>
+				</div>
+			</Section>
+
+			{/* Binding Types Section */}
+			<Section
+				title={__('انواع صحافی', 'tabesh-v2')}
+				description={__('مدیریت انواع صحافی کتاب (شومیز، جلد سخت، منگنه و ...)', 'tabesh-v2')}
+			>
+				<div className="parameter-list">
+					{bindingTypes.map((item) => (
+						<div key={item.id} className="parameter-item">
+							<span className="parameter-name">{item.name}</span>
+							{item.prompt_master && (
+								<span className="parameter-prompt" title={item.prompt_master}>
+									📝
+								</span>
+							)}
+							<button
+								type="button"
+								className="button button-small button-link-delete"
+								onClick={() => deleteParameter('binding-types', item.id)}
+							>
+								{__('حذف', 'tabesh-v2')}
+							</button>
+						</div>
+					))}
+				</div>
+
+				<div className="parameter-add-form">
+					<FormGroup label={__('نام نوع صحافی', 'tabesh-v2')}>
+						<TextInput
+							name="binding_type_name"
+							value={newBindingType.name}
+							onChange={(e) => setNewBindingType({ ...newBindingType, name: e.target.value })}
+							placeholder={__('مثال: شومیز', 'tabesh-v2')}
+						/>
+					</FormGroup>
+					<FormGroup label={__('پرامپت مستر', 'tabesh-v2')}>
+						<textarea
+							name="binding_type_prompt"
+							value={newBindingType.prompt_master}
+							onChange={(e) => setNewBindingType({ ...newBindingType, prompt_master: e.target.value })}
+							rows={2}
+							className="large-text"
+							placeholder={__('توضیحات برای هوش مصنوعی', 'tabesh-v2')}
+						/>
+					</FormGroup>
+					<button
+						type="button"
+						className="button button-primary"
+						onClick={() => addParameter('binding-types', newBindingType, setBindingTypes, () => setNewBindingType({ name: '', prompt_master: '' }))}
+						disabled={!newBindingType.name}
+					>
+						{__('افزودن نوع صحافی', 'tabesh-v2')}
 					</button>
 				</div>
 			</Section>

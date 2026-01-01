@@ -121,6 +121,10 @@ class Rest_Api {
 		$this->register_book_parameter_routes( 'cover-weights', 'tabesh_cover_weights' );
 		$this->register_book_parameter_routes( 'lamination-types', 'tabesh_lamination_types' );
 		$this->register_book_parameter_routes( 'additional-services', 'tabesh_additional_services' );
+		$this->register_book_parameter_routes( 'binding-types', 'tabesh_binding_types' );
+
+		// Book pricing endpoints.
+		$this->register_book_pricing_routes();
 	}
 
 	/**
@@ -163,6 +167,116 @@ class Rest_Api {
 					'callback'            => function( $request ) use ( $table_suffix ) {
 						return $this->delete_book_parameter( $request, $table_suffix );
 					},
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Register book pricing routes.
+	 *
+	 * @return void
+	 */
+	private function register_book_pricing_routes() {
+		// Get all pricing data for a book size.
+		register_rest_route(
+			$this->namespace,
+			'/book-pricing/(?P<book_size_id>\d+)',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_book_pricing' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+			)
+		);
+
+		// Page cost pricing.
+		register_rest_route(
+			$this->namespace,
+			'/book-pricing/page-cost',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_page_cost_pricing' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'save_page_cost_pricing' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+			)
+		);
+
+		// Binding pricing.
+		register_rest_route(
+			$this->namespace,
+			'/book-pricing/binding',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_binding_pricing' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'save_binding_pricing' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+			)
+		);
+
+		// Additional services pricing.
+		register_rest_route(
+			$this->namespace,
+			'/book-pricing/additional-services',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_additional_services_pricing' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'save_additional_services_pricing' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+			)
+		);
+
+		// Service binding restrictions.
+		register_rest_route(
+			$this->namespace,
+			'/book-pricing/service-restrictions',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_service_restrictions' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'save_service_restrictions' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+			)
+		);
+
+		// Size limits.
+		register_rest_route(
+			$this->namespace,
+			'/book-pricing/size-limits',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_size_limits' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'save_size_limits' ),
 					'permission_callback' => array( $this, 'check_permissions' ),
 				),
 			)
@@ -610,6 +724,7 @@ class Rest_Api {
 			'tabesh_cover_weights',
 			'tabesh_lamination_types',
 			'tabesh_additional_services',
+			'tabesh_binding_types',
 		);
 
 		if ( ! in_array( $table_suffix, $allowed_tables, true ) ) {
@@ -669,6 +784,7 @@ class Rest_Api {
 			'tabesh_cover_weights',
 			'tabesh_lamination_types',
 			'tabesh_additional_services',
+			'tabesh_binding_types',
 		);
 
 		if ( ! in_array( $table_suffix, $allowed_tables, true ) ) {
@@ -742,6 +858,7 @@ class Rest_Api {
 			'tabesh_cover_weights',
 			'tabesh_lamination_types',
 			'tabesh_additional_services',
+			'tabesh_binding_types',
 		);
 
 		if ( ! in_array( $table_suffix, $allowed_tables, true ) ) {
@@ -775,6 +892,535 @@ class Rest_Api {
 				'message' => __( 'Parameter deleted successfully', 'tabesh-v2' ),
 			),
 			200
+		);
+	}
+
+	/**
+	 * Get all pricing data for a book size.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function get_book_pricing( $request ) {
+		$book_size_id = absint( $request->get_param( 'book_size_id' ) );
+
+		return new \WP_REST_Response(
+			array(
+				'success'        => true,
+				'page_costs'     => $this->get_page_costs_for_size( $book_size_id ),
+				'bindings'       => $this->get_bindings_for_size( $book_size_id ),
+				'services'       => $this->get_services_for_size( $book_size_id ),
+				'restrictions'   => $this->get_restrictions_for_size( $book_size_id ),
+				'limits'         => $this->get_limits_for_size( $book_size_id ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Get page cost pricing.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function get_page_cost_pricing( $request ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tabesh_book_pricing_page_cost';
+		$book_size_id = $request->get_param( 'book_size_id' );
+
+		$where = '';
+		if ( $book_size_id ) {
+			$where = $wpdb->prepare( 'WHERE book_size_id = %d', absint( $book_size_id ) );
+		}
+
+		$results = $wpdb->get_results(
+			"SELECT pc.*, 
+				pt.name as paper_type_name,
+				pw.weight as paper_weight,
+				pr.name as print_type_name
+			FROM {$table} pc
+			LEFT JOIN {$wpdb->prefix}tabesh_paper_types pt ON pc.paper_type_id = pt.id
+			LEFT JOIN {$wpdb->prefix}tabesh_paper_weights pw ON pc.paper_weight_id = pw.id
+			LEFT JOIN {$wpdb->prefix}tabesh_print_types pr ON pc.print_type_id = pr.id
+			{$where}
+			ORDER BY pc.id DESC",
+			ARRAY_A
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'data'    => $results,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Save page cost pricing.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function save_page_cost_pricing( $request ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tabesh_book_pricing_page_cost';
+
+		$data = array(
+			'book_size_id'    => absint( $request->get_param( 'book_size_id' ) ),
+			'paper_type_id'   => absint( $request->get_param( 'paper_type_id' ) ),
+			'paper_weight_id' => absint( $request->get_param( 'paper_weight_id' ) ),
+			'print_type_id'   => absint( $request->get_param( 'print_type_id' ) ),
+			'price'           => floatval( $request->get_param( 'price' ) ),
+			'is_enabled'      => ! empty( $request->get_param( 'is_enabled' ) ) ? 1 : 0,
+		);
+
+		$existing = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT id FROM {$table} WHERE book_size_id = %d AND paper_type_id = %d AND paper_weight_id = %d AND print_type_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$data['book_size_id'],
+				$data['paper_type_id'],
+				$data['paper_weight_id'],
+				$data['print_type_id']
+			)
+		);
+
+		if ( $existing ) {
+			$result = $wpdb->update( $table, $data, array( 'id' => $existing ) );
+		} else {
+			$result = $wpdb->insert( $table, $data );
+		}
+
+		if ( false === $result ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'Failed to save pricing', 'tabesh-v2' ),
+				),
+				500
+			);
+		}
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => __( 'Pricing saved successfully', 'tabesh-v2' ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Get binding pricing.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function get_binding_pricing( $request ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tabesh_book_pricing_binding';
+		$book_size_id = $request->get_param( 'book_size_id' );
+
+		$where = '';
+		if ( $book_size_id ) {
+			$where = $wpdb->prepare( 'WHERE book_size_id = %d', absint( $book_size_id ) );
+		}
+
+		$results = $wpdb->get_results(
+			"SELECT bp.*, 
+				bt.name as binding_type_name,
+				cw.weight as cover_weight
+			FROM {$table} bp
+			LEFT JOIN {$wpdb->prefix}tabesh_binding_types bt ON bp.binding_type_id = bt.id
+			LEFT JOIN {$wpdb->prefix}tabesh_cover_weights cw ON bp.cover_weight_id = cw.id
+			{$where}
+			ORDER BY bp.id DESC",
+			ARRAY_A
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'data'    => $results,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Save binding pricing.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function save_binding_pricing( $request ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tabesh_book_pricing_binding';
+
+		$data = array(
+			'book_size_id'    => absint( $request->get_param( 'book_size_id' ) ),
+			'binding_type_id' => absint( $request->get_param( 'binding_type_id' ) ),
+			'cover_weight_id' => absint( $request->get_param( 'cover_weight_id' ) ),
+			'price'           => floatval( $request->get_param( 'price' ) ),
+			'is_enabled'      => ! empty( $request->get_param( 'is_enabled' ) ) ? 1 : 0,
+		);
+
+		$existing = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT id FROM {$table} WHERE book_size_id = %d AND binding_type_id = %d AND cover_weight_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$data['book_size_id'],
+				$data['binding_type_id'],
+				$data['cover_weight_id']
+			)
+		);
+
+		if ( $existing ) {
+			$result = $wpdb->update( $table, $data, array( 'id' => $existing ) );
+		} else {
+			$result = $wpdb->insert( $table, $data );
+		}
+
+		if ( false === $result ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'Failed to save binding pricing', 'tabesh-v2' ),
+				),
+				500
+			);
+		}
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => __( 'Binding pricing saved successfully', 'tabesh-v2' ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Get additional services pricing.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function get_additional_services_pricing( $request ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tabesh_book_pricing_additional_services';
+		$book_size_id = $request->get_param( 'book_size_id' );
+
+		$where = '';
+		if ( $book_size_id ) {
+			$where = $wpdb->prepare( 'WHERE book_size_id = %d', absint( $book_size_id ) );
+		}
+
+		$results = $wpdb->get_results(
+			"SELECT ps.*, 
+				s.name as service_name
+			FROM {$table} ps
+			LEFT JOIN {$wpdb->prefix}tabesh_additional_services s ON ps.service_id = s.id
+			{$where}
+			ORDER BY ps.id DESC",
+			ARRAY_A
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'data'    => $results,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Save additional services pricing.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function save_additional_services_pricing( $request ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tabesh_book_pricing_additional_services';
+
+		$data = array(
+			'book_size_id'     => absint( $request->get_param( 'book_size_id' ) ),
+			'service_id'       => absint( $request->get_param( 'service_id' ) ),
+			'price'            => floatval( $request->get_param( 'price' ) ),
+			'calculation_type' => sanitize_text_field( $request->get_param( 'calculation_type' ) ),
+			'pages_per_unit'   => $request->get_param( 'pages_per_unit' ) ? absint( $request->get_param( 'pages_per_unit' ) ) : null,
+			'is_enabled'       => ! empty( $request->get_param( 'is_enabled' ) ) ? 1 : 0,
+		);
+
+		$existing = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT id FROM {$table} WHERE book_size_id = %d AND service_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$data['book_size_id'],
+				$data['service_id']
+			)
+		);
+
+		if ( $existing ) {
+			$result = $wpdb->update( $table, $data, array( 'id' => $existing ) );
+		} else {
+			$result = $wpdb->insert( $table, $data );
+		}
+
+		if ( false === $result ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'Failed to save service pricing', 'tabesh-v2' ),
+				),
+				500
+			);
+		}
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => __( 'Service pricing saved successfully', 'tabesh-v2' ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Get service binding restrictions.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function get_service_restrictions( $request ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tabesh_book_pricing_service_binding_restrictions';
+		$book_size_id = $request->get_param( 'book_size_id' );
+
+		$where = '';
+		if ( $book_size_id ) {
+			$where = $wpdb->prepare( 'WHERE book_size_id = %d', absint( $book_size_id ) );
+		}
+
+		$results = $wpdb->get_results(
+			"SELECT sr.*, 
+				s.name as service_name,
+				bt.name as binding_type_name
+			FROM {$table} sr
+			LEFT JOIN {$wpdb->prefix}tabesh_additional_services s ON sr.service_id = s.id
+			LEFT JOIN {$wpdb->prefix}tabesh_binding_types bt ON sr.binding_type_id = bt.id
+			{$where}
+			ORDER BY sr.id DESC",
+			ARRAY_A
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'data'    => $results,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Save service binding restrictions.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function save_service_restrictions( $request ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tabesh_book_pricing_service_binding_restrictions';
+
+		$data = array(
+			'book_size_id'    => absint( $request->get_param( 'book_size_id' ) ),
+			'service_id'      => absint( $request->get_param( 'service_id' ) ),
+			'binding_type_id' => absint( $request->get_param( 'binding_type_id' ) ),
+			'is_enabled'      => ! empty( $request->get_param( 'is_enabled' ) ) ? 1 : 0,
+		);
+
+		$existing = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT id FROM {$table} WHERE book_size_id = %d AND service_id = %d AND binding_type_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$data['book_size_id'],
+				$data['service_id'],
+				$data['binding_type_id']
+			)
+		);
+
+		if ( $existing ) {
+			$result = $wpdb->update( $table, $data, array( 'id' => $existing ) );
+		} else {
+			$result = $wpdb->insert( $table, $data );
+		}
+
+		if ( false === $result ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'Failed to save restrictions', 'tabesh-v2' ),
+				),
+				500
+			);
+		}
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => __( 'Restrictions saved successfully', 'tabesh-v2' ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Get size limits.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function get_size_limits( $request ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tabesh_book_pricing_size_limits';
+		$book_size_id = $request->get_param( 'book_size_id' );
+
+		if ( $book_size_id ) {
+			$result = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT * FROM {$table} WHERE book_size_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					absint( $book_size_id )
+				),
+				ARRAY_A
+			);
+		} else {
+			$result = $wpdb->get_results(
+				"SELECT * FROM {$table} ORDER BY id DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				ARRAY_A
+			);
+		}
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'data'    => $result,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Save size limits.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function save_size_limits( $request ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tabesh_book_pricing_size_limits';
+
+		$data = array(
+			'book_size_id'      => absint( $request->get_param( 'book_size_id' ) ),
+			'min_circulation'   => absint( $request->get_param( 'min_circulation' ) ),
+			'max_circulation'   => absint( $request->get_param( 'max_circulation' ) ),
+			'circulation_step'  => absint( $request->get_param( 'circulation_step' ) ),
+			'min_pages'         => absint( $request->get_param( 'min_pages' ) ),
+			'max_pages'         => absint( $request->get_param( 'max_pages' ) ),
+			'pages_step'        => absint( $request->get_param( 'pages_step' ) ),
+		);
+
+		$existing = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT id FROM {$table} WHERE book_size_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$data['book_size_id']
+			)
+		);
+
+		if ( $existing ) {
+			$result = $wpdb->update( $table, $data, array( 'id' => $existing ) );
+		} else {
+			$result = $wpdb->insert( $table, $data );
+		}
+
+		if ( false === $result ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'Failed to save limits', 'tabesh-v2' ),
+				),
+				500
+			);
+		}
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => __( 'Limits saved successfully', 'tabesh-v2' ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Helper methods for getting pricing data.
+	 */
+	private function get_page_costs_for_size( $book_size_id ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tabesh_book_pricing_page_cost';
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$table} WHERE book_size_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$book_size_id
+			),
+			ARRAY_A
+		);
+	}
+
+	private function get_bindings_for_size( $book_size_id ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tabesh_book_pricing_binding';
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$table} WHERE book_size_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$book_size_id
+			),
+			ARRAY_A
+		);
+	}
+
+	private function get_services_for_size( $book_size_id ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tabesh_book_pricing_additional_services';
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$table} WHERE book_size_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$book_size_id
+			),
+			ARRAY_A
+		);
+	}
+
+	private function get_restrictions_for_size( $book_size_id ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tabesh_book_pricing_service_binding_restrictions';
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$table} WHERE book_size_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$book_size_id
+			),
+			ARRAY_A
+		);
+	}
+
+	private function get_limits_for_size( $book_size_id ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tabesh_book_pricing_size_limits';
+		return $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$table} WHERE book_size_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$book_size_id
+			),
+			ARRAY_A
 		);
 	}
 }
