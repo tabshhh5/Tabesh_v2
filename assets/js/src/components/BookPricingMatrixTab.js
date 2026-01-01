@@ -89,6 +89,23 @@ const BookPricingMatrixTab = () => {
 				apiFetch({ path: '/tabesh/v2/book-params/additional-services' }),
 			]);
 			
+			// Validate all API responses
+			const responses = [
+				{ name: 'book-sizes', data: sizesData },
+				{ name: 'paper-types', data: paperTypesData },
+				{ name: 'paper-weights', data: paperWeightsData },
+				{ name: 'print-types', data: printTypesData },
+				{ name: 'binding-types', data: bindingTypesData },
+				{ name: 'cover-weights', data: coverWeightsData },
+				{ name: 'additional-services', data: servicesData },
+			];
+			
+			for (const response of responses) {
+				if (!response.data || response.data.success === false) {
+					throw new Error(`Invalid response from ${response.name} endpoint`);
+				}
+			}
+			
 			setBookSizes(sizesData.data || []);
 			setPaperTypes(paperTypesData.data || []);
 			setPaperWeights(paperWeightsData.data || []);
@@ -103,7 +120,8 @@ const BookPricingMatrixTab = () => {
 			}
 		} catch (error) {
 			console.error('Error loading initial data:', error);
-			alert(__('خطا در بارگذاری اطلاعات', 'tabesh-v2'));
+			const errorMessage = error.message || __('خطا در بارگذاری پارامترهای محصول', 'tabesh-v2');
+			alert(`${__('خطا', 'tabesh-v2')}: ${errorMessage}`);
 		}
 		setLoading(false);
 	};
@@ -131,16 +149,25 @@ const BookPricingMatrixTab = () => {
 			setBindingCosts(bindingData.data || []);
 			setServicePricing(servicesData.data || []);
 			setServiceRestrictions(restrictionsData.data || []);
-			setSizeLimits(limitsData.data || {
+			
+			// Handle size limits - API returns object or null
+			const defaultLimits = {
 				min_circulation: 1,
 				max_circulation: 10000,
 				circulation_step: 1,
 				min_pages: 1,
 				max_pages: 1000,
 				pages_step: 1,
-			});
+			};
+			
+			if (limitsData.data && typeof limitsData.data === 'object' && !Array.isArray(limitsData.data)) {
+				setSizeLimits({ ...defaultLimits, ...limitsData.data });
+			} else {
+				setSizeLimits(defaultLimits);
+			}
 		} catch (error) {
 			console.error('Error loading pricing data:', error);
+			alert(__('خطا در بارگذاری اطلاعات قیمت‌گذاری', 'tabesh-v2'));
 		}
 	};
 	
@@ -497,6 +524,17 @@ const PageCostMatrix = ({ paperTypes, paperWeights, printTypes, getPageCost, sav
 		weightsByType[pw.paper_type_id].push(pw);
 	});
 	
+	// Check if we have any data to display
+	const hasData = paperTypes.length > 0 && paperWeights.length > 0 && printTypes.length > 0;
+	
+	if (!hasData) {
+		return (
+			<div className="tabesh-notice">
+				<p>{__('برای نمایش ماتریس قیمت، ابتدا باید در بخش پارامتر محصول، نوع کاغذ، گرماژ و نوع چاپ را تعریف کنید.', 'tabesh-v2')}</p>
+			</div>
+		);
+	}
+	
 	return (
 		<div className="page-cost-matrix">
 			<h3>{__('هزینه هر صفحه (کاغذ + چاپ)', 'tabesh-v2')}</h3>
@@ -612,6 +650,15 @@ const BindingCostMatrix = ({ bindingTypes, coverWeights, getBindingCost, saveBin
 		const existing = getBindingCost(bindingTypeId, coverWeightId);
 		await saveBindingCost(bindingTypeId, coverWeightId, existing?.price || 0, existing ? !existing.is_enabled : 0);
 	};
+	
+	// Check if we have any data to display
+	if (bindingTypes.length === 0 || coverWeights.length === 0) {
+		return (
+			<div className="tabesh-notice">
+				<p>{__('برای نمایش ماتریس قیمت صحافی، ابتدا باید در بخش پارامتر محصول، انواع صحافی و گرماژ جلد را تعریف کنید.', 'tabesh-v2')}</p>
+			</div>
+		);
+	}
 	
 	return (
 		<div className="binding-cost-matrix">
@@ -730,6 +777,15 @@ const AdditionalServicesConfig = ({ additionalServices, getServicePricing, saveS
 		);
 		setEditingService(null);
 	};
+	
+	// Check if we have any data to display
+	if (additionalServices.length === 0) {
+		return (
+			<div className="tabesh-notice">
+				<p>{__('برای نمایش خدمات اضافی، ابتدا باید در بخش پارامتر محصول، خدمات اضافی را تعریف کنید.', 'tabesh-v2')}</p>
+			</div>
+		);
+	}
 	
 	return (
 		<div className="additional-services-config">
@@ -854,6 +910,15 @@ const ServiceBindingRestrictions = ({ additionalServices, bindingTypes, getServi
 		const existing = getServiceRestriction(serviceId, bindingTypeId);
 		await saveServiceRestriction(serviceId, bindingTypeId, existing ? !existing.is_enabled : 1);
 	};
+	
+	// Check if we have any data to display
+	if (additionalServices.length === 0 || bindingTypes.length === 0) {
+		return (
+			<div className="tabesh-notice">
+				<p>{__('برای نمایش محدودیت‌های خدمات، ابتدا باید در بخش پارامتر محصول، خدمات اضافی و انواع صحافی را تعریف کنید.', 'tabesh-v2')}</p>
+			</div>
+		);
+	}
 	
 	return (
 		<div className="service-binding-restrictions">
