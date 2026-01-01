@@ -5,7 +5,6 @@ import CustomersPanel from './panels/CustomersPanel';
 import ManagersPanel from './panels/ManagersPanel';
 import EmployeesPanel from './panels/EmployeesPanel';
 import SettingsPanel from './panels/SettingsPanel';
-import './admin.css';
 
 /**
  * Initialize the Tabesh v2 React application.

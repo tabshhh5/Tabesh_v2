@@ -1,0 +1,206 @@
+/**
+ * Dashboard Home Section Styles
+ */
+
+.section-dashboard-home {
+	.dashboard-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		gap: 20px;
+		margin-bottom: 32px;
+		
+		.stat-card {
+			background: $bg-primary;
+			border: 1px solid $border-color;
+			border-radius: 12px;
+			padding: 20px;
+			display: flex;
+			gap: 16px;
+			transition: $transition;
+			
+			&:hover {
+				transform: translateY(-2px);
+				box-shadow: $shadow-md;
+			}
+			
+			.stat-icon {
+				width: 48px;
+				height: 48px;
+				background: rgba($primary-color, 0.1);
+				border-radius: 12px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: $primary-color;
+				flex-shrink: 0;
+				
+				svg {
+					width: 24px;
+					height: 24px;
+				}
+			}
+			
+			.stat-content {
+				flex: 1;
+				
+				h3 {
+					margin: 0 0 8px 0;
+					font-size: 14px;
+					font-weight: 500;
+					color: $text-secondary;
+				}
+				
+				.stat-value {
+					font-size: 28px;
+					font-weight: 700;
+					color: $text-primary;
+					margin: 0 0 4px 0;
+				}
+				
+				.stat-change {
+					font-size: 12px;
+					font-weight: 500;
+					
+					&.positive {
+						color: $success-color;
+					}
+					
+					&.negative {
+						color: $danger-color;
+					}
+				}
+				
+				.stat-label {
+					font-size: 12px;
+					color: $text-secondary;
+				}
+			}
+		}
+	}
+	
+	.dashboard-sections {
+		display: grid;
+		grid-template-columns: 2fr 1fr;
+		gap: 24px;
+		
+		@media (max-width: 1024px) {
+			grid-template-columns: 1fr;
+		}
+		
+		.recent-orders,
+		.quick-actions {
+			background: $bg-primary;
+			border: 1px solid $border-color;
+			border-radius: 12px;
+			padding: 24px;
+			
+			h2 {
+				margin: 0 0 20px 0;
+				font-size: 18px;
+				font-weight: 600;
+				color: $text-primary;
+			}
+		}
+		
+		.order-list {
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+			
+			.order-item {
+				padding: 16px;
+				background: $bg-secondary;
+				border-radius: 8px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				transition: $transition;
+				
+				&:hover {
+					background: darken($bg-secondary, 3%);
+					cursor: pointer;
+				}
+				
+				.order-info {
+					display: flex;
+					align-items: center;
+					gap: 12px;
+					
+					.order-id {
+						font-weight: 600;
+						color: $primary-color;
+					}
+					
+					.order-title {
+						color: $text-primary;
+						font-size: 14px;
+					}
+				}
+				
+				.order-meta {
+					display: flex;
+					align-items: center;
+					gap: 12px;
+					
+					.order-status {
+						padding: 4px 12px;
+						border-radius: 12px;
+						font-size: 12px;
+						font-weight: 500;
+						
+						&.in-progress {
+							background: rgba($primary-color, 0.1);
+							color: $primary-color;
+						}
+					}
+					
+					.order-date {
+						font-size: 12px;
+						color: $text-secondary;
+					}
+				}
+			}
+		}
+		
+		.action-buttons {
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+			
+			.action-btn {
+				background: $bg-secondary;
+				border: 1px solid $border-color;
+				padding: 16px;
+				border-radius: 8px;
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				cursor: pointer;
+				transition: $transition;
+				color: $text-primary;
+				font-size: 14px;
+				font-weight: 500;
+				
+				&:hover {
+					background: darken($bg-secondary, 3%);
+					border-color: darken($border-color, 10%);
+				}
+				
+				&.primary {
+					background: $primary-color;
+					color: white;
+					border-color: $primary-color;
+					
+					&:hover {
+						background: darken($primary-color, 10%);
+					}
+				}
+				
+				svg {
+					width: 20px;
+					height: 20px;
+				}
+			}
+		}
+	}
+}
