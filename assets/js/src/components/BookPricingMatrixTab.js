@@ -89,6 +89,11 @@ const BookPricingMatrixTab = () => {
 				apiFetch({ path: '/tabesh/v2/book-params/additional-services' }),
 			]);
 			
+			// Validate API response structure
+			if (!sizesData || !sizesData.success) {
+				throw new Error('Invalid response from book-sizes endpoint');
+			}
+			
 			setBookSizes(sizesData.data || []);
 			setPaperTypes(paperTypesData.data || []);
 			setPaperWeights(paperWeightsData.data || []);
@@ -103,7 +108,8 @@ const BookPricingMatrixTab = () => {
 			}
 		} catch (error) {
 			console.error('Error loading initial data:', error);
-			alert(__('خطا در بارگذاری اطلاعات', 'tabesh-v2'));
+			const errorMessage = error.message || __('خطا در بارگذاری پارامترهای محصول', 'tabesh-v2');
+			alert(`${__('خطا', 'tabesh-v2')}: ${errorMessage}`);
 		}
 		setLoading(false);
 	};
@@ -131,16 +137,25 @@ const BookPricingMatrixTab = () => {
 			setBindingCosts(bindingData.data || []);
 			setServicePricing(servicesData.data || []);
 			setServiceRestrictions(restrictionsData.data || []);
-			setSizeLimits(limitsData.data || {
+			
+			// Handle size limits - API returns object or null
+			const defaultLimits = {
 				min_circulation: 1,
 				max_circulation: 10000,
 				circulation_step: 1,
 				min_pages: 1,
 				max_pages: 1000,
 				pages_step: 1,
-			});
+			};
+			
+			if (limitsData.data && typeof limitsData.data === 'object' && !Array.isArray(limitsData.data)) {
+				setSizeLimits({ ...defaultLimits, ...limitsData.data });
+			} else {
+				setSizeLimits(defaultLimits);
+			}
 		} catch (error) {
 			console.error('Error loading pricing data:', error);
+			alert(__('خطا در بارگذاری اطلاعات قیمت‌گذاری', 'tabesh-v2'));
 		}
 	};
 	

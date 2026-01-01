@@ -91,16 +91,24 @@ const BookPrintingParametersTab = () => {
 	 */
 	const addParameter = async (endpoint, data, setData, resetForm) => {
 		try {
-			await apiFetch({
+			const response = await apiFetch({
 				path: `/tabesh/v2/book-params/${endpoint}`,
 				method: 'POST',
 				data: data,
 			});
-			resetForm();
-			loadAllParameters();
+			
+			// Check if the response indicates success
+			if (response && response.success) {
+				resetForm();
+				await loadAllParameters();
+				alert(__('پارامتر با موفقیت اضافه شد', 'tabesh-v2'));
+			} else {
+				throw new Error(response?.message || 'Unknown error');
+			}
 		} catch (error) {
 			console.error('Error adding parameter:', error);
-			alert(__('خطا در افزودن پارامتر', 'tabesh-v2'));
+			const errorMessage = error.message || __('خطا در افزودن پارامتر', 'tabesh-v2');
+			alert(`${__('خطا', 'tabesh-v2')}: ${errorMessage}`);
 		}
 	};
 

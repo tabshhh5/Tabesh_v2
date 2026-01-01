@@ -801,14 +801,51 @@ class Rest_Api {
 
 		$data = array();
 
-		// Handle different table structures.
+		// Handle different table structures with validation.
 		if ( 'tabesh_paper_weights' === $table_suffix ) {
-			$data['paper_type_id'] = absint( $request->get_param( 'paper_type_id' ) );
-			$data['weight']        = absint( $request->get_param( 'weight' ) );
+			$paper_type_id = absint( $request->get_param( 'paper_type_id' ) );
+			$weight = absint( $request->get_param( 'weight' ) );
+			
+			if ( ! $paper_type_id || ! $weight ) {
+				return new \WP_REST_Response(
+					array(
+						'success' => false,
+						'message' => __( 'نوع کاغذ و گرماژ الزامی است', 'tabesh-v2' ),
+					),
+					400
+				);
+			}
+			
+			$data['paper_type_id'] = $paper_type_id;
+			$data['weight']        = $weight;
 		} elseif ( 'tabesh_cover_weights' === $table_suffix ) {
-			$data['weight'] = absint( $request->get_param( 'weight' ) );
+			$weight = absint( $request->get_param( 'weight' ) );
+			
+			if ( ! $weight ) {
+				return new \WP_REST_Response(
+					array(
+						'success' => false,
+						'message' => __( 'گرماژ الزامی است', 'tabesh-v2' ),
+					),
+					400
+				);
+			}
+			
+			$data['weight'] = $weight;
 		} else {
-			$data['name'] = sanitize_text_field( $request->get_param( 'name' ) );
+			$name = sanitize_text_field( $request->get_param( 'name' ) );
+			
+			if ( empty( $name ) ) {
+				return new \WP_REST_Response(
+					array(
+						'success' => false,
+						'message' => __( 'نام پارامتر الزامی است', 'tabesh-v2' ),
+					),
+					400
+				);
+			}
+			
+			$data['name'] = $name;
 		}
 
 		// Add prompt_master if provided.
@@ -819,10 +856,22 @@ class Rest_Api {
 		$result = $wpdb->insert( $table, $data );
 
 		if ( ! $result ) {
+			// Check for duplicate entry error
+			$error = $wpdb->last_error;
+			if ( strpos( $error, 'Duplicate entry' ) !== false ) {
+				return new \WP_REST_Response(
+					array(
+						'success' => false,
+						'message' => __( 'این مقدار قبلاً ثبت شده است', 'tabesh-v2' ),
+					),
+					400
+				);
+			}
+			
 			return new \WP_REST_Response(
 				array(
 					'success' => false,
-					'message' => __( 'Failed to create parameter', 'tabesh-v2' ),
+					'message' => __( 'خطا در ثبت پارامتر', 'tabesh-v2' ) . ': ' . $error,
 				),
 				500
 			);
@@ -831,7 +880,7 @@ class Rest_Api {
 		return new \WP_REST_Response(
 			array(
 				'success' => true,
-				'message' => __( 'Parameter created successfully', 'tabesh-v2' ),
+				'message' => __( 'پارامتر با موفقیت ثبت شد', 'tabesh-v2' ),
 				'id'      => $wpdb->insert_id,
 			),
 			201
