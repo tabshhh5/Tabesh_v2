@@ -89,9 +89,21 @@ const BookPricingMatrixTab = () => {
 				apiFetch({ path: '/tabesh/v2/book-params/additional-services' }),
 			]);
 			
-			// Validate API response structure
-			if (!sizesData || !sizesData.success) {
-				throw new Error('Invalid response from book-sizes endpoint');
+			// Validate all API responses
+			const responses = [
+				{ name: 'book-sizes', data: sizesData },
+				{ name: 'paper-types', data: paperTypesData },
+				{ name: 'paper-weights', data: paperWeightsData },
+				{ name: 'print-types', data: printTypesData },
+				{ name: 'binding-types', data: bindingTypesData },
+				{ name: 'cover-weights', data: coverWeightsData },
+				{ name: 'additional-services', data: servicesData },
+			];
+			
+			for (const response of responses) {
+				if (!response.data || response.data.success === false) {
+					throw new Error(`Invalid response from ${response.name} endpoint`);
+				}
 			}
 			
 			setBookSizes(sizesData.data || []);

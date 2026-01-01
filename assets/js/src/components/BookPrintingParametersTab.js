@@ -98,13 +98,15 @@ const BookPrintingParametersTab = () => {
 			});
 			
 			// Check if the response indicates success
-			if (response && response.success) {
-				resetForm();
-				await loadAllParameters();
-				alert(__('پارامتر با موفقیت اضافه شد', 'tabesh-v2'));
-			} else {
-				throw new Error(response?.message || 'Unknown error');
+			// API should return { success: true/false, message: string }
+			if (!response || response.success === false) {
+				const errorMessage = response?.message || __('خطا در افزودن پارامتر', 'tabesh-v2');
+				throw new Error(errorMessage);
 			}
+			
+			resetForm();
+			await loadAllParameters();
+			alert(__('پارامتر با موفقیت اضافه شد', 'tabesh-v2'));
 		} catch (error) {
 			console.error('Error adding parameter:', error);
 			const errorMessage = error.message || __('خطا در افزودن پارامتر', 'tabesh-v2');

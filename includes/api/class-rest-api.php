@@ -856,9 +856,8 @@ class Rest_Api {
 		$result = $wpdb->insert( $table, $data );
 
 		if ( ! $result ) {
-			// Check for duplicate entry error
-			$error = $wpdb->last_error;
-			if ( strpos( $error, 'Duplicate entry' ) !== false ) {
+			// Check for duplicate entry error using error code
+			if ( 1062 === $wpdb->last_errno ) {
 				return new \WP_REST_Response(
 					array(
 						'success' => false,
@@ -868,10 +867,13 @@ class Rest_Api {
 				);
 			}
 			
+			// Log the full error for debugging
+			error_log( 'Tabesh DB Error: ' . $wpdb->last_error );
+			
 			return new \WP_REST_Response(
 				array(
 					'success' => false,
-					'message' => __( 'خطا در ثبت پارامتر', 'tabesh-v2' ) . ': ' . $error,
+					'message' => __( 'خطا در ثبت پارامتر. لطفاً دوباره تلاش کنید.', 'tabesh-v2' ),
 				),
 				500
 			);
