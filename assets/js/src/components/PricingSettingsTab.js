@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import { useState } from '@wordpress/element';
 import {
 	FormGroup,
 	TextInput,
@@ -6,6 +7,7 @@ import {
 	Checkbox,
 	Section,
 } from '../components/FormComponents';
+import BookPricingMatrixTab from './BookPricingMatrixTab';
 
 /**
  * Pricing Settings Tab Component.
@@ -16,6 +18,7 @@ import {
  */
 const PricingSettingsTab = ( { settings, onChange } ) => {
 	const pricingSettings = settings.pricing || {};
+	const [selectedProduct, setSelectedProduct] = useState('book');
 
 	const handleChange = ( e ) => {
 		const { name, value, type, checked } = e.target;
@@ -30,6 +33,43 @@ const PricingSettingsTab = ( { settings, onChange } ) => {
 
 	return (
 		<div className="pricing-settings-tab">
+			{/* Product Type Selector */}
+			<Section
+				title={ __( 'نوع محصول', 'tabesh-v2' ) }
+				description={ __( 'انتخاب نوع محصول برای قیمت‌گذاری', 'tabesh-v2' ) }
+			>
+				<FormGroup label={ __( 'نوع محصول', 'tabesh-v2' ) }>
+					<select
+						value={selectedProduct}
+						onChange={(e) => setSelectedProduct(e.target.value)}
+						className="regular-text"
+					>
+						<option value="book">{ __( 'کتاب', 'tabesh-v2' ) }</option>
+						<option value="receipt">{ __( 'قبض', 'tabesh-v2' ) }</option>
+						<option value="box">{ __( 'جعبه', 'tabesh-v2' ) }</option>
+						<option value="business_card">{ __( 'کارت ویزیت', 'tabesh-v2' ) }</option>
+						<option value="poster">{ __( 'پوستر', 'tabesh-v2' ) }</option>
+						<option value="flyer">{ __( 'تراکت', 'tabesh-v2' ) }</option>
+					</select>
+				</FormGroup>
+			</Section>
+
+			{/* Book Pricing Matrix */}
+			{selectedProduct === 'book' && (
+				<BookPricingMatrixTab />
+			)}
+
+			{/* Other product types - Coming soon */}
+			{selectedProduct !== 'book' && (
+				<Section
+					title={ __( 'قیمت‌گذاری ' + selectedProduct, 'tabesh-v2' ) }
+					description={ __( 'این بخش به زودی اضافه خواهد شد', 'tabesh-v2' ) }
+				>
+					<p>{ __( 'قیمت‌گذاری این محصول در نسخه‌های بعدی اضافه خواهد شد.', 'tabesh-v2' ) }</p>
+				</Section>
+			)}
+
+			{/* General Pricing Settings */}
 			<Section
 				title={ __( 'تنظیمات عمومی قیمت‌گذاری', 'tabesh-v2' ) }
 				description={ __(
