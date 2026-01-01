@@ -4,7 +4,6 @@ import apiFetch from '@wordpress/api-fetch';
 import TabPanel from '../components/TabPanel';
 import AISettingsTab from '../components/AISettingsTab';
 import ProductParametersTab from '../components/ProductParametersTab';
-import BookPrintingParametersTab from '../components/BookPrintingParametersTab';
 import PricingSettingsTab from '../components/PricingSettingsTab';
 import SMSSettingsTab from '../components/SMSSettingsTab';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -98,11 +97,6 @@ const SettingsPanel = () => {
 					onChange={ handleSettingsChange }
 				/>
 			),
-		},
-		{
-			id: 'book_printing',
-			title: __( 'پارامترهای چاپ کتاب', 'tabesh-v2' ),
-			content: <BookPrintingParametersTab />,
 		},
 		{
 			id: 'pricing',
