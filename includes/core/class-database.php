@@ -26,7 +26,7 @@ class Database {
 	 *
 	 * @var string
 	 */
-	private $db_version = '1.1.0';
+	private $db_version = '1.2.0';
 
 	/**
 	 * Constructor.
@@ -65,6 +65,14 @@ class Database {
 		$cover_weights_table = $this->wpdb->prefix . 'tabesh_cover_weights';
 		$lamination_types_table = $this->wpdb->prefix . 'tabesh_lamination_types';
 		$additional_services_table = $this->wpdb->prefix . 'tabesh_additional_services';
+		$binding_types_table = $this->wpdb->prefix . 'tabesh_binding_types';
+
+		// Book pricing tables.
+		$pricing_page_cost_table = $this->wpdb->prefix . 'tabesh_book_pricing_page_cost';
+		$pricing_binding_table = $this->wpdb->prefix . 'tabesh_book_pricing_binding';
+		$pricing_additional_services_table = $this->wpdb->prefix . 'tabesh_book_pricing_additional_services';
+		$pricing_service_binding_restrictions_table = $this->wpdb->prefix . 'tabesh_book_pricing_service_binding_restrictions';
+		$pricing_size_limits_table = $this->wpdb->prefix . 'tabesh_book_pricing_size_limits';
 
 		$sql = array();
 
@@ -225,6 +233,102 @@ class Database {
 			UNIQUE KEY name (name)
 		) {$charset_collate};";
 
+		// Create binding types table (انواع صحافی).
+		$sql[] = "CREATE TABLE IF NOT EXISTS {$binding_types_table} (
+			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			name varchar(255) NOT NULL,
+			prompt_master text DEFAULT NULL,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			UNIQUE KEY name (name)
+		) {$charset_collate};";
+
+		// Create book pricing page cost table (هزینه هر صفحه).
+		$sql[] = "CREATE TABLE IF NOT EXISTS {$pricing_page_cost_table} (
+			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			book_size_id bigint(20) UNSIGNED NOT NULL,
+			paper_type_id bigint(20) UNSIGNED NOT NULL,
+			paper_weight_id bigint(20) UNSIGNED NOT NULL,
+			print_type_id bigint(20) UNSIGNED NOT NULL,
+			price decimal(10,2) NOT NULL DEFAULT 0.00,
+			is_enabled tinyint(1) NOT NULL DEFAULT 1,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			KEY book_size_id (book_size_id),
+			KEY paper_type_id (paper_type_id),
+			KEY paper_weight_id (paper_weight_id),
+			KEY print_type_id (print_type_id),
+			UNIQUE KEY pricing_combination (book_size_id, paper_type_id, paper_weight_id, print_type_id)
+		) {$charset_collate};";
+
+		// Create book pricing binding table (هزینه صحافی و جلد).
+		$sql[] = "CREATE TABLE IF NOT EXISTS {$pricing_binding_table} (
+			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			book_size_id bigint(20) UNSIGNED NOT NULL,
+			binding_type_id bigint(20) UNSIGNED NOT NULL,
+			cover_weight_id bigint(20) UNSIGNED NOT NULL,
+			price decimal(10,2) NOT NULL DEFAULT 0.00,
+			is_enabled tinyint(1) NOT NULL DEFAULT 1,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			KEY book_size_id (book_size_id),
+			KEY binding_type_id (binding_type_id),
+			KEY cover_weight_id (cover_weight_id),
+			UNIQUE KEY binding_combination (book_size_id, binding_type_id, cover_weight_id)
+		) {$charset_collate};";
+
+		// Create book pricing additional services table (خدمات اضافی).
+		$sql[] = "CREATE TABLE IF NOT EXISTS {$pricing_additional_services_table} (
+			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			book_size_id bigint(20) UNSIGNED NOT NULL,
+			service_id bigint(20) UNSIGNED NOT NULL,
+			price decimal(10,2) NOT NULL DEFAULT 0.00,
+			calculation_type varchar(50) NOT NULL DEFAULT 'fixed',
+			pages_per_unit int(11) DEFAULT NULL,
+			is_enabled tinyint(1) NOT NULL DEFAULT 1,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			KEY book_size_id (book_size_id),
+			KEY service_id (service_id),
+			UNIQUE KEY service_combination (book_size_id, service_id)
+		) {$charset_collate};";
+
+		// Create service binding restrictions table (محدودیت های خدمات اضافی بر اساس نوع صحافی).
+		$sql[] = "CREATE TABLE IF NOT EXISTS {$pricing_service_binding_restrictions_table} (
+			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			book_size_id bigint(20) UNSIGNED NOT NULL,
+			service_id bigint(20) UNSIGNED NOT NULL,
+			binding_type_id bigint(20) UNSIGNED NOT NULL,
+			is_enabled tinyint(1) NOT NULL DEFAULT 1,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			KEY book_size_id (book_size_id),
+			KEY service_id (service_id),
+			KEY binding_type_id (binding_type_id),
+			UNIQUE KEY restriction_combination (book_size_id, service_id, binding_type_id)
+		) {$charset_collate};";
+
+		// Create book pricing size limits table (محدودیت های تیراژ و تعداد صفحه).
+		$sql[] = "CREATE TABLE IF NOT EXISTS {$pricing_size_limits_table} (
+			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			book_size_id bigint(20) UNSIGNED NOT NULL,
+			min_circulation int(11) NOT NULL DEFAULT 1,
+			max_circulation int(11) NOT NULL DEFAULT 10000,
+			circulation_step int(11) NOT NULL DEFAULT 1,
+			min_pages int(11) NOT NULL DEFAULT 1,
+			max_pages int(11) NOT NULL DEFAULT 1000,
+			pages_step int(11) NOT NULL DEFAULT 1,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			UNIQUE KEY book_size_id (book_size_id)
+		) {$charset_collate};";
+
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 		foreach ( $sql as $query ) {
@@ -254,6 +358,12 @@ class Database {
 			$this->wpdb->prefix . 'tabesh_cover_weights',
 			$this->wpdb->prefix . 'tabesh_lamination_types',
 			$this->wpdb->prefix . 'tabesh_additional_services',
+			$this->wpdb->prefix . 'tabesh_binding_types',
+			$this->wpdb->prefix . 'tabesh_book_pricing_page_cost',
+			$this->wpdb->prefix . 'tabesh_book_pricing_binding',
+			$this->wpdb->prefix . 'tabesh_book_pricing_additional_services',
+			$this->wpdb->prefix . 'tabesh_book_pricing_service_binding_restrictions',
+			$this->wpdb->prefix . 'tabesh_book_pricing_size_limits',
 		);
 
 		foreach ( $tables as $table ) {
@@ -369,5 +479,59 @@ class Database {
 	 */
 	public function get_additional_services_table() {
 		return $this->wpdb->prefix . 'tabesh_additional_services';
+	}
+
+	/**
+	 * Get binding types table name.
+	 *
+	 * @return string
+	 */
+	public function get_binding_types_table() {
+		return $this->wpdb->prefix . 'tabesh_binding_types';
+	}
+
+	/**
+	 * Get book pricing page cost table name.
+	 *
+	 * @return string
+	 */
+	public function get_pricing_page_cost_table() {
+		return $this->wpdb->prefix . 'tabesh_book_pricing_page_cost';
+	}
+
+	/**
+	 * Get book pricing binding table name.
+	 *
+	 * @return string
+	 */
+	public function get_pricing_binding_table() {
+		return $this->wpdb->prefix . 'tabesh_book_pricing_binding';
+	}
+
+	/**
+	 * Get book pricing additional services table name.
+	 *
+	 * @return string
+	 */
+	public function get_pricing_additional_services_table() {
+		return $this->wpdb->prefix . 'tabesh_book_pricing_additional_services';
+	}
+
+	/**
+	 * Get service binding restrictions table name.
+	 *
+	 * @return string
+	 */
+	public function get_pricing_service_binding_restrictions_table() {
+		return $this->wpdb->prefix . 'tabesh_book_pricing_service_binding_restrictions';
+	}
+
+	/**
+	 * Get book pricing size limits table name.
+	 *
+	 * @return string
+	 */
+	public function get_pricing_size_limits_table() {
+		return $this->wpdb->prefix . 'tabesh_book_pricing_size_limits';
 	}
 }
