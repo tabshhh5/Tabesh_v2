@@ -295,7 +295,9 @@ class Plugin {
 				$wpdb->prefix . 'tabesh_paper_types',
 				$type
 			);
-			$paper_type_ids[ $type['name'] ] = $wpdb->insert_id;
+			// Store insert_id immediately to avoid race conditions.
+			$last_id = $wpdb->insert_id;
+			$paper_type_ids[ $type['name'] ] = $last_id;
 		}
 
 		// Default paper weights (گرماژ کاغذ متن).

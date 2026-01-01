@@ -599,6 +599,29 @@ class Rest_Api {
 	 */
 	private function get_book_parameters( $request, $table_suffix ) {
 		global $wpdb;
+
+		// Validate table suffix to prevent SQL injection.
+		$allowed_tables = array(
+			'tabesh_book_sizes',
+			'tabesh_paper_types',
+			'tabesh_paper_weights',
+			'tabesh_print_types',
+			'tabesh_license_types',
+			'tabesh_cover_weights',
+			'tabesh_lamination_types',
+			'tabesh_additional_services',
+		);
+
+		if ( ! in_array( $table_suffix, $allowed_tables, true ) ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'Invalid table name', 'tabesh-v2' ),
+				),
+				400
+			);
+		}
+
 		$table = $wpdb->prefix . $table_suffix;
 
 		// Special handling for paper_weights to include paper_type relationship.
@@ -635,6 +658,29 @@ class Rest_Api {
 	 */
 	private function create_book_parameter( $request, $table_suffix ) {
 		global $wpdb;
+
+		// Validate table suffix to prevent SQL injection.
+		$allowed_tables = array(
+			'tabesh_book_sizes',
+			'tabesh_paper_types',
+			'tabesh_paper_weights',
+			'tabesh_print_types',
+			'tabesh_license_types',
+			'tabesh_cover_weights',
+			'tabesh_lamination_types',
+			'tabesh_additional_services',
+		);
+
+		if ( ! in_array( $table_suffix, $allowed_tables, true ) ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'Invalid table name', 'tabesh-v2' ),
+				),
+				400
+			);
+		}
+
 		$table = $wpdb->prefix . $table_suffix;
 
 		$data = array();
@@ -685,6 +731,29 @@ class Rest_Api {
 	 */
 	private function delete_book_parameter( $request, $table_suffix ) {
 		global $wpdb;
+
+		// Validate table suffix to prevent SQL injection.
+		$allowed_tables = array(
+			'tabesh_book_sizes',
+			'tabesh_paper_types',
+			'tabesh_paper_weights',
+			'tabesh_print_types',
+			'tabesh_license_types',
+			'tabesh_cover_weights',
+			'tabesh_lamination_types',
+			'tabesh_additional_services',
+		);
+
+		if ( ! in_array( $table_suffix, $allowed_tables, true ) ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'Invalid table name', 'tabesh-v2' ),
+				),
+				400
+			);
+		}
+
 		$table = $wpdb->prefix . $table_suffix;
 		$id    = absint( $request->get_param( 'id' ) );
 
