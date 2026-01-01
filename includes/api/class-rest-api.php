@@ -111,6 +111,62 @@ class Rest_Api {
 				),
 			)
 		);
+
+		// Book printing parameters endpoints.
+		$this->register_book_parameter_routes( 'book-sizes', 'tabesh_book_sizes' );
+		$this->register_book_parameter_routes( 'paper-types', 'tabesh_paper_types' );
+		$this->register_book_parameter_routes( 'paper-weights', 'tabesh_paper_weights' );
+		$this->register_book_parameter_routes( 'print-types', 'tabesh_print_types' );
+		$this->register_book_parameter_routes( 'license-types', 'tabesh_license_types' );
+		$this->register_book_parameter_routes( 'cover-weights', 'tabesh_cover_weights' );
+		$this->register_book_parameter_routes( 'lamination-types', 'tabesh_lamination_types' );
+		$this->register_book_parameter_routes( 'additional-services', 'tabesh_additional_services' );
+	}
+
+	/**
+	 * Register book parameter routes.
+	 *
+	 * @param string $endpoint Endpoint name.
+	 * @param string $table_suffix Table suffix without prefix.
+	 * @return void
+	 */
+	private function register_book_parameter_routes( $endpoint, $table_suffix ) {
+		// List and create.
+		register_rest_route(
+			$this->namespace,
+			'/book-params/' . $endpoint,
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => function( $request ) use ( $table_suffix ) {
+						return $this->get_book_parameters( $request, $table_suffix );
+					},
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => function( $request ) use ( $table_suffix ) {
+						return $this->create_book_parameter( $request, $table_suffix );
+					},
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+			)
+		);
+
+		// Delete.
+		register_rest_route(
+			$this->namespace,
+			'/book-params/' . $endpoint . '/(?P<id>\d+)',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::DELETABLE,
+					'callback'            => function( $request ) use ( $table_suffix ) {
+						return $this->delete_book_parameter( $request, $table_suffix );
+					},
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -532,5 +588,124 @@ class Rest_Api {
 		}
 
 		return $sanitized;
+	}
+
+	/**
+	 * Get book parameters.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @param string           $table_suffix Table suffix without prefix.
+	 * @return \WP_REST_Response
+	 */
+	private function get_book_parameters( $request, $table_suffix ) {
+		global $wpdb;
+		$table = $wpdb->prefix . $table_suffix;
+
+		// Special handling for paper_weights to include paper_type relationship.
+		if ( 'tabesh_paper_weights' === $table_suffix ) {
+			$results = $wpdb->get_results(
+				"SELECT pw.*, pt.name as paper_type_name 
+				FROM {$table} pw 
+				LEFT JOIN {$wpdb->prefix}tabesh_paper_types pt ON pw.paper_type_id = pt.id 
+				ORDER BY pw.id DESC",
+				ARRAY_A
+			); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		} else {
+			$results = $wpdb->get_results(
+				"SELECT * FROM {$table} ORDER BY id DESC",
+				ARRAY_A
+			); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		}
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'data'    => $results,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Create book parameter.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @param string           $table_suffix Table suffix without prefix.
+	 * @return \WP_REST_Response
+	 */
+	private function create_book_parameter( $request, $table_suffix ) {
+		global $wpdb;
+		$table = $wpdb->prefix . $table_suffix;
+
+		$data = array();
+
+		// Handle different table structures.
+		if ( 'tabesh_paper_weights' === $table_suffix ) {
+			$data['paper_type_id'] = absint( $request->get_param( 'paper_type_id' ) );
+			$data['weight']        = absint( $request->get_param( 'weight' ) );
+		} elseif ( 'tabesh_cover_weights' === $table_suffix ) {
+			$data['weight'] = absint( $request->get_param( 'weight' ) );
+		} else {
+			$data['name'] = sanitize_text_field( $request->get_param( 'name' ) );
+		}
+
+		// Add prompt_master if provided.
+		if ( $request->get_param( 'prompt_master' ) ) {
+			$data['prompt_master'] = sanitize_textarea_field( $request->get_param( 'prompt_master' ) );
+		}
+
+		$result = $wpdb->insert( $table, $data );
+
+		if ( ! $result ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'Failed to create parameter', 'tabesh-v2' ),
+				),
+				500
+			);
+		}
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => __( 'Parameter created successfully', 'tabesh-v2' ),
+				'id'      => $wpdb->insert_id,
+			),
+			201
+		);
+	}
+
+	/**
+	 * Delete book parameter.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @param string           $table_suffix Table suffix without prefix.
+	 * @return \WP_REST_Response
+	 */
+	private function delete_book_parameter( $request, $table_suffix ) {
+		global $wpdb;
+		$table = $wpdb->prefix . $table_suffix;
+		$id    = absint( $request->get_param( 'id' ) );
+
+		$result = $wpdb->delete( $table, array( 'id' => $id ) );
+
+		if ( ! $result ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'Failed to delete parameter', 'tabesh-v2' ),
+				),
+				500
+			);
+		}
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => __( 'Parameter deleted successfully', 'tabesh-v2' ),
+			),
+			200
+		);
 	}
 }
