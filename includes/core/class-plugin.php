@@ -91,6 +91,9 @@ class Plugin {
 
 		// Add rewrite rules flush on activation.
 		add_action( 'init', array( $this, 'maybe_flush_rewrite_rules' ) );
+
+		// Check database version and upgrade if needed.
+		add_action( 'plugins_loaded', array( $this, 'maybe_upgrade_database' ) );
 	}
 
 	/**
@@ -182,6 +185,21 @@ class Plugin {
 	}
 
 	/**
+	 * Maybe upgrade database.
+	 *
+	 * @return void
+	 */
+	public function maybe_upgrade_database() {
+		$current_db_version = get_option( 'tabesh_v2_db_version', '0.0.0' );
+		$required_db_version = '1.1.0';
+
+		if ( version_compare( $current_db_version, $required_db_version, '<' ) ) {
+			$database = new Database();
+			$database->create_tables();
+		}
+	}
+
+	/**
 	 * Plugin activation handler.
 	 *
 	 * @return void
@@ -196,6 +214,12 @@ class Plugin {
 
 		// Set default options.
 		self::set_default_options();
+
+		// Initialize default book printing parameters if this is first activation.
+		if ( ! get_option( 'tabesh_v2_book_params_initialized' ) ) {
+			self::initialize_default_book_parameters();
+			add_option( 'tabesh_v2_book_params_initialized', true );
+		}
 	}
 
 	/**
@@ -233,6 +257,138 @@ class Plugin {
 		$default_settings = \Tabesh_v2\Panels\Settings_Panel::get_default_settings();
 
 		add_option( 'tabesh_v2_settings', $default_settings );
+	}
+
+	/**
+	 * Initialize default book printing parameters.
+	 *
+	 * @return void
+	 */
+	private static function initialize_default_book_parameters() {
+		global $wpdb;
+
+		// Default book sizes (قطع کتاب).
+		$book_sizes = array(
+			array( 'name' => 'رقعی', 'prompt_master' => 'قطع کتاب رقعی با ابعاد استاندارد' ),
+			array( 'name' => 'وزیری', 'prompt_master' => 'قطع کتاب وزیری با ابعاد استاندارد' ),
+			array( 'name' => 'رحلی', 'prompt_master' => 'قطع کتاب رحلی با ابعاد استاندارد' ),
+			array( 'name' => 'پالتویی', 'prompt_master' => 'قطع کتاب پالتویی با ابعاد استاندارد' ),
+		);
+
+		foreach ( $book_sizes as $size ) {
+			$wpdb->insert(
+				$wpdb->prefix . 'tabesh_book_sizes',
+				$size
+			);
+		}
+
+		// Default paper types (نوع کاغذ متن).
+		$paper_types = array(
+			array( 'name' => 'بالک', 'prompt_master' => 'کاغذ بالک با کیفیت مناسب برای چاپ متن' ),
+			array( 'name' => 'تحریر', 'prompt_master' => 'کاغذ تحریر با کیفیت بالا' ),
+			array( 'name' => 'گلاسه', 'prompt_master' => 'کاغذ گلاسه براق' ),
+		);
+
+		$paper_type_ids = array();
+		foreach ( $paper_types as $type ) {
+			$wpdb->insert(
+				$wpdb->prefix . 'tabesh_paper_types',
+				$type
+			);
+			$paper_type_ids[ $type['name'] ] = $wpdb->insert_id;
+		}
+
+		// Default paper weights (گرماژ کاغذ متن).
+		$paper_weights = array(
+			array( 'paper_type_id' => $paper_type_ids['بالک'], 'weight' => 60, 'prompt_master' => 'گرماژ 60 گرم' ),
+			array( 'paper_type_id' => $paper_type_ids['بالک'], 'weight' => 70, 'prompt_master' => 'گرماژ 70 گرم' ),
+			array( 'paper_type_id' => $paper_type_ids['بالک'], 'weight' => 80, 'prompt_master' => 'گرماژ 80 گرم' ),
+			array( 'paper_type_id' => $paper_type_ids['تحریر'], 'weight' => 60, 'prompt_master' => 'گرماژ 60 گرم' ),
+			array( 'paper_type_id' => $paper_type_ids['تحریر'], 'weight' => 70, 'prompt_master' => 'گرماژ 70 گرم' ),
+			array( 'paper_type_id' => $paper_type_ids['تحریر'], 'weight' => 80, 'prompt_master' => 'گرماژ 80 گرم' ),
+			array( 'paper_type_id' => $paper_type_ids['تحریر'], 'weight' => 90, 'prompt_master' => 'گرماژ 90 گرم' ),
+		);
+
+		foreach ( $paper_weights as $weight ) {
+			$wpdb->insert(
+				$wpdb->prefix . 'tabesh_paper_weights',
+				$weight
+			);
+		}
+
+		// Default print types (انواع چاپ).
+		$print_types = array(
+			array( 'name' => 'چاپ سیاه‌وسفید', 'prompt_master' => 'چاپ تک رنگ سیاه' ),
+			array( 'name' => 'چاپ رنگی', 'prompt_master' => 'چاپ تمام رنگی CMYK' ),
+			array( 'name' => 'چاپ ترکیبی', 'prompt_master' => 'ترکیبی از چاپ سیاه‌وسفید و رنگی' ),
+		);
+
+		foreach ( $print_types as $type ) {
+			$wpdb->insert(
+				$wpdb->prefix . 'tabesh_print_types',
+				$type
+			);
+		}
+
+		// Default license types (انواع مجوز).
+		$license_types = array(
+			array( 'name' => 'دارای مجوز شخصی', 'prompt_master' => 'مجوز شخصی برای چاپ' ),
+			array( 'name' => 'مجوز انتشارات چاپکو', 'prompt_master' => 'مجوز انتشارات چاپکو' ),
+			array( 'name' => 'مجوز انتشارات سفیر سلامت', 'prompt_master' => 'مجوز انتشارات سفیر سلامت' ),
+			array( 'name' => 'بدون مجوز', 'prompt_master' => 'بدون نیاز به مجوز چاپ' ),
+		);
+
+		foreach ( $license_types as $type ) {
+			$wpdb->insert(
+				$wpdb->prefix . 'tabesh_license_types',
+				$type
+			);
+		}
+
+		// Default cover weights (گرماژ کاغذ جلد).
+		$cover_weights = array(
+			array( 'weight' => 135, 'prompt_master' => 'گرماژ 135 گرم برای جلد' ),
+			array( 'weight' => 200, 'prompt_master' => 'گرماژ 200 گرم برای جلد' ),
+			array( 'weight' => 250, 'prompt_master' => 'گرماژ 250 گرم برای جلد' ),
+			array( 'weight' => 300, 'prompt_master' => 'گرماژ 300 گرم برای جلد' ),
+		);
+
+		foreach ( $cover_weights as $weight ) {
+			$wpdb->insert(
+				$wpdb->prefix . 'tabesh_cover_weights',
+				$weight
+			);
+		}
+
+		// Default lamination types (انواع سلفون جلد).
+		$lamination_types = array(
+			array( 'name' => 'سلفون مات', 'prompt_master' => 'پوشش سلفون مات' ),
+			array( 'name' => 'سلفون براق', 'prompt_master' => 'پوشش سلفون براق' ),
+			array( 'name' => 'بدون سلفون', 'prompt_master' => 'بدون پوشش سلفون' ),
+		);
+
+		foreach ( $lamination_types as $type ) {
+			$wpdb->insert(
+				$wpdb->prefix . 'tabesh_lamination_types',
+				$type
+			);
+		}
+
+		// Default additional services (خدمات اضافی).
+		$additional_services = array(
+			array( 'name' => 'شیرینک', 'prompt_master' => 'بسته‌بندی با شیرینک' ),
+			array( 'name' => 'نقره‌کوب', 'prompt_master' => 'طراحی و اجرای نقره‌کوب' ),
+			array( 'name' => 'طلاکوب', 'prompt_master' => 'طراحی و اجرای طلاکوب' ),
+			array( 'name' => 'UV برجسته', 'prompt_master' => 'پوشش UV برجسته' ),
+			array( 'name' => 'وکیوم', 'prompt_master' => 'بسته‌بندی وکیوم' ),
+		);
+
+		foreach ( $additional_services as $service ) {
+			$wpdb->insert(
+				$wpdb->prefix . 'tabesh_additional_services',
+				$service
+			);
+		}
 	}
 
 	/**
