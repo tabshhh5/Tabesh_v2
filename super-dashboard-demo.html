@@ -1,136 +1,0 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tabesh Super Dashboard Demo</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        }
-        .demo-header {
-            background: #2d3748;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        .demo-instructions {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background: #f7fafc;
-            border-radius: 8px;
-            border-right: 4px solid #667eea;
-        }
-        .demo-instructions h2 {
-            margin-top: 0;
-            color: #2d3748;
-        }
-        .demo-instructions code {
-            background: #e2e8f0;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
-        }
-        .demo-instructions pre {
-            background: #2d3748;
-            color: #e2e8f0;
-            padding: 15px;
-            border-radius: 8px;
-            overflow-x: auto;
-        }
-        .demo-instructions pre code {
-            background: transparent;
-            color: inherit;
-        }
-        .shortcode-example {
-            background: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            border: 2px dashed #cbd5e0;
-            margin: 15px 0;
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            color: #667eea;
-        }
-    </style>
-</head>
-<body>
-    <div class="demo-header">
-        <h1>🎨 Tabesh Super Dashboard</h1>
-        <p>پنل مدیریت مدرن برای مشتریان چاپخانه</p>
-    </div>
-
-    <div class="demo-instructions">
-        <h2>📋 نحوه استفاده</h2>
-        <p>برای نمایش داشبورد سوپر پنل در هر صفحه یا پست وردپرس، از شورت‌کد زیر استفاده کنید:</p>
-        
-        <div class="shortcode-example">
-            [tabesh_super_dashboard]
-        </div>
-
-        <h3>🔧 نصب و راه‌اندازی</h3>
-        <ol>
-            <li>افزونه Tabesh v2 را فعال کنید</li>
-            <li>یک صفحه جدید در وردپرس ایجاد کنید</li>
-            <li>شورت‌کد بالا را در محتوای صفحه قرار دهید</li>
-            <li>صفحه را منتشر کنید</li>
-            <li>با حساب کاربری مشتری وارد شوید و صفحه را مشاهده کنید</li>
-        </ol>
-
-        <h3>✨ ویژگی‌های اصلی</h3>
-        <ul>
-            <li><strong>طراحی استودیویی مدرن:</strong> رابط کاربری تمیز و حرفه‌ای</li>
-            <li><strong>ماژول‌های قابل تنظیم:</strong> فعال/غیرفعال کردن ماژول‌های مختلف</li>
-            <li><strong>نمایش Side-by-Side:</strong> چیدمان شبکه‌ای با قابلیت تغییر اندازه</li>
-            <li><strong>کنترل پنجره‌ها:</strong> کوچک کردن، بزرگ کردن و بستن ماژول‌ها</li>
-            <li><strong>ریسپانسیو:</strong> سازگار با دسکتاپ، تبلت و موبایل</li>
-            <li><strong>انیمیشن‌های روان:</strong> تجربه کاربری بهبود یافته</li>
-            <li><strong>پشتیبانی RTL:</strong> طراحی کامل راست به چپ</li>
-        </ul>
-
-        <h3>📦 ماژول‌های موجود</h3>
-        <ul>
-            <li>تاریخچه قیمت (کاغذ، طلا، دلار، یورو، درهم)</li>
-            <li>مقالات جدید</li>
-            <li>ثبت سفارش جدید</li>
-            <li>تاریخچه سفارشات</li>
-            <li>سفارشات در حال انجام</li>
-            <li>گزارش مالی</li>
-            <li>مدیریت فایلها</li>
-            <li>چتبات هوش مصنوعی</li>
-            <li>تیکت پشتیبانی</li>
-            <li>پیام به مدیر حساب</li>
-            <li>ناحیه کانون صنفی</li>
-            <li>محصولات منتشر شده</li>
-            <li>میزان فروش</li>
-            <li>بخش تبلیغات</li>
-        </ul>
-
-        <h3>🎯 نکات مهم</h3>
-        <ul>
-            <li>کاربر باید وارد سیستم شده باشد</li>
-            <li>این نسخه فقط UI/UX است (بدون اتصال به بک‌اند)</li>
-            <li>داده‌های نمایش داده شده جعلی و نمونه هستند</li>
-            <li>قابلیت‌های عملیاتی در مراحل بعدی اضافه خواهند شد</li>
-        </ul>
-
-        <h3>💻 کد نمونه برای قالب</h3>
-        <p>اگر می‌خواهید داشبورد را مستقیماً در قالب نمایش دهید:</p>
-        <pre><code>&lt;?php
-// در فایل قالب
-echo do_shortcode('[tabesh_super_dashboard]');
-?&gt;</code></pre>
-
-        <h3>🔗 مستندات بیشتر</h3>
-        <p>برای اطلاعات بیشتر، فایل <code>SUPER_DASHBOARD.md</code> را در پوشه افزونه مطالعه کنید.</p>
-    </div>
-
-    <div style="text-align: center; padding: 40px; color: #718096;">
-        <p>ساخته شده با ❤️ توسط تیم تابش</p>
-    </div>
-</body>
-</html>
