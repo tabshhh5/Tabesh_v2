@@ -28,13 +28,13 @@
 			&:hover {
 				transform: translateY(-4px);
 				box-shadow: $shadow-lg;
-				border-color: rgba(59, 130, 246, 0.3);
+				border-color: $primary-border-hover;
 			}
 			
 			.stat-icon {
 				width: 48px;
 				height: 48px;
-				background: rgba(59, 130, 246, 0.1);
+				background: $primary-bg-light;
 				border-radius: 12px;
 				display: flex;
 				align-items: center;
@@ -51,7 +51,7 @@
 			
 			&:hover .stat-icon {
 				transform: scale(1.1) rotate(5deg);
-				background: rgba(59, 130, 246, 0.2);
+				background: $primary-bg-hover;
 			}
 			
 			.stat-content {
