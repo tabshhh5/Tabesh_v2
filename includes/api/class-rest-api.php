@@ -281,6 +281,24 @@ class Rest_Api {
 				),
 			)
 		);
+
+		// License pricing.
+		register_rest_route(
+			$this->namespace,
+			'/book-pricing/license-pricing',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_license_pricing' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'save_license_pricing' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -1407,6 +1425,97 @@ class Rest_Api {
 			array(
 				'success' => true,
 				'message' => __( 'Limits saved successfully', 'tabesh-v2' ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Get license pricing.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function get_license_pricing( $request ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tabesh_book_pricing_license';
+
+		$results = $wpdb->get_results(
+			"SELECT * FROM {$table}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			ARRAY_A
+		);
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'data'    => $results,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Save license pricing.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function save_license_pricing( $request ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tabesh_book_pricing_license';
+
+		$license_type_id = $request->get_param( 'license_type_id' );
+		$price           = $request->get_param( 'price' );
+		$is_enabled      = $request->get_param( 'is_enabled' );
+
+		if ( null === $license_type_id || null === $price ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'Missing required parameters', 'tabesh-v2' ),
+				),
+				400
+			);
+		}
+
+		$data = array(
+			'license_type_id' => intval( $license_type_id ),
+			'price'           => floatval( $price ),
+			'is_enabled'      => intval( $is_enabled ),
+		);
+
+		// Check if record exists.
+		$existing = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT id FROM {$table} WHERE license_type_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$license_type_id
+			)
+		);
+
+		if ( $existing ) {
+			$result = $wpdb->update(
+				$table,
+				$data,
+				array( 'license_type_id' => $license_type_id )
+			);
+		} else {
+			$result = $wpdb->insert( $table, $data );
+		}
+
+		if ( false === $result ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'Failed to save license pricing', 'tabesh-v2' ),
+				),
+				500
+			);
+		}
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => __( 'License pricing saved successfully', 'tabesh-v2' ),
 			),
 			200
 		);

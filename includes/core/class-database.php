@@ -26,7 +26,7 @@ class Database {
 	 *
 	 * @var string
 	 */
-	private $db_version = '1.2.0';
+	private $db_version = '1.3.0';
 
 	/**
 	 * Constructor.
@@ -73,6 +73,7 @@ class Database {
 		$pricing_additional_services_table = $this->wpdb->prefix . 'tabesh_book_pricing_additional_services';
 		$pricing_service_binding_restrictions_table = $this->wpdb->prefix . 'tabesh_book_pricing_service_binding_restrictions';
 		$pricing_size_limits_table = $this->wpdb->prefix . 'tabesh_book_pricing_size_limits';
+		$pricing_license_table = $this->wpdb->prefix . 'tabesh_book_pricing_license';
 
 		$sql = array();
 
@@ -329,6 +330,18 @@ class Database {
 			UNIQUE KEY book_size_id (book_size_id)
 		) {$charset_collate};";
 
+		// Create book pricing license table (قیمت‌گذاری مجوز).
+		$sql[] = "CREATE TABLE IF NOT EXISTS {$pricing_license_table} (
+			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			license_type_id bigint(20) UNSIGNED NOT NULL,
+			price decimal(10,2) NOT NULL DEFAULT 0.00,
+			is_enabled tinyint(1) NOT NULL DEFAULT 1,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			UNIQUE KEY license_type_id (license_type_id)
+		) {$charset_collate};";
+
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 		foreach ( $sql as $query ) {
@@ -364,6 +377,7 @@ class Database {
 			$this->wpdb->prefix . 'tabesh_book_pricing_additional_services',
 			$this->wpdb->prefix . 'tabesh_book_pricing_service_binding_restrictions',
 			$this->wpdb->prefix . 'tabesh_book_pricing_size_limits',
+			$this->wpdb->prefix . 'tabesh_book_pricing_license',
 		);
 
 		foreach ( $tables as $table ) {
@@ -533,5 +547,14 @@ class Database {
 	 */
 	public function get_pricing_size_limits_table() {
 		return $this->wpdb->prefix . 'tabesh_book_pricing_size_limits';
+	}
+
+	/**
+	 * Get book pricing license table name.
+	 *
+	 * @return string
+	 */
+	public function get_pricing_license_table() {
+		return $this->wpdb->prefix . 'tabesh_book_pricing_license';
 	}
 }
