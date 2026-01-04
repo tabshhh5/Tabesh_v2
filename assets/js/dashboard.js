@@ -56,7 +56,8 @@
 		}
 
 		currentMobile = mobile;
-		showMessage('در حال ارسال کد...', 'info');
+		showLoading(true);
+		showMessage('', 'info');
 
 		// Send OTP request
 		wp.apiFetch({
@@ -67,6 +68,7 @@
 			},
 		})
 			.then(function (response) {
+				showLoading(false);
 				if (response.success) {
 					showMessage(response.message, 'success');
 					showStep2();
@@ -75,6 +77,7 @@
 				}
 			})
 			.catch(function (error) {
+				showLoading(false);
 				showMessage('خطا در ارسال کد. لطفاً دوباره تلاش کنید.', 'error');
 				console.error('Error sending OTP:', error);
 			});
@@ -113,7 +116,8 @@
 			}
 		}
 
-		showMessage('در حال تأیید...', 'info');
+		showLoading(true);
+		showMessage('', 'info');
 
 		// Verify OTP and login/register
 		wp.apiFetch({
@@ -122,6 +126,7 @@
 			data: data,
 		})
 			.then(function (response) {
+				showLoading(false);
 				if (response.success) {
 					showMessage(response.message, 'success');
 					
@@ -141,6 +146,7 @@
 				}
 			})
 			.catch(function (error) {
+				showLoading(false);
 				showMessage('خطا در تأیید کد. لطفاً دوباره تلاش کنید.', 'error');
 				console.error('Error verifying OTP:', error);
 			});
@@ -186,13 +192,31 @@
 		const $messageDiv = $('#tabesh-auth-message');
 		
 		if (!message) {
-			$messageDiv.html('').removeClass();
+			$messageDiv.html('').removeClass().hide();
 			return;
 		}
 
 		$messageDiv
 			.html('<p>' + message + '</p>')
 			.removeClass()
-			.addClass('message message-' + type);
+			.addClass(type)
+			.show();
+	}
+
+	/**
+	 * Show/hide loading indicator.
+	 *
+	 * @param {boolean} show Whether to show loading
+	 */
+	function showLoading(show) {
+		if (show) {
+			$('#tabesh-auth-loading').show();
+			$('#tabesh-auth-step-1, #tabesh-auth-step-2').css('opacity', '0.5');
+			$('button').prop('disabled', true);
+		} else {
+			$('#tabesh-auth-loading').hide();
+			$('#tabesh-auth-step-1, #tabesh-auth-step-2').css('opacity', '1');
+			$('button').prop('disabled', false);
+		}
 	}
 })(jQuery);
