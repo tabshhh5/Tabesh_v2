@@ -330,7 +330,7 @@ const BookPrintingParametersTab = () => {
 			{/* Print Types Section */}
 			<Section
 				title={__('انواع چاپ', 'tabesh-v2')}
-				description={__('مدیریت روشهای چاپ (سیاه‌وسفید، رنگی، ترکیبی)', 'tabesh-v2')}
+				description={__('مدیریت روشهای چاپ (سیاه‌وسفید، رنگی). چاپ ترکیبی به صورت خودکار از صفحات سیاه‌وسفید و رنگی محاسبه می‌شود.', 'tabesh-v2')}
 			>
 				<div className="parameter-list">
 					{printTypes.map((item) => (
