@@ -26,7 +26,7 @@ class Database {
 	 *
 	 * @var string
 	 */
-	private $db_version = '1.3.0';
+	private $db_version = '1.4.0';
 
 	/**
 	 * Constructor.
@@ -66,6 +66,9 @@ class Database {
 		$lamination_types_table = $this->wpdb->prefix . 'tabesh_lamination_types';
 		$additional_services_table = $this->wpdb->prefix . 'tabesh_additional_services';
 		$binding_types_table = $this->wpdb->prefix . 'tabesh_binding_types';
+
+		// Authentication tables.
+		$otp_tokens_table = $this->wpdb->prefix . 'tabesh_otp_tokens';
 
 		// Book pricing tables.
 		$pricing_page_cost_table = $this->wpdb->prefix . 'tabesh_book_pricing_page_cost';
@@ -342,6 +345,18 @@ class Database {
 			UNIQUE KEY license_type_id (license_type_id)
 		) {$charset_collate};";
 
+		// Create OTP tokens table for authentication.
+		$sql[] = "CREATE TABLE IF NOT EXISTS {$otp_tokens_table} (
+			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			mobile varchar(15) NOT NULL,
+			code varchar(10) NOT NULL,
+			expires_at datetime NOT NULL,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			KEY mobile (mobile),
+			KEY expires_at (expires_at)
+		) {$charset_collate};";
+
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 		foreach ( $sql as $query ) {
@@ -378,6 +393,7 @@ class Database {
 			$this->wpdb->prefix . 'tabesh_book_pricing_service_binding_restrictions',
 			$this->wpdb->prefix . 'tabesh_book_pricing_size_limits',
 			$this->wpdb->prefix . 'tabesh_book_pricing_license',
+			$this->wpdb->prefix . 'tabesh_otp_tokens',
 		);
 
 		foreach ( $tables as $table ) {
