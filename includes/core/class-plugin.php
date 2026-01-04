@@ -319,10 +319,10 @@ class Plugin {
 		}
 
 		// Default print types (انواع چاپ).
+		// Note: Combined printing is not a separate type - it's calculated from B&W + Color pages
 		$print_types = array(
 			array( 'name' => 'چاپ سیاه‌وسفید', 'prompt_master' => 'چاپ تک رنگ سیاه' ),
 			array( 'name' => 'چاپ رنگی', 'prompt_master' => 'چاپ تمام رنگی CMYK' ),
-			array( 'name' => 'چاپ ترکیبی', 'prompt_master' => 'ترکیبی از چاپ سیاه‌وسفید و رنگی' ),
 		);
 
 		foreach ( $print_types as $type ) {

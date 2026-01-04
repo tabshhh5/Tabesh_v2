@@ -389,11 +389,14 @@ const BookPricingMatrixTab = () => {
 					<h4 style={{ marginTop: '0', color: '#b45309', display: 'flex', alignItems: 'center', gap: '8px' }}>
 						💡 {__('قانون مهم: قیمت پیش‌فرض', 'tabesh-v2')}
 					</h4>
-					<p style={{ marginBottom: '0', color: '#78350f', lineHeight: '1.6' }}>
+					<p style={{ marginBottom: '10px', color: '#78350f', lineHeight: '1.6' }}>
 						{__('به صورت پیش‌فرض، تمام پارامترها دارای قیمت 0 تومان هستند. ', 'tabesh-v2')}
 						<strong>{__('قیمت 0 به معنای غیرفعال بودن آن گزینه است.', 'tabesh-v2')}</strong>
 						{' '}
-						{__('برای فعال‌سازی هر ترکیب، باید قیمت مناسب را تعیین کرده و چک‌باکس آن را فعال کنید.', 'tabesh-v2')}
+						{__('برای فعال‌سازی هر ترکیب، باید قیمت مناسب را تعیین کرده و کلید کشویی آن را روشن کنید.', 'tabesh-v2')}
+					</p>
+					<p style={{ marginBottom: '0', color: '#78350f', lineHeight: '1.6', fontSize: '0.95em' }}>
+						📝 {__('توجه: چاپ ترکیبی به صورت جداگانه قیمت‌گذاری نمی‌شود. قیمت نهایی چاپ ترکیبی از جمع صفحات سیاه‌وسفید و رنگی محاسبه می‌گردد.', 'tabesh-v2')}
 					</p>
 				</div>
 				
@@ -578,6 +581,57 @@ const BookPricingMatrixTab = () => {
 };
 
 /**
+ * Toggle Switch Component - Modern UI switch for enable/disable
+ */
+const ToggleSwitch = ({ checked, onChange, disabled, label }) => {
+	return (
+		<label style={{ 
+			display: 'flex', 
+			alignItems: 'center', 
+			gap: '8px',
+			cursor: disabled ? 'not-allowed' : 'pointer',
+			opacity: disabled ? 0.6 : 1,
+			userSelect: 'none'
+		}}>
+			<div
+				onClick={() => !disabled && onChange()}
+				style={{
+					position: 'relative',
+					width: '44px',
+					height: '24px',
+					backgroundColor: checked ? '#10b981' : '#e5e7eb',
+					borderRadius: '12px',
+					transition: 'background-color 0.2s',
+					cursor: disabled ? 'not-allowed' : 'pointer',
+					boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)'
+				}}
+			>
+				<div style={{
+					position: 'absolute',
+					top: '2px',
+					left: checked ? '22px' : '2px',
+					width: '20px',
+					height: '20px',
+					backgroundColor: '#ffffff',
+					borderRadius: '50%',
+					transition: 'left 0.2s',
+					boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+				}} />
+			</div>
+			{label && (
+				<span style={{ 
+					fontSize: '12px', 
+					fontWeight: '500',
+					color: checked ? '#065f46' : '#6b7280'
+				}}>
+					{label}
+				</span>
+			)}
+		</label>
+	);
+};
+
+/**
  * Page Cost Matrix Component
  */
 const PageCostMatrix = ({ paperTypes, paperWeights, printTypes, getPageCost, savePageCost, saving }) => {
@@ -592,7 +646,10 @@ const PageCostMatrix = ({ paperTypes, paperWeights, printTypes, getPageCost, sav
 	
 	const toggleEnabled = async (paperTypeId, paperWeightId, printTypeId) => {
 		const existing = getPageCost(paperTypeId, paperWeightId, printTypeId);
-		await savePageCost(paperTypeId, paperWeightId, printTypeId, existing?.price || 0, existing ? !existing.is_enabled : 0);
+		// Toggle the enabled state for this specific combination only
+		// Default is enabled (1) when first clicked on a new combination
+		const newEnabledState = existing ? !existing.is_enabled : 1;
+		await savePageCost(paperTypeId, paperWeightId, printTypeId, existing?.price || 0, newEnabledState);
 	};
 	
 	// Group paper weights by paper type
@@ -625,7 +682,7 @@ const PageCostMatrix = ({ paperTypes, paperWeights, printTypes, getPageCost, sav
 				<ul style={{ marginLeft: '20px', lineHeight: '1.8' }}>
 					<li>{paperTypes.length === 0 && '❌ '}{__('نوع کاغذ متن (مثال: بالک، تحریر، گلاسه)', 'tabesh-v2')}</li>
 					<li>{paperWeights.length === 0 && '❌ '}{__('گرماژ کاغذ متن (مثال: 60، 70، 80 گرم)', 'tabesh-v2')}</li>
-					<li>{printTypes.length === 0 && '❌ '}{__('انواع چاپ (مثال: سیاه‌وسفید، رنگی، ترکیبی)', 'tabesh-v2')}</li>
+					<li>{printTypes.length === 0 && '❌ '}{__('انواع چاپ (مثال: سیاه‌وسفید، رنگی)', 'tabesh-v2')}</li>
 				</ul>
 				<p style={{ marginTop: '15px', fontStyle: 'italic' }}>
 					💡 {__('نکته: پس از تعریف هر پارامتر، قیمت پیش‌فرض 0 تومان برای تمام ترکیبات در نظر گرفته می‌شود. قیمت 0 به معنای غیرفعال بودن آن ترکیب است.', 'tabesh-v2')}
@@ -647,10 +704,10 @@ const PageCostMatrix = ({ paperTypes, paperWeights, printTypes, getPageCost, sav
 					📄 {__('هزینه هر صفحه (کاغذ + چاپ)', 'tabesh-v2')}
 				</h3>
 				<p style={{ marginBottom: '0', color: '#4b5563' }}>
-					{__('قیمت نهایی هر صفحه شامل هزینه کاغذ و چاپ است. برای ویرایش، روی قیمت کلیک کنید. چک‌باکس فعال/غیرفعال بودن هر ترکیب را کنترل می‌کند.', 'tabesh-v2')}
+					{__('قیمت نهایی هر صفحه شامل هزینه کاغذ و چاپ است. برای ویرایش، روی قیمت کلیک کنید. کلید کشویی روشن/خاموش فعال/غیرفعال بودن هر ترکیب را کنترل می‌کند.', 'tabesh-v2')}
 				</p>
 				<p style={{ marginTop: '10px', marginBottom: '0', color: '#6b7280', fontSize: '0.9em', fontStyle: 'italic' }}>
-					💡 {__('نکته: قیمت 0 تومان به معنای غیرفعال بودن آن ترکیب است.', 'tabesh-v2')}
+					💡 {__('نکته: هر کلید کشویی فقط برای همان ترکیب خاص (گرماژ + نوع چاپ) عمل می‌کند و سایر گزینه‌ها را تحت تاثیر قرار نمی‌دهد.', 'tabesh-v2')}
 				</p>
 			</div>
 			
@@ -767,23 +824,11 @@ const PageCostMatrix = ({ paperTypes, paperWeights, printTypes, getPageCost, sav
 																		</span>
 																	)}
 																</span>
-																<label style={{ display: 'flex', alignItems: 'center', margin: 0, cursor: 'pointer' }}>
-																	<input
-																		type="checkbox"
-																		checked={cost ? Boolean(cost.is_enabled) : false}
-																		onChange={() => toggleEnabled(paperType.id, weight.id, printType.id)}
-																		disabled={saving}
-																		title={__('فعال/غیرفعال', 'tabesh-v2')}
-																		style={{ margin: '0' }}
-																	/>
-																	<span style={{ 
-																		fontSize: '11px', 
-																		marginRight: '4px',
-																		color: '#6b7280'
-																	}}>
-																		{cost && cost.is_enabled ? '✓' : '✗'}
-																	</span>
-																</label>
+																<ToggleSwitch
+																	checked={cost ? Boolean(cost.is_enabled) : false}
+																	onChange={() => toggleEnabled(paperType.id, weight.id, printType.id)}
+																	disabled={saving}
+																/>
 															</>
 														)}
 													</div>
@@ -816,7 +861,10 @@ const BindingCostMatrix = ({ bindingTypes, coverWeights, getBindingCost, saveBin
 	
 	const toggleEnabled = async (bindingTypeId, coverWeightId) => {
 		const existing = getBindingCost(bindingTypeId, coverWeightId);
-		await saveBindingCost(bindingTypeId, coverWeightId, existing?.price || 0, existing ? !existing.is_enabled : 0);
+		// Toggle the enabled state for this specific combination only
+		// Default is enabled (1) when first clicked on a new combination
+		const newEnabledState = existing ? !existing.is_enabled : 1;
+		await saveBindingCost(bindingTypeId, coverWeightId, existing?.price || 0, newEnabledState);
 	};
 	
 	// Check if we have any data to display - show helpful message but allow viewing
@@ -859,10 +907,10 @@ const BindingCostMatrix = ({ bindingTypes, coverWeights, getBindingCost, saveBin
 					📚 {__('هزینه صحافی و جلد', 'tabesh-v2')}
 				</h3>
 				<p style={{ marginBottom: '0', color: '#4b5563' }}>
-					{__('هزینه صحافی برای هر ترکیب صحافی و گرماژ جلد. برای ویرایش، روی قیمت کلیک کنید. چک‌باکس مجاز/غیرمجاز بودن هر ترکیب را کنترل می‌کند.', 'tabesh-v2')}
+					{__('هزینه صحافی برای هر ترکیب صحافی و گرماژ جلد. برای ویرایش، روی قیمت کلیک کنید. کلید کشویی روشن/خاموش مجاز/غیرمجاز بودن هر ترکیب را کنترل می‌کند.', 'tabesh-v2')}
 				</p>
 				<p style={{ marginTop: '10px', marginBottom: '0', color: '#6b7280', fontSize: '0.9em', fontStyle: 'italic' }}>
-					💡 {__('نکته: قیمت 0 تومان به معنای غیرمجاز بودن آن ترکیب است.', 'tabesh-v2')}
+					💡 {__('نکته: هر کلید کشویی فقط برای همان ترکیب خاص عمل می‌کند و سایر گزینه‌ها را تحت تاثیر قرار نمی‌دهد.', 'tabesh-v2')}
 				</p>
 			</div>
 			
@@ -972,23 +1020,11 @@ const BindingCostMatrix = ({ bindingTypes, coverWeights, getBindingCost, saveBin
 																</span>
 															)}
 														</span>
-														<label style={{ display: 'flex', alignItems: 'center', margin: 0, cursor: 'pointer' }}>
-															<input
-																type="checkbox"
-																checked={cost ? Boolean(cost.is_enabled) : false}
-																onChange={() => toggleEnabled(bindingType.id, weight.id)}
-																disabled={saving}
-																title={__('مجاز/غیرمجاز', 'tabesh-v2')}
-																style={{ margin: '0' }}
-															/>
-															<span style={{ 
-																fontSize: '11px', 
-																marginRight: '4px',
-																color: '#6b7280'
-															}}>
-																{cost && cost.is_enabled ? '✓' : '✗'}
-															</span>
-														</label>
+														<ToggleSwitch
+															checked={cost ? Boolean(cost.is_enabled) : false}
+															onChange={() => toggleEnabled(bindingType.id, weight.id)}
+															disabled={saving}
+														/>
 													</>
 												)}
 											</div>
@@ -1246,7 +1282,10 @@ const AdditionalServicesConfig = ({ additionalServices, getServicePricing, saveS
 const ServiceBindingRestrictions = ({ additionalServices, bindingTypes, getServiceRestriction, saveServiceRestriction, saving }) => {
 	const toggleRestriction = async (serviceId, bindingTypeId) => {
 		const existing = getServiceRestriction(serviceId, bindingTypeId);
-		await saveServiceRestriction(serviceId, bindingTypeId, existing ? !existing.is_enabled : 1);
+		// Default is enabled (true) if not set - so when toggling from default, we disable it
+		// If it exists, toggle its current state
+		const newEnabledState = existing ? !existing.is_enabled : 0; // Disable when first clicked from default enabled state
+		await saveServiceRestriction(serviceId, bindingTypeId, newEnabledState);
 	};
 	
 	// Check if we have any data to display - show helpful message
@@ -1325,40 +1364,19 @@ const ServiceBindingRestrictions = ({ additionalServices, bindingTypes, getServi
 									<tr key={bindingType.id} style={{ backgroundColor: isEnabled ? '#f0fdf4' : '#fef2f2' }}>
 										<td style={{ fontWeight: 'bold' }}>{bindingType.name}</td>
 										<td>
-											<label style={{ 
+											<div style={{ 
 												display: 'flex', 
 												alignItems: 'center', 
 												gap: '12px',
-												cursor: 'pointer',
-												margin: 0
+												padding: '4px 0'
 											}}>
-												<input
-													type="checkbox"
+												<ToggleSwitch
 													checked={isEnabled}
 													onChange={() => toggleRestriction(service.id, bindingType.id)}
 													disabled={saving}
-													style={{ 
-														width: '18px',
-														height: '18px',
-														cursor: 'pointer'
-													}}
+													label={isEnabled ? __('فعال', 'tabesh-v2') : __('غیر فعال', 'tabesh-v2')}
 												/>
-												<span style={{ 
-													display: 'inline-block',
-													padding: '4px 12px',
-													backgroundColor: isEnabled ? '#d1fae5' : '#fee2e2',
-													color: isEnabled ? '#065f46' : '#991b1b',
-													borderRadius: '3px',
-													fontWeight: '500',
-													fontSize: '0.9em'
-												}}>
-													{isEnabled ? (
-														<>✓ {__('فعال', 'tabesh-v2')}</>
-													) : (
-														<>✗ {__('غیر فعال', 'tabesh-v2')}</>
-													)}
-												</span>
-											</label>
+											</div>
 										</td>
 									</tr>
 								);
