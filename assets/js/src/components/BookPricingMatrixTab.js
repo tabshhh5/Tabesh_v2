@@ -647,8 +647,8 @@ const PageCostMatrix = ({ paperTypes, paperWeights, printTypes, getPageCost, sav
 	const toggleEnabled = async (paperTypeId, paperWeightId, printTypeId) => {
 		const existing = getPageCost(paperTypeId, paperWeightId, printTypeId);
 		// Toggle the enabled state for this specific combination only
-		// Default is enabled (1) when first clicked on a new combination
-		const newEnabledState = existing ? !existing.is_enabled : 1;
+		// Convert to number: if existing and enabled (truthy), set to 0, otherwise set to 1
+		const newEnabledState = (existing && existing.is_enabled) ? 0 : 1;
 		await savePageCost(paperTypeId, paperWeightId, printTypeId, existing?.price || 0, newEnabledState);
 	};
 	
@@ -862,8 +862,8 @@ const BindingCostMatrix = ({ bindingTypes, coverWeights, getBindingCost, saveBin
 	const toggleEnabled = async (bindingTypeId, coverWeightId) => {
 		const existing = getBindingCost(bindingTypeId, coverWeightId);
 		// Toggle the enabled state for this specific combination only
-		// Default is enabled (1) when first clicked on a new combination
-		const newEnabledState = existing ? !existing.is_enabled : 1;
+		// Convert to number: if existing and enabled (truthy), set to 0, otherwise set to 1
+		const newEnabledState = (existing && existing.is_enabled) ? 0 : 1;
 		await saveBindingCost(bindingTypeId, coverWeightId, existing?.price || 0, newEnabledState);
 	};
 	
@@ -1282,9 +1282,11 @@ const AdditionalServicesConfig = ({ additionalServices, getServicePricing, saveS
 const ServiceBindingRestrictions = ({ additionalServices, bindingTypes, getServiceRestriction, saveServiceRestriction, saving }) => {
 	const toggleRestriction = async (serviceId, bindingTypeId) => {
 		const existing = getServiceRestriction(serviceId, bindingTypeId);
-		// Default is enabled (true) if not set - so when toggling from default, we disable it
-		// If it exists, toggle its current state
-		const newEnabledState = existing ? !existing.is_enabled : 0; // Disable when first clicked from default enabled state
+		// Default is enabled (true) if not set
+		// If no record exists, create one with is_enabled: 0 (disabled)
+		// If record exists, toggle between 0 and 1
+		const currentState = existing ? existing.is_enabled : 1; // Default to enabled (1) if no record
+		const newEnabledState = currentState ? 0 : 1;
 		await saveServiceRestriction(serviceId, bindingTypeId, newEnabledState);
 	};
 	
