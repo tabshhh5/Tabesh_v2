@@ -1,8 +1,8 @@
 import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import UserDashboardSettings from './UserDashboardSettings';
-import LoadingSpinner from './LoadingSpinner';
+import UserDashboardSettings from '../components/UserDashboardSettings';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 /**
  * User Dashboard Admin Panel Component.
