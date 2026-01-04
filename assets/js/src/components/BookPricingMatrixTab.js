@@ -318,9 +318,9 @@ const BookPricingMatrixTab = () => {
 	 */
 	const getPageCost = (paperTypeId, paperWeightId, printTypeId) => {
 		const existing = pageCosts.find(
-			pc => pc.paper_type_id == paperTypeId && 
-				  pc.paper_weight_id == paperWeightId && 
-				  pc.print_type_id == printTypeId
+			pc => pc.paper_type_id === paperTypeId && 
+				  pc.paper_weight_id === paperWeightId && 
+				  pc.print_type_id === printTypeId
 		);
 		// Return existing or default to 0 price (disabled)
 		return existing || { price: 0, is_enabled: 0 };
@@ -331,8 +331,8 @@ const BookPricingMatrixTab = () => {
 	 */
 	const getBindingCost = (bindingTypeId, coverWeightId) => {
 		const existing = bindingCosts.find(
-			bc => bc.binding_type_id == bindingTypeId && 
-				  bc.cover_weight_id == coverWeightId
+			bc => bc.binding_type_id === bindingTypeId && 
+				  bc.cover_weight_id === coverWeightId
 		);
 		// Return existing or default to 0 price (disabled)
 		return existing || { price: 0, is_enabled: 0 };
@@ -342,7 +342,7 @@ const BookPricingMatrixTab = () => {
 	 * Get service pricing - returns default 0 if not found
 	 */
 	const getServicePricing = (serviceId) => {
-		const existing = servicePricing.find(sp => sp.service_id == serviceId);
+		const existing = servicePricing.find(sp => sp.service_id === serviceId);
 		// Return existing or default configuration
 		return existing || { price: 0, calculation_type: 'fixed', pages_per_unit: null, is_enabled: 0 };
 	};
@@ -352,7 +352,7 @@ const BookPricingMatrixTab = () => {
 	 */
 	const getServiceRestriction = (serviceId, bindingTypeId) => {
 		return serviceRestrictions.find(
-			sr => sr.service_id == serviceId && sr.binding_type_id == bindingTypeId
+			sr => sr.service_id === serviceId && sr.binding_type_id === bindingTypeId
 		);
 	};
 	
@@ -1014,11 +1014,18 @@ const AdditionalServicesConfig = ({ additionalServices, getServicePricing, saveS
 	const handleEdit = (serviceId) => {
 		const pricing = getServicePricing(serviceId);
 		setEditingService(serviceId);
+		
+		// Determine is_enabled value - default to true only if pricing exists and is_enabled is undefined
+		let isEnabled = true;
+		if (pricing) {
+			isEnabled = pricing.is_enabled !== undefined ? Boolean(pricing.is_enabled) : true;
+		}
+		
 		setTempData({
 			price: pricing?.price || '0',
 			calculation_type: pricing?.calculation_type || 'fixed',
 			pages_per_unit: pricing?.pages_per_unit || '',
-			is_enabled: pricing ? (pricing.is_enabled !== undefined ? Boolean(pricing.is_enabled) : true) : true,
+			is_enabled: isEnabled,
 		});
 	};
 	
