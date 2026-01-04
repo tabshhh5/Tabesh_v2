@@ -117,7 +117,7 @@
 				transition: $transition;
 				
 				&:hover {
-					background: darken($bg-secondary, 3%);
+					background: $bg-tertiary;
 					cursor: pointer;
 				}
 				
@@ -182,8 +182,7 @@
 				font-weight: 500;
 				
 				&:hover {
-					background: darken($bg-secondary, 3%);
-					border-color: darken($border-color, 10%);
+					background: $bg-tertiary;
 				}
 				
 				&.primary {
@@ -192,7 +191,7 @@
 					border-color: $primary-color;
 					
 					&:hover {
-						background: darken($primary-color, 10%);
+						filter: brightness(0.9);
 					}
 				}
 				
