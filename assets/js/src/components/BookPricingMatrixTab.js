@@ -314,31 +314,37 @@ const BookPricingMatrixTab = () => {
 	};
 	
 	/**
-	 * Get page cost for a specific combination
+	 * Get page cost for a specific combination - returns default 0 if not found
 	 */
 	const getPageCost = (paperTypeId, paperWeightId, printTypeId) => {
-		return pageCosts.find(
+		const existing = pageCosts.find(
 			pc => pc.paper_type_id == paperTypeId && 
 				  pc.paper_weight_id == paperWeightId && 
 				  pc.print_type_id == printTypeId
 		);
+		// Return existing or default to 0 price (disabled)
+		return existing || { price: 0, is_enabled: 0 };
 	};
 	
 	/**
-	 * Get binding cost for a specific combination
+	 * Get binding cost for a specific combination - returns default 0 if not found
 	 */
 	const getBindingCost = (bindingTypeId, coverWeightId) => {
-		return bindingCosts.find(
+		const existing = bindingCosts.find(
 			bc => bc.binding_type_id == bindingTypeId && 
 				  bc.cover_weight_id == coverWeightId
 		);
+		// Return existing or default to 0 price (disabled)
+		return existing || { price: 0, is_enabled: 0 };
 	};
 	
 	/**
-	 * Get service pricing
+	 * Get service pricing - returns default 0 if not found
 	 */
 	const getServicePricing = (serviceId) => {
-		return servicePricing.find(sp => sp.service_id == serviceId);
+		const existing = servicePricing.find(sp => sp.service_id == serviceId);
+		// Return existing or default configuration
+		return existing || { price: 0, calculation_type: 'fixed', pages_per_unit: null, is_enabled: 0 };
 	};
 	
 	/**
@@ -372,6 +378,25 @@ const BookPricingMatrixTab = () => {
 				title={__('قیمت‌گذاری ماتریسی کتاب', 'tabesh-v2')}
 				description={__('تنظیم قیمت‌ها و قوانین برای هر قطع کتاب', 'tabesh-v2')}
 			>
+				{/* Important Notice */}
+				<div style={{ 
+					backgroundColor: '#fef3c7', 
+					padding: '15px', 
+					borderRadius: '4px', 
+					marginBottom: '20px',
+					border: '2px solid #f59e0b'
+				}}>
+					<h4 style={{ marginTop: '0', color: '#b45309', display: 'flex', alignItems: 'center', gap: '8px' }}>
+						💡 {__('قانون مهم: قیمت پیش‌فرض', 'tabesh-v2')}
+					</h4>
+					<p style={{ marginBottom: '0', color: '#78350f', lineHeight: '1.6' }}>
+						{__('به صورت پیش‌فرض، تمام پارامترها دارای قیمت 0 تومان هستند. ', 'tabesh-v2')}
+						<strong>{__('قیمت 0 به معنای غیرفعال بودن آن گزینه است.', 'tabesh-v2')}</strong>
+						{' '}
+						{__('برای فعال‌سازی هر ترکیب، باید قیمت مناسب را تعیین کرده و چک‌باکس آن را فعال کنید.', 'tabesh-v2')}
+					</p>
+				</div>
+				
 				{/* Book Size Selector */}
 				<div className="book-size-selector" style={{ marginBottom: '20px' }}>
 					<FormGroup label={__('انتخاب قطع کتاب', 'tabesh-v2')}>
@@ -728,10 +753,18 @@ const PageCostMatrix = ({ paperTypes, paperWeights, printTypes, getPageCost, sav
 																>
 																	{cost && cost.is_enabled ? (
 																		<>
-																			{cost.price > 0 ? `${cost.price} ${__('تومان', 'tabesh-v2')}` : __('0 تومان (غیرفعال)', 'tabesh-v2')}
+																			{cost.price > 0 ? (
+																				`${cost.price} ${__('تومان', 'tabesh-v2')}`
+																			) : (
+																				<span style={{ color: '#991b1b', fontStyle: 'italic' }}>
+																					{__('0 تومان (غیرفعال)', 'tabesh-v2')}
+																				</span>
+																			)}
 																		</>
 																	) : (
-																		__('غیر فعال', 'tabesh-v2')
+																		<span style={{ fontStyle: 'italic' }}>
+																			{__('غیر فعال', 'tabesh-v2')}
+																		</span>
 																	)}
 																</span>
 																<label style={{ display: 'flex', alignItems: 'center', margin: 0, cursor: 'pointer' }}>
@@ -925,10 +958,18 @@ const BindingCostMatrix = ({ bindingTypes, coverWeights, getBindingCost, saveBin
 														>
 															{cost && cost.is_enabled ? (
 																<>
-																	{cost.price > 0 ? `${cost.price} ${__('تومان', 'tabesh-v2')}` : __('0 تومان (غیرمجاز)', 'tabesh-v2')}
+																	{cost.price > 0 ? (
+																		`${cost.price} ${__('تومان', 'tabesh-v2')}`
+																	) : (
+																		<span style={{ color: '#991b1b', fontStyle: 'italic' }}>
+																			{__('0 تومان (غیرمجاز)', 'tabesh-v2')}
+																		</span>
+																	)}
 																</>
 															) : (
-																__('غیر مجاز', 'tabesh-v2')
+																<span style={{ fontStyle: 'italic' }}>
+																	{__('غیر مجاز', 'tabesh-v2')}
+																</span>
 															)}
 														</span>
 														<label style={{ display: 'flex', alignItems: 'center', margin: 0, cursor: 'pointer' }}>
@@ -977,7 +1018,7 @@ const AdditionalServicesConfig = ({ additionalServices, getServicePricing, saveS
 			price: pricing?.price || '0',
 			calculation_type: pricing?.calculation_type || 'fixed',
 			pages_per_unit: pricing?.pages_per_unit || '',
-			is_enabled: pricing ? Boolean(pricing.is_enabled) : true,
+			is_enabled: pricing ? (pricing.is_enabled !== undefined ? Boolean(pricing.is_enabled) : true) : true,
 		});
 	};
 	
