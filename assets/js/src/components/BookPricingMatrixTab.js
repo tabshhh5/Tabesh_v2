@@ -31,6 +31,7 @@ const BookPricingMatrixTab = () => {
 	const [bindingTypes, setBindingTypes] = useState([]);
 	const [coverWeights, setCoverWeights] = useState([]);
 	const [additionalServices, setAdditionalServices] = useState([]);
+	const [licenseTypes, setLicenseTypes] = useState([]);
 	
 	// Pricing data for selected book size
 	const [pageCosts, setPageCosts] = useState([]);
@@ -45,6 +46,7 @@ const BookPricingMatrixTab = () => {
 		max_pages: 1000,
 		pages_step: 1,
 	});
+	const [licensePricing, setLicensePricing] = useState([]);
 	
 	// Loading states
 	const [loading, setLoading] = useState(true);
@@ -79,6 +81,8 @@ const BookPricingMatrixTab = () => {
 				bindingTypesData,
 				coverWeightsData,
 				servicesData,
+				licenseTypesData,
+				licensePricingData,
 			] = await Promise.all([
 				apiFetch({ path: '/tabesh/v2/book-params/book-sizes' }),
 				apiFetch({ path: '/tabesh/v2/book-params/paper-types' }),
@@ -87,6 +91,8 @@ const BookPricingMatrixTab = () => {
 				apiFetch({ path: '/tabesh/v2/book-params/binding-types' }),
 				apiFetch({ path: '/tabesh/v2/book-params/cover-weights' }),
 				apiFetch({ path: '/tabesh/v2/book-params/additional-services' }),
+				apiFetch({ path: '/tabesh/v2/book-params/license-types' }),
+				apiFetch({ path: '/tabesh/v2/book-pricing/license-pricing' }),
 			]);
 			
 			// Validate all API responses
@@ -98,6 +104,8 @@ const BookPricingMatrixTab = () => {
 				{ name: 'binding-types', data: bindingTypesData },
 				{ name: 'cover-weights', data: coverWeightsData },
 				{ name: 'additional-services', data: servicesData },
+				{ name: 'license-types', data: licenseTypesData },
+				{ name: 'license-pricing', data: licensePricingData },
 			];
 			
 			for (const response of responses) {
@@ -113,6 +121,8 @@ const BookPricingMatrixTab = () => {
 			setBindingTypes(bindingTypesData.data || []);
 			setCoverWeights(coverWeightsData.data || []);
 			setAdditionalServices(servicesData.data || []);
+			setLicenseTypes(licenseTypesData.data || []);
+			setLicensePricing(licensePricingData.data || []);
 			
 			// Auto-select first book size if available
 			if (sizesData.data && sizesData.data.length > 0) {
@@ -314,6 +324,32 @@ const BookPricingMatrixTab = () => {
 	};
 	
 	/**
+	 * Save license pricing
+	 */
+	const saveLicensePricing = async (licenseTypeId, price, isEnabled) => {
+		setSaving(true);
+		try {
+			await apiFetch({
+				path: '/tabesh/v2/book-pricing/license-pricing',
+				method: 'POST',
+				data: {
+					license_type_id: licenseTypeId,
+					price: price,
+					is_enabled: isEnabled,
+				},
+			});
+			
+			// Reload license pricing data
+			const licensePricingData = await apiFetch({ path: '/tabesh/v2/book-pricing/license-pricing' });
+			setLicensePricing(licensePricingData.data || []);
+		} catch (error) {
+			console.error('Error saving license pricing:', error);
+			alert(__('خطا در ذخیره قیمت مجوز', 'tabesh-v2'));
+		}
+		setSaving(false);
+	};
+	
+	/**
 	 * Get page cost for a specific combination - returns default 0 if not found
 	 */
 	const getPageCost = (paperTypeId, paperWeightId, printTypeId) => {
@@ -354,6 +390,15 @@ const BookPricingMatrixTab = () => {
 		return serviceRestrictions.find(
 			sr => sr.service_id === serviceId && sr.binding_type_id === bindingTypeId
 		);
+	};
+	
+	/**
+	 * Get license pricing - returns default 0 if not found
+	 */
+	const getLicensePricing = (licenseTypeId) => {
+		const existing = licensePricing.find(lp => lp.license_type_id === licenseTypeId);
+		// Return existing or default to 0 price (disabled)
+		return existing || { price: 0, is_enabled: 0 };
 	};
 	
 	if (loading) {
@@ -516,6 +561,24 @@ const BookPricingMatrixTab = () => {
 							>
 								📊 {__('محدودیت‌های تیراژ و صفحه', 'tabesh-v2')}
 							</button>
+							<button
+								type="button"
+								className={`tab-button ${activeTab === 'license' ? 'active' : ''}`}
+								onClick={() => setActiveTab('license')}
+								style={{ 
+									padding: '12px 24px',
+									border: 'none',
+									borderBottom: activeTab === 'license' ? '3px solid #6366f1' : '3px solid transparent',
+									backgroundColor: activeTab === 'license' ? '#eef2ff' : 'transparent',
+									color: activeTab === 'license' ? '#4338ca' : '#6b7280',
+									fontWeight: activeTab === 'license' ? 'bold' : 'normal',
+									cursor: 'pointer',
+									transition: 'all 0.2s',
+									fontSize: '14px'
+								}}
+							>
+								📜 {__('قیمت‌گذاری مجوز', 'tabesh-v2')}
+							</button>
 						</div>
 						
 						{/* Tab Content */}
@@ -569,6 +632,16 @@ const BookPricingMatrixTab = () => {
 									sizeLimits={sizeLimits}
 									setSizeLimits={setSizeLimits}
 									saveSizeLimits={saveSizeLimits}
+									saving={saving}
+								/>
+							)}
+							
+							{activeTab === 'license' && (
+								<LicensePricingForm
+									licenseTypes={licenseTypes}
+									licensePricing={licensePricing}
+									getLicensePricing={getLicensePricing}
+									saveLicensePricing={saveLicensePricing}
 									saving={saving}
 								/>
 							)}
@@ -647,8 +720,8 @@ const PageCostMatrix = ({ paperTypes, paperWeights, printTypes, getPageCost, sav
 	const toggleEnabled = async (paperTypeId, paperWeightId, printTypeId) => {
 		const existing = getPageCost(paperTypeId, paperWeightId, printTypeId);
 		// Toggle the enabled state for this specific combination only
-		// Default is enabled (1) when first clicked on a new combination
-		const newEnabledState = existing ? !existing.is_enabled : 1;
+		// Convert to number: if existing and enabled (truthy), set to 0, otherwise set to 1
+		const newEnabledState = (existing && existing.is_enabled) ? 0 : 1;
 		await savePageCost(paperTypeId, paperWeightId, printTypeId, existing?.price || 0, newEnabledState);
 	};
 	
@@ -862,8 +935,8 @@ const BindingCostMatrix = ({ bindingTypes, coverWeights, getBindingCost, saveBin
 	const toggleEnabled = async (bindingTypeId, coverWeightId) => {
 		const existing = getBindingCost(bindingTypeId, coverWeightId);
 		// Toggle the enabled state for this specific combination only
-		// Default is enabled (1) when first clicked on a new combination
-		const newEnabledState = existing ? !existing.is_enabled : 1;
+		// Convert to number: if existing and enabled (truthy), set to 0, otherwise set to 1
+		const newEnabledState = (existing && existing.is_enabled) ? 0 : 1;
 		await saveBindingCost(bindingTypeId, coverWeightId, existing?.price || 0, newEnabledState);
 	};
 	
@@ -1282,9 +1355,11 @@ const AdditionalServicesConfig = ({ additionalServices, getServicePricing, saveS
 const ServiceBindingRestrictions = ({ additionalServices, bindingTypes, getServiceRestriction, saveServiceRestriction, saving }) => {
 	const toggleRestriction = async (serviceId, bindingTypeId) => {
 		const existing = getServiceRestriction(serviceId, bindingTypeId);
-		// Default is enabled (true) if not set - so when toggling from default, we disable it
-		// If it exists, toggle its current state
-		const newEnabledState = existing ? !existing.is_enabled : 0; // Disable when first clicked from default enabled state
+		// Default is enabled (true) if not set
+		// If no record exists, create one with is_enabled: 0 (disabled)
+		// If record exists, toggle between 0 and 1
+		const currentState = existing ? existing.is_enabled : 1; // Default to enabled (1) if no record
+		const newEnabledState = currentState ? 0 : 1;
 		await saveServiceRestriction(serviceId, bindingTypeId, newEnabledState);
 	};
 	
@@ -1509,6 +1584,194 @@ const SizeLimitsForm = ({ sizeLimits, setSizeLimits, saveSizeLimits, saving }) =
 					{saving ? __('در حال ذخیره...', 'tabesh-v2') : __('💾 ذخیره محدودیت‌ها', 'tabesh-v2')}
 				</button>
 			</div>
+		</div>
+	);
+};
+
+/**
+ * License Pricing Form Component
+ */
+const LicensePricingForm = ({ licenseTypes, getLicensePricing, saveLicensePricing, saving }) => {
+	const [editingLicense, setEditingLicense] = useState(null);
+	const [tempPrice, setTempPrice] = useState('');
+	
+	const handleEdit = (licenseTypeId) => {
+		const pricing = getLicensePricing(licenseTypeId);
+		setEditingLicense(licenseTypeId);
+		setTempPrice(pricing?.price || '0');
+	};
+	
+	const handleSave = async (licenseTypeId) => {
+		const existing = getLicensePricing(licenseTypeId);
+		await saveLicensePricing(licenseTypeId, tempPrice, existing?.is_enabled !== undefined ? existing.is_enabled : 1);
+		setEditingLicense(null);
+	};
+	
+	const toggleEnabled = async (licenseTypeId) => {
+		const existing = getLicensePricing(licenseTypeId);
+		// Convert to number: if existing and enabled (truthy), set to 0, otherwise set to 1
+		const newEnabledState = (existing && existing.is_enabled) ? 0 : 1;
+		await saveLicensePricing(licenseTypeId, existing?.price || 0, newEnabledState);
+	};
+	
+	// Check if we have any data to display
+	if (licenseTypes.length === 0) {
+		return (
+			<div className="tabesh-notice tabesh-notice-info" style={{ 
+				padding: '20px', 
+				backgroundColor: '#e7f3ff', 
+				border: '1px solid #2271b1',
+				borderRadius: '4px',
+				marginBottom: '20px'
+			}}>
+				<h3 style={{ marginTop: '0', color: '#2271b1' }}>
+					{__('راهنمای تنظیم قیمت مجوز', 'tabesh-v2')}
+				</h3>
+				<p style={{ marginBottom: '10px' }}>
+					{__('برای تنظیم قیمت مجوزها، ابتدا باید انواع مجوز را در بخش "پارامترهای چاپ کتاب" تعریف کنید.', 'tabesh-v2')}
+				</p>
+				<p style={{ marginTop: '10px' }}>
+					{__('مثال‌های انواع مجوز: دارای مجوز، بدون مجوز، مجوز وزارت فرهنگ', 'tabesh-v2')}
+				</p>
+				<p style={{ marginTop: '15px', fontStyle: 'italic' }}>
+					💡 {__('نکته: قیمت مجوز به صورت ثابت به فاکتور اضافه می‌شود و به قطع کتاب وابسته نیست.', 'tabesh-v2')}
+				</p>
+			</div>
+		);
+	}
+	
+	return (
+		<div className="license-pricing-form">
+			<div style={{ 
+				backgroundColor: '#f0f6fc', 
+				padding: '15px', 
+				borderRadius: '4px', 
+				marginBottom: '20px',
+				border: '1px solid #d0e3f5'
+			}}>
+				<h3 style={{ marginTop: '0', color: '#1d4ed8' }}>
+					📜 {__('قیمت‌گذاری مجوز', 'tabesh-v2')}
+				</h3>
+				<p style={{ marginBottom: '0', color: '#4b5563' }}>
+					{__('تنظیم قیمت ثابت برای هر نوع مجوز. این قیمت به صورت یکبار به کل فاکتور اضافه می‌شود و به قطع کتاب وابسته نیست.', 'tabesh-v2')}
+				</p>
+			</div>
+			
+			<table className="wp-list-table widefat fixed striped" style={{ borderRadius: '4px', overflow: 'hidden' }}>
+				<thead>
+					<tr style={{ backgroundColor: '#f9fafb' }}>
+						<th style={{ fontWeight: 'bold', width: '40%' }}>{__('نوع مجوز', 'tabesh-v2')}</th>
+						<th style={{ fontWeight: 'bold', width: '30%' }}>{__('قیمت (تومان)', 'tabesh-v2')}</th>
+						<th style={{ fontWeight: 'bold', width: '30%' }}>{__('عملیات', 'tabesh-v2')}</th>
+					</tr>
+				</thead>
+				<tbody>
+					{licenseTypes.map((license) => {
+						const pricing = getLicensePricing(license.id);
+						const isEditing = editingLicense === license.id;
+						
+						return (
+							<tr key={license.id} style={{ backgroundColor: pricing?.price > 0 ? '#f0fdf4' : '#fef2f2' }}>
+								<td>
+									<strong style={{ color: '#1f2937' }}>{license.name}</strong>
+								</td>
+								<td>
+									{isEditing ? (
+										<div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+											<input
+												type="number"
+												value={tempPrice}
+												onChange={(e) => setTempPrice(e.target.value)}
+												style={{ 
+													width: '150px',
+													padding: '4px 8px',
+													border: '1px solid #3b82f6',
+													borderRadius: '3px'
+												}}
+												disabled={saving}
+												placeholder="0"
+											/>
+											<button
+												type="button"
+												className="button button-small button-primary"
+												onClick={() => handleSave(license.id)}
+												disabled={saving}
+												style={{ padding: '2px 8px' }}
+											>
+												✓
+											</button>
+											<button
+												type="button"
+												className="button button-small"
+												onClick={() => setEditingLicense(null)}
+												disabled={saving}
+												style={{ padding: '2px 8px' }}
+											>
+												✗
+											</button>
+										</div>
+									) : (
+										<div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+											<span
+												onClick={() => handleEdit(license.id)}
+												style={{ 
+													cursor: 'pointer', 
+													flex: 1,
+													padding: '6px 12px',
+													borderRadius: '3px',
+													backgroundColor: pricing && pricing.is_enabled ? '#dbeafe' : '#fee2e2',
+													color: pricing && pricing.is_enabled ? '#1e40af' : '#991b1b',
+													fontWeight: '500',
+													textAlign: 'center',
+													transition: 'all 0.2s'
+												}}
+												title={__('کلیک برای ویرایش', 'tabesh-v2')}
+											>
+												{pricing && pricing.is_enabled ? (
+													<>
+														{pricing.price > 0 ? (
+															`${pricing.price} ${__('تومان', 'tabesh-v2')}`
+														) : (
+															<span style={{ color: '#991b1b', fontStyle: 'italic' }}>
+																{__('0 تومان (غیرفعال)', 'tabesh-v2')}
+															</span>
+														)}
+													</>
+												) : (
+													<span style={{ fontStyle: 'italic' }}>
+														{__('غیر فعال', 'tabesh-v2')}
+													</span>
+												)}
+											</span>
+											<ToggleSwitch
+												checked={pricing ? Boolean(pricing.is_enabled) : false}
+												onChange={() => toggleEnabled(license.id)}
+												disabled={saving}
+											/>
+										</div>
+									)}
+								</td>
+								<td>
+									{!isEditing && (
+										<button
+											type="button"
+											className="button button-small"
+											onClick={() => handleEdit(license.id)}
+											style={{ 
+												backgroundColor: '#3b82f6',
+												color: '#fff',
+												borderColor: '#3b82f6'
+											}}
+										>
+											{__('ویرایش', 'tabesh-v2')}
+										</button>
+									)}
+								</td>
+							</tr>
+						);
+					})}
+				</tbody>
+			</table>
 		</div>
 	);
 };
