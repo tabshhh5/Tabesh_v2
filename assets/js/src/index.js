@@ -4,6 +4,7 @@ import App from './components/App';
 import CustomersPanel from './panels/CustomersPanel';
 import ManagersPanel from './panels/ManagersPanel';
 import EmployeesPanel from './panels/EmployeesPanel';
+import UserDashboardPanel from './panels/UserDashboardPanel';
 import SettingsPanel from './panels/SettingsPanel';
 
 /**
@@ -32,6 +33,12 @@ const initApp = () => {
 	const employeesRoot = document.getElementById( 'tabesh-v2-employees' );
 	if ( employeesRoot ) {
 		render( <EmployeesPanel />, employeesRoot );
+	}
+
+	// User Dashboard panel
+	const userDashboardRoot = document.getElementById( 'tabesh-v2-user-dashboard' );
+	if ( userDashboardRoot ) {
+		render( <UserDashboardPanel />, userDashboardRoot );
 	}
 
 	// Settings panel

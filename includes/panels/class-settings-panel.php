@@ -140,6 +140,36 @@ class Settings_Panel {
 				'backup_interval'      => 7,
 				'max_backups'          => 10,
 			),
+			'user_dashboard'    => array(
+				'enabled'             => false,
+				'page_slug'           => 'panel',
+				'dashboard_page_id'   => 0,
+				'menu_items'          => array(
+					array( 'id' => 'orders', 'label' => 'سفارشات', 'icon' => 'shopping-cart', 'enabled' => true, 'order' => 1 ),
+					array( 'id' => 'profile', 'label' => 'پروفایل', 'icon' => 'user', 'enabled' => true, 'order' => 2 ),
+					array( 'id' => 'tickets', 'label' => 'تیکت‌ها', 'icon' => 'support', 'enabled' => true, 'order' => 3 ),
+					array( 'id' => 'files', 'label' => 'فایل‌ها', 'icon' => 'file', 'enabled' => true, 'order' => 4 ),
+					array( 'id' => 'financial', 'label' => 'مالی', 'icon' => 'money', 'enabled' => true, 'order' => 5 ),
+				),
+			),
+			'auth'              => array(
+				'otp_enabled'           => false,
+				'otp_provider'          => 'melipayamak',
+				'otp_length'            => 5,
+				'otp_expiry'            => 120,
+				'melipayamak'           => array(
+					'username'          => '',
+					'password'          => '',
+					'sender_number'     => '',
+					'pattern_id'        => '',
+					'wsdl_url'          => 'https://rest.payamak-panel.com/api/SendSMS/SendByBaseNumber2',
+				),
+				'require_name'          => true,
+				'allow_corporate'       => true,
+				'replace_woocommerce'   => false,
+				'auto_create_user'      => true,
+				'min_mobile_length'     => 11,
+			),
 		);
 	}
 
