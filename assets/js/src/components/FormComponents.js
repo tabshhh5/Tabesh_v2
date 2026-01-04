@@ -7,12 +7,17 @@ import { __ } from '@wordpress/i18n';
  * @param {Object} props Component props
  * @param {string} props.label Field label
  * @param {string} props.description Optional description
+ * @param {boolean} props.required Whether field is required
  * @param {React.ReactNode} props.children Form field element
  */
-export const FormGroup = ( { label, description, children } ) => {
+export const FormGroup = ( { label, description, required, children } ) => {
 	return (
 		<div className="form-group">
-			<label className="form-label">{ label }</label>
+			{ label && (
+				<label className={ `form-label ${ required ? 'required' : '' }` }>
+					{ label }
+				</label>
+			) }
 			{ children }
 			{ description && <p className="description">{ description }</p> }
 		</div>
@@ -28,6 +33,9 @@ export const TextInput = ( {
 	onChange,
 	placeholder = '',
 	type = 'text',
+	required = false,
+	dir,
+	...rest
 } ) => {
 	return (
 		<input
@@ -37,6 +45,9 @@ export const TextInput = ( {
 			onChange={ onChange }
 			placeholder={ placeholder }
 			className="regular-text"
+			required={ required }
+			dir={ dir }
+			{ ...rest }
 		/>
 	);
 };
