@@ -314,31 +314,37 @@ const BookPricingMatrixTab = () => {
 	};
 	
 	/**
-	 * Get page cost for a specific combination
+	 * Get page cost for a specific combination - returns default 0 if not found
 	 */
 	const getPageCost = (paperTypeId, paperWeightId, printTypeId) => {
-		return pageCosts.find(
-			pc => pc.paper_type_id == paperTypeId && 
-				  pc.paper_weight_id == paperWeightId && 
-				  pc.print_type_id == printTypeId
+		const existing = pageCosts.find(
+			pc => pc.paper_type_id === paperTypeId && 
+				  pc.paper_weight_id === paperWeightId && 
+				  pc.print_type_id === printTypeId
 		);
+		// Return existing or default to 0 price (disabled)
+		return existing || { price: 0, is_enabled: 0 };
 	};
 	
 	/**
-	 * Get binding cost for a specific combination
+	 * Get binding cost for a specific combination - returns default 0 if not found
 	 */
 	const getBindingCost = (bindingTypeId, coverWeightId) => {
-		return bindingCosts.find(
-			bc => bc.binding_type_id == bindingTypeId && 
-				  bc.cover_weight_id == coverWeightId
+		const existing = bindingCosts.find(
+			bc => bc.binding_type_id === bindingTypeId && 
+				  bc.cover_weight_id === coverWeightId
 		);
+		// Return existing or default to 0 price (disabled)
+		return existing || { price: 0, is_enabled: 0 };
 	};
 	
 	/**
-	 * Get service pricing
+	 * Get service pricing - returns default 0 if not found
 	 */
 	const getServicePricing = (serviceId) => {
-		return servicePricing.find(sp => sp.service_id == serviceId);
+		const existing = servicePricing.find(sp => sp.service_id === serviceId);
+		// Return existing or default configuration
+		return existing || { price: 0, calculation_type: 'fixed', pages_per_unit: null, is_enabled: 0 };
 	};
 	
 	/**
@@ -346,7 +352,7 @@ const BookPricingMatrixTab = () => {
 	 */
 	const getServiceRestriction = (serviceId, bindingTypeId) => {
 		return serviceRestrictions.find(
-			sr => sr.service_id == serviceId && sr.binding_type_id == bindingTypeId
+			sr => sr.service_id === serviceId && sr.binding_type_id === bindingTypeId
 		);
 	};
 	
@@ -372,6 +378,25 @@ const BookPricingMatrixTab = () => {
 				title={__('قیمت‌گذاری ماتریسی کتاب', 'tabesh-v2')}
 				description={__('تنظیم قیمت‌ها و قوانین برای هر قطع کتاب', 'tabesh-v2')}
 			>
+				{/* Important Notice */}
+				<div style={{ 
+					backgroundColor: '#fef3c7', 
+					padding: '15px', 
+					borderRadius: '4px', 
+					marginBottom: '20px',
+					border: '2px solid #f59e0b'
+				}}>
+					<h4 style={{ marginTop: '0', color: '#b45309', display: 'flex', alignItems: 'center', gap: '8px' }}>
+						💡 {__('قانون مهم: قیمت پیش‌فرض', 'tabesh-v2')}
+					</h4>
+					<p style={{ marginBottom: '0', color: '#78350f', lineHeight: '1.6' }}>
+						{__('به صورت پیش‌فرض، تمام پارامترها دارای قیمت 0 تومان هستند. ', 'tabesh-v2')}
+						<strong>{__('قیمت 0 به معنای غیرفعال بودن آن گزینه است.', 'tabesh-v2')}</strong>
+						{' '}
+						{__('برای فعال‌سازی هر ترکیب، باید قیمت مناسب را تعیین کرده و چک‌باکس آن را فعال کنید.', 'tabesh-v2')}
+					</p>
+				</div>
+				
 				{/* Book Size Selector */}
 				<div className="book-size-selector" style={{ marginBottom: '20px' }}>
 					<FormGroup label={__('انتخاب قطع کتاب', 'tabesh-v2')}>
@@ -392,46 +417,101 @@ const BookPricingMatrixTab = () => {
 				{selectedBookSize && (
 					<>
 						{/* Tab Navigation */}
-						<div className="pricing-tabs" style={{ marginBottom: '20px', borderBottom: '1px solid #ccc' }}>
+						<div className="pricing-tabs" style={{ 
+							marginBottom: '20px', 
+							borderBottom: '2px solid #e5e7eb',
+							display: 'flex',
+							gap: '10px'
+						}}>
 							<button
 								type="button"
 								className={`tab-button ${activeTab === 'page-cost' ? 'active' : ''}`}
 								onClick={() => setActiveTab('page-cost')}
-								style={{ padding: '10px 20px', marginRight: '10px' }}
+								style={{ 
+									padding: '12px 24px',
+									border: 'none',
+									borderBottom: activeTab === 'page-cost' ? '3px solid #3b82f6' : '3px solid transparent',
+									backgroundColor: activeTab === 'page-cost' ? '#eff6ff' : 'transparent',
+									color: activeTab === 'page-cost' ? '#1e40af' : '#6b7280',
+									fontWeight: activeTab === 'page-cost' ? 'bold' : 'normal',
+									cursor: 'pointer',
+									transition: 'all 0.2s',
+									fontSize: '14px'
+								}}
 							>
-								{__('هزینه هر صفحه', 'tabesh-v2')}
+								📄 {__('هزینه هر صفحه', 'tabesh-v2')}
 							</button>
 							<button
 								type="button"
 								className={`tab-button ${activeTab === 'binding' ? 'active' : ''}`}
 								onClick={() => setActiveTab('binding')}
-								style={{ padding: '10px 20px', marginRight: '10px' }}
+								style={{ 
+									padding: '12px 24px',
+									border: 'none',
+									borderBottom: activeTab === 'binding' ? '3px solid #8b5cf6' : '3px solid transparent',
+									backgroundColor: activeTab === 'binding' ? '#f5f3ff' : 'transparent',
+									color: activeTab === 'binding' ? '#6b21a8' : '#6b7280',
+									fontWeight: activeTab === 'binding' ? 'bold' : 'normal',
+									cursor: 'pointer',
+									transition: 'all 0.2s',
+									fontSize: '14px'
+								}}
 							>
-								{__('هزینه صحافی و جلد', 'tabesh-v2')}
+								📚 {__('هزینه صحافی و جلد', 'tabesh-v2')}
 							</button>
 							<button
 								type="button"
 								className={`tab-button ${activeTab === 'services' ? 'active' : ''}`}
 								onClick={() => setActiveTab('services')}
-								style={{ padding: '10px 20px', marginRight: '10px' }}
+								style={{ 
+									padding: '12px 24px',
+									border: 'none',
+									borderBottom: activeTab === 'services' ? '3px solid #10b981' : '3px solid transparent',
+									backgroundColor: activeTab === 'services' ? '#ecfdf5' : 'transparent',
+									color: activeTab === 'services' ? '#047857' : '#6b7280',
+									fontWeight: activeTab === 'services' ? 'bold' : 'normal',
+									cursor: 'pointer',
+									transition: 'all 0.2s',
+									fontSize: '14px'
+								}}
 							>
-								{__('خدمات اضافی', 'tabesh-v2')}
+								⭐ {__('خدمات اضافی', 'tabesh-v2')}
 							</button>
 							<button
 								type="button"
 								className={`tab-button ${activeTab === 'restrictions' ? 'active' : ''}`}
 								onClick={() => setActiveTab('restrictions')}
-								style={{ padding: '10px 20px', marginRight: '10px' }}
+								style={{ 
+									padding: '12px 24px',
+									border: 'none',
+									borderBottom: activeTab === 'restrictions' ? '3px solid #f59e0b' : '3px solid transparent',
+									backgroundColor: activeTab === 'restrictions' ? '#fffbeb' : 'transparent',
+									color: activeTab === 'restrictions' ? '#b45309' : '#6b7280',
+									fontWeight: activeTab === 'restrictions' ? 'bold' : 'normal',
+									cursor: 'pointer',
+									transition: 'all 0.2s',
+									fontSize: '14px'
+								}}
 							>
-								{__('محدودیت‌های خدمات', 'tabesh-v2')}
+								🔒 {__('محدودیت‌های خدمات', 'tabesh-v2')}
 							</button>
 							<button
 								type="button"
 								className={`tab-button ${activeTab === 'limits' ? 'active' : ''}`}
 								onClick={() => setActiveTab('limits')}
-								style={{ padding: '10px 20px' }}
+								style={{ 
+									padding: '12px 24px',
+									border: 'none',
+									borderBottom: activeTab === 'limits' ? '3px solid #ef4444' : '3px solid transparent',
+									backgroundColor: activeTab === 'limits' ? '#fef2f2' : 'transparent',
+									color: activeTab === 'limits' ? '#b91c1c' : '#6b7280',
+									fontWeight: activeTab === 'limits' ? 'bold' : 'normal',
+									cursor: 'pointer',
+									transition: 'all 0.2s',
+									fontSize: '14px'
+								}}
 							>
-								{__('محدودیت‌های تیراژ و صفحه', 'tabesh-v2')}
+								📊 {__('محدودیت‌های تیراژ و صفحه', 'tabesh-v2')}
 							</button>
 						</div>
 						
@@ -524,42 +604,91 @@ const PageCostMatrix = ({ paperTypes, paperWeights, printTypes, getPageCost, sav
 		weightsByType[pw.paper_type_id].push(pw);
 	});
 	
-	// Check if we have any data to display
+	// Check if we have any data to display - show helpful message but allow viewing
 	const hasData = paperTypes.length > 0 && paperWeights.length > 0 && printTypes.length > 0;
 	
 	if (!hasData) {
 		return (
-			<div className="tabesh-notice">
-				<p>{__('برای نمایش ماتریس قیمت، ابتدا باید در بخش پارامتر محصول، نوع کاغذ، گرماژ و نوع چاپ را تعریف کنید.', 'tabesh-v2')}</p>
+			<div className="tabesh-notice tabesh-notice-info" style={{ 
+				padding: '20px', 
+				backgroundColor: '#e7f3ff', 
+				border: '1px solid #2271b1',
+				borderRadius: '4px',
+				marginBottom: '20px'
+			}}>
+				<h3 style={{ marginTop: '0', color: '#2271b1' }}>
+					{__('راهنمای تنظیم ماتریس قیمت صفحه', 'tabesh-v2')}
+				</h3>
+				<p style={{ marginBottom: '10px' }}>
+					{__('برای استفاده از ماتریس قیمت، ابتدا باید پارامترهای زیر را در بخش "پارامترهای چاپ کتاب" تعریف کنید:', 'tabesh-v2')}
+				</p>
+				<ul style={{ marginLeft: '20px', lineHeight: '1.8' }}>
+					<li>{paperTypes.length === 0 && '❌ '}{__('نوع کاغذ متن (مثال: بالک، تحریر، گلاسه)', 'tabesh-v2')}</li>
+					<li>{paperWeights.length === 0 && '❌ '}{__('گرماژ کاغذ متن (مثال: 60، 70، 80 گرم)', 'tabesh-v2')}</li>
+					<li>{printTypes.length === 0 && '❌ '}{__('انواع چاپ (مثال: سیاه‌وسفید، رنگی، ترکیبی)', 'tabesh-v2')}</li>
+				</ul>
+				<p style={{ marginTop: '15px', fontStyle: 'italic' }}>
+					💡 {__('نکته: پس از تعریف هر پارامتر، قیمت پیش‌فرض 0 تومان برای تمام ترکیبات در نظر گرفته می‌شود. قیمت 0 به معنای غیرفعال بودن آن ترکیب است.', 'tabesh-v2')}
+				</p>
 			</div>
 		);
 	}
 	
 	return (
 		<div className="page-cost-matrix">
-			<h3>{__('هزینه هر صفحه (کاغذ + چاپ)', 'tabesh-v2')}</h3>
-			<p>{__('قیمت نهایی هر صفحه شامل هزینه کاغذ و چاپ است', 'tabesh-v2')}</p>
+			<div style={{ 
+				backgroundColor: '#f0f6fc', 
+				padding: '15px', 
+				borderRadius: '4px', 
+				marginBottom: '20px',
+				border: '1px solid #d0e3f5'
+			}}>
+				<h3 style={{ marginTop: '0', color: '#1d4ed8' }}>
+					📄 {__('هزینه هر صفحه (کاغذ + چاپ)', 'tabesh-v2')}
+				</h3>
+				<p style={{ marginBottom: '0', color: '#4b5563' }}>
+					{__('قیمت نهایی هر صفحه شامل هزینه کاغذ و چاپ است. برای ویرایش، روی قیمت کلیک کنید. چک‌باکس فعال/غیرفعال بودن هر ترکیب را کنترل می‌کند.', 'tabesh-v2')}
+				</p>
+				<p style={{ marginTop: '10px', marginBottom: '0', color: '#6b7280', fontSize: '0.9em', fontStyle: 'italic' }}>
+					💡 {__('نکته: قیمت 0 تومان به معنای غیرفعال بودن آن ترکیب است.', 'tabesh-v2')}
+				</p>
+			</div>
 			
 			{paperTypes.map((paperType) => {
 				const weights = weightsByType[paperType.id] || [];
 				if (weights.length === 0) return null;
 				
 				return (
-					<div key={paperType.id} className="paper-type-section" style={{ marginBottom: '30px' }}>
-						<h4>{paperType.name}:</h4>
-						<table className="wp-list-table widefat fixed striped">
+					<div key={paperType.id} className="paper-type-section" style={{ 
+						marginBottom: '30px',
+						backgroundColor: '#fff',
+						padding: '15px',
+						borderRadius: '6px',
+						boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+					}}>
+						<h4 style={{ 
+							color: '#1f2937', 
+							borderBottom: '2px solid #3b82f6',
+							paddingBottom: '8px',
+							marginBottom: '15px'
+						}}>
+							📋 {paperType.name}
+						</h4>
+						<table className="wp-list-table widefat fixed striped" style={{ borderRadius: '4px', overflow: 'hidden' }}>
 							<thead>
-								<tr>
-									<th>{__('گرماژ', 'tabesh-v2')}</th>
+								<tr style={{ backgroundColor: '#f9fafb' }}>
+									<th style={{ fontWeight: 'bold' }}>{__('گرماژ', 'tabesh-v2')}</th>
 									{printTypes.map(pt => (
-										<th key={pt.id}>{pt.name}</th>
+										<th key={pt.id} style={{ fontWeight: 'bold', textAlign: 'center' }}>{pt.name}</th>
 									))}
 								</tr>
 							</thead>
 							<tbody>
 								{weights.map((weight) => (
 									<tr key={weight.id}>
-										<td><strong>{weight.weight} {__('گرم', 'tabesh-v2')}</strong></td>
+										<td style={{ fontWeight: 'bold', backgroundColor: '#f9fafb' }}>
+											{weight.weight} {__('گرم', 'tabesh-v2')}
+										</td>
 										{printTypes.map(printType => {
 											const cellKey = `${paperType.id}-${weight.id}-${printType.id}`;
 											const cost = getPageCost(paperType.id, weight.id, printType.id);
@@ -567,31 +696,39 @@ const PageCostMatrix = ({ paperTypes, paperWeights, printTypes, getPageCost, sav
 											
 											return (
 												<td key={printType.id}>
-													<div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+													<div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px' }}>
 														{isEditing ? (
 															<>
 																<input
 																	type="number"
 																	value={tempValue}
 																	onChange={(e) => setTempValue(e.target.value)}
-																	style={{ width: '100px' }}
+																	style={{ 
+																		width: '100px',
+																		padding: '4px 8px',
+																		border: '1px solid #3b82f6',
+																		borderRadius: '3px'
+																	}}
 																	disabled={saving}
+																	placeholder="0"
 																/>
 																<button
 																	type="button"
-																	className="button button-small"
+																	className="button button-small button-primary"
 																	onClick={() => handleSave(paperType.id, weight.id, printType.id)}
 																	disabled={saving}
+																	style={{ padding: '2px 8px' }}
 																>
-																	{__('ذخیره', 'tabesh-v2')}
+																	✓
 																</button>
 																<button
 																	type="button"
 																	className="button button-small"
 																	onClick={() => setEditingCell(null)}
 																	disabled={saving}
+																	style={{ padding: '2px 8px' }}
 																>
-																	{__('لغو', 'tabesh-v2')}
+																	✗
 																</button>
 															</>
 														) : (
@@ -601,21 +738,52 @@ const PageCostMatrix = ({ paperTypes, paperWeights, printTypes, getPageCost, sav
 																		setEditingCell(cellKey);
 																		setTempValue(cost?.price || '0');
 																	}}
-																	style={{ cursor: 'pointer', flex: 1 }}
+																	style={{ 
+																		cursor: 'pointer', 
+																		flex: 1,
+																		padding: '4px 8px',
+																		borderRadius: '3px',
+																		backgroundColor: cost && cost.is_enabled ? '#d1fae5' : '#fee2e2',
+																		color: cost && cost.is_enabled ? '#065f46' : '#991b1b',
+																		fontWeight: '500',
+																		textAlign: 'center',
+																		transition: 'all 0.2s'
+																	}}
+																	title={__('کلیک برای ویرایش', 'tabesh-v2')}
 																>
 																	{cost && cost.is_enabled ? (
-																		`${cost.price} ${__('تومان', 'tabesh-v2')}`
+																		<>
+																			{cost.price > 0 ? (
+																				`${cost.price} ${__('تومان', 'tabesh-v2')}`
+																			) : (
+																				<span style={{ color: '#991b1b', fontStyle: 'italic' }}>
+																					{__('0 تومان (غیرفعال)', 'tabesh-v2')}
+																				</span>
+																			)}
+																		</>
 																	) : (
-																		__('غیر فعال', 'tabesh-v2')
+																		<span style={{ fontStyle: 'italic' }}>
+																			{__('غیر فعال', 'tabesh-v2')}
+																		</span>
 																	)}
 																</span>
-																<input
-																	type="checkbox"
-																	checked={cost ? Boolean(cost.is_enabled) : false}
-																	onChange={() => toggleEnabled(paperType.id, weight.id, printType.id)}
-																	disabled={saving}
-																	title={__('فعال/غیرفعال', 'tabesh-v2')}
-																/>
+																<label style={{ display: 'flex', alignItems: 'center', margin: 0, cursor: 'pointer' }}>
+																	<input
+																		type="checkbox"
+																		checked={cost ? Boolean(cost.is_enabled) : false}
+																		onChange={() => toggleEnabled(paperType.id, weight.id, printType.id)}
+																		disabled={saving}
+																		title={__('فعال/غیرفعال', 'tabesh-v2')}
+																		style={{ margin: '0' }}
+																	/>
+																	<span style={{ 
+																		fontSize: '11px', 
+																		marginRight: '4px',
+																		color: '#6b7280'
+																	}}>
+																		{cost && cost.is_enabled ? '✓' : '✗'}
+																	</span>
+																</label>
 															</>
 														)}
 													</div>
@@ -651,28 +819,74 @@ const BindingCostMatrix = ({ bindingTypes, coverWeights, getBindingCost, saveBin
 		await saveBindingCost(bindingTypeId, coverWeightId, existing?.price || 0, existing ? !existing.is_enabled : 0);
 	};
 	
-	// Check if we have any data to display
+	// Check if we have any data to display - show helpful message but allow viewing
 	if (bindingTypes.length === 0 || coverWeights.length === 0) {
 		return (
-			<div className="tabesh-notice">
-				<p>{__('برای نمایش ماتریس قیمت صحافی، ابتدا باید در بخش پارامتر محصول، انواع صحافی و گرماژ جلد را تعریف کنید.', 'tabesh-v2')}</p>
+			<div className="tabesh-notice tabesh-notice-info" style={{ 
+				padding: '20px', 
+				backgroundColor: '#e7f3ff', 
+				border: '1px solid #2271b1',
+				borderRadius: '4px',
+				marginBottom: '20px'
+			}}>
+				<h3 style={{ marginTop: '0', color: '#2271b1' }}>
+					{__('راهنمای تنظیم ماتریس قیمت صحافی', 'tabesh-v2')}
+				</h3>
+				<p style={{ marginBottom: '10px' }}>
+					{__('برای استفاده از ماتریس قیمت صحافی، ابتدا باید پارامترهای زیر را در بخش "پارامترهای چاپ کتاب" تعریف کنید:', 'tabesh-v2')}
+				</p>
+				<ul style={{ marginLeft: '20px', lineHeight: '1.8' }}>
+					<li>{bindingTypes.length === 0 && '❌ '}{__('انواع صحافی (مثال: شومیز، جلد سخت، منگنه، فنری)', 'tabesh-v2')}</li>
+					<li>{coverWeights.length === 0 && '❌ '}{__('گرماژ جلد (مثال: 135، 200، 250، 300 گرم)', 'tabesh-v2')}</li>
+				</ul>
+				<p style={{ marginTop: '15px', fontStyle: 'italic' }}>
+					💡 {__('نکته: پس از تعریف هر پارامتر، قیمت پیش‌فرض 0 تومان برای تمام ترکیبات در نظر گرفته می‌شود. قیمت 0 به معنای غیرفعال بودن آن ترکیب است.', 'tabesh-v2')}
+				</p>
 			</div>
 		);
 	}
 	
 	return (
 		<div className="binding-cost-matrix">
-			<h3>{__('هزینه صحافی و جلد', 'tabesh-v2')}</h3>
-			<p>{__('هزینه صحافی برای هر ترکیب صحافی و گرماژ جلد', 'tabesh-v2')}</p>
+			<div style={{ 
+				backgroundColor: '#f0f6fc', 
+				padding: '15px', 
+				borderRadius: '4px', 
+				marginBottom: '20px',
+				border: '1px solid #d0e3f5'
+			}}>
+				<h3 style={{ marginTop: '0', color: '#1d4ed8' }}>
+					📚 {__('هزینه صحافی و جلد', 'tabesh-v2')}
+				</h3>
+				<p style={{ marginBottom: '0', color: '#4b5563' }}>
+					{__('هزینه صحافی برای هر ترکیب صحافی و گرماژ جلد. برای ویرایش، روی قیمت کلیک کنید. چک‌باکس مجاز/غیرمجاز بودن هر ترکیب را کنترل می‌کند.', 'tabesh-v2')}
+				</p>
+				<p style={{ marginTop: '10px', marginBottom: '0', color: '#6b7280', fontSize: '0.9em', fontStyle: 'italic' }}>
+					💡 {__('نکته: قیمت 0 تومان به معنای غیرمجاز بودن آن ترکیب است.', 'tabesh-v2')}
+				</p>
+			</div>
 			
 			{bindingTypes.map((bindingType) => (
-				<div key={bindingType.id} className="binding-type-section" style={{ marginBottom: '30px' }}>
-					<h4>{bindingType.name}:</h4>
-					<table className="wp-list-table widefat fixed striped">
+				<div key={bindingType.id} className="binding-type-section" style={{ 
+					marginBottom: '30px',
+					backgroundColor: '#fff',
+					padding: '15px',
+					borderRadius: '6px',
+					boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+				}}>
+					<h4 style={{ 
+						color: '#1f2937', 
+						borderBottom: '2px solid #8b5cf6',
+						paddingBottom: '8px',
+						marginBottom: '15px'
+					}}>
+						🔖 {bindingType.name}
+					</h4>
+					<table className="wp-list-table widefat fixed striped" style={{ borderRadius: '4px', overflow: 'hidden' }}>
 						<thead>
-							<tr>
-								<th>{__('گرماژ جلد', 'tabesh-v2')}</th>
-								<th>{__('هزینه جلد و صحافی', 'tabesh-v2')}</th>
+							<tr style={{ backgroundColor: '#f9fafb' }}>
+								<th style={{ fontWeight: 'bold', width: '30%' }}>{__('گرماژ جلد', 'tabesh-v2')}</th>
+								<th style={{ fontWeight: 'bold' }}>{__('هزینه جلد و صحافی', 'tabesh-v2')}</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -683,33 +897,43 @@ const BindingCostMatrix = ({ bindingTypes, coverWeights, getBindingCost, saveBin
 								
 								return (
 									<tr key={weight.id}>
-										<td><strong>{weight.weight} {__('گرم', 'tabesh-v2')}</strong></td>
+										<td style={{ fontWeight: 'bold', backgroundColor: '#f9fafb' }}>
+											{weight.weight} {__('گرم', 'tabesh-v2')}
+										</td>
 										<td>
-											<div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+											<div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px' }}>
 												{isEditing ? (
 													<>
 														<input
 															type="number"
 															value={tempValue}
 															onChange={(e) => setTempValue(e.target.value)}
-															style={{ width: '150px' }}
+															style={{ 
+																width: '150px',
+																padding: '4px 8px',
+																border: '1px solid #8b5cf6',
+																borderRadius: '3px'
+															}}
 															disabled={saving}
+															placeholder="0"
 														/>
 														<button
 															type="button"
-															className="button button-small"
+															className="button button-small button-primary"
 															onClick={() => handleSave(bindingType.id, weight.id)}
 															disabled={saving}
+															style={{ padding: '2px 8px' }}
 														>
-															{__('ذخیره', 'tabesh-v2')}
+															✓
 														</button>
 														<button
 															type="button"
 															className="button button-small"
 															onClick={() => setEditingCell(null)}
 															disabled={saving}
+															style={{ padding: '2px 8px' }}
 														>
-															{__('لغو', 'tabesh-v2')}
+															✗
 														</button>
 													</>
 												) : (
@@ -719,21 +943,52 @@ const BindingCostMatrix = ({ bindingTypes, coverWeights, getBindingCost, saveBin
 																setEditingCell(cellKey);
 																setTempValue(cost?.price || '0');
 															}}
-															style={{ cursor: 'pointer', flex: 1 }}
+															style={{ 
+																cursor: 'pointer', 
+																flex: 1,
+																padding: '6px 12px',
+																borderRadius: '3px',
+																backgroundColor: cost && cost.is_enabled ? '#ddd6fe' : '#fee2e2',
+																color: cost && cost.is_enabled ? '#5b21b6' : '#991b1b',
+																fontWeight: '500',
+																textAlign: 'center',
+																transition: 'all 0.2s'
+															}}
+															title={__('کلیک برای ویرایش', 'tabesh-v2')}
 														>
 															{cost && cost.is_enabled ? (
-																`${cost.price} ${__('تومان', 'tabesh-v2')}`
+																<>
+																	{cost.price > 0 ? (
+																		`${cost.price} ${__('تومان', 'tabesh-v2')}`
+																	) : (
+																		<span style={{ color: '#991b1b', fontStyle: 'italic' }}>
+																			{__('0 تومان (غیرمجاز)', 'tabesh-v2')}
+																		</span>
+																	)}
+																</>
 															) : (
-																__('غیر مجاز', 'tabesh-v2')
+																<span style={{ fontStyle: 'italic' }}>
+																	{__('غیر مجاز', 'tabesh-v2')}
+																</span>
 															)}
 														</span>
-														<input
-															type="checkbox"
-															checked={cost ? Boolean(cost.is_enabled) : false}
-															onChange={() => toggleEnabled(bindingType.id, weight.id)}
-															disabled={saving}
-															title={__('مجاز/غیرمجاز', 'tabesh-v2')}
-														/>
+														<label style={{ display: 'flex', alignItems: 'center', margin: 0, cursor: 'pointer' }}>
+															<input
+																type="checkbox"
+																checked={cost ? Boolean(cost.is_enabled) : false}
+																onChange={() => toggleEnabled(bindingType.id, weight.id)}
+																disabled={saving}
+																title={__('مجاز/غیرمجاز', 'tabesh-v2')}
+																style={{ margin: '0' }}
+															/>
+															<span style={{ 
+																fontSize: '11px', 
+																marginRight: '4px',
+																color: '#6b7280'
+															}}>
+																{cost && cost.is_enabled ? '✓' : '✗'}
+															</span>
+														</label>
 													</>
 												)}
 											</div>
@@ -759,11 +1014,18 @@ const AdditionalServicesConfig = ({ additionalServices, getServicePricing, saveS
 	const handleEdit = (serviceId) => {
 		const pricing = getServicePricing(serviceId);
 		setEditingService(serviceId);
+		
+		// Determine is_enabled value - default to true only if pricing exists and is_enabled is undefined
+		let isEnabled = true;
+		if (pricing) {
+			isEnabled = pricing.is_enabled !== undefined ? Boolean(pricing.is_enabled) : true;
+		}
+		
 		setTempData({
 			price: pricing?.price || '0',
 			calculation_type: pricing?.calculation_type || 'fixed',
 			pages_per_unit: pricing?.pages_per_unit || '',
-			is_enabled: pricing ? Boolean(pricing.is_enabled) : true,
+			is_enabled: isEnabled,
 		});
 	};
 	
@@ -778,28 +1040,65 @@ const AdditionalServicesConfig = ({ additionalServices, getServicePricing, saveS
 		setEditingService(null);
 	};
 	
-	// Check if we have any data to display
+	// Check if we have any data to display - show helpful message
 	if (additionalServices.length === 0) {
 		return (
-			<div className="tabesh-notice">
-				<p>{__('برای نمایش خدمات اضافی، ابتدا باید در بخش پارامتر محصول، خدمات اضافی را تعریف کنید.', 'tabesh-v2')}</p>
+			<div className="tabesh-notice tabesh-notice-info" style={{ 
+				padding: '20px', 
+				backgroundColor: '#e7f3ff', 
+				border: '1px solid #2271b1',
+				borderRadius: '4px',
+				marginBottom: '20px'
+			}}>
+				<h3 style={{ marginTop: '0', color: '#2271b1' }}>
+					{__('راهنمای تنظیم خدمات اضافی', 'tabesh-v2')}
+				</h3>
+				<p style={{ marginBottom: '10px' }}>
+					{__('برای تنظیم قیمت خدمات اضافی، ابتدا باید خدمات را در بخش "پارامترهای چاپ کتاب" تعریف کنید.', 'tabesh-v2')}
+				</p>
+				<p style={{ marginTop: '10px' }}>
+					{__('مثال‌های خدمات اضافی: شیرینک، نقره‌کوب، طلاکوب، UV برجسته، وکیوم', 'tabesh-v2')}
+				</p>
+				<p style={{ marginTop: '15px', fontStyle: 'italic' }}>
+					💡 {__('نکته: پس از تعریف خدمات، قیمت پیش‌فرض 0 تومان برای هر خدمت در نظر گرفته می‌شود.', 'tabesh-v2')}
+				</p>
 			</div>
 		);
 	}
 	
 	return (
 		<div className="additional-services-config">
-			<h3>{__('خدمات اضافی', 'tabesh-v2')}</h3>
-			<p>{__('تنظیم قیمت و نحوه محاسبه برای خدمات اضافی', 'tabesh-v2')}</p>
+			<div style={{ 
+				backgroundColor: '#f0f6fc', 
+				padding: '15px', 
+				borderRadius: '4px', 
+				marginBottom: '20px',
+				border: '1px solid #d0e3f5'
+			}}>
+				<h3 style={{ marginTop: '0', color: '#1d4ed8' }}>
+					⭐ {__('خدمات اضافی', 'tabesh-v2')}
+				</h3>
+				<p style={{ marginBottom: '0', color: '#4b5563' }}>
+					{__('تنظیم قیمت و نحوه محاسبه برای خدمات اضافی. روی دکمه "ویرایش" کلیک کنید تا قیمت و نوع محاسبه را تنظیم کنید.', 'tabesh-v2')}
+				</p>
+				<p style={{ marginTop: '10px', marginBottom: '0', color: '#6b7280', fontSize: '0.9em' }}>
+					📌 {__('انواع محاسبه:', 'tabesh-v2')}
+				</p>
+				<ul style={{ marginTop: '5px', marginBottom: '0', color: '#6b7280', fontSize: '0.9em', lineHeight: '1.6' }}>
+					<li><strong>{__('ثابت:', 'tabesh-v2')}</strong> {__('مبلغ ثابت به کل فاکتور اضافه می‌شود', 'tabesh-v2')}</li>
+					<li><strong>{__('به ازای هر جلد:', 'tabesh-v2')}</strong> {__('قیمت × تیراژ', 'tabesh-v2')}</li>
+					<li><strong>{__('بر اساس تعداد صفحه:', 'tabesh-v2')}</strong> {__('بر اساس واحدهای صفحه (مثلاً هر ۱۰۰۰۰ صفحه)', 'tabesh-v2')}</li>
+				</ul>
+			</div>
 			
-			<table className="wp-list-table widefat fixed striped">
+			<table className="wp-list-table widefat fixed striped" style={{ borderRadius: '4px', overflow: 'hidden' }}>
 				<thead>
-					<tr>
-						<th>{__('نام خدمات', 'tabesh-v2')}</th>
-						<th>{__('قیمت (تومان)', 'tabesh-v2')}</th>
-						<th>{__('نوع محاسبه', 'tabesh-v2')}</th>
-						<th>{__('تعداد صفحه', 'tabesh-v2')}</th>
-						<th>{__('عملیات', 'tabesh-v2')}</th>
+					<tr style={{ backgroundColor: '#f9fafb' }}>
+						<th style={{ fontWeight: 'bold', width: '25%' }}>{__('نام خدمات', 'tabesh-v2')}</th>
+						<th style={{ fontWeight: 'bold', width: '20%' }}>{__('قیمت (تومان)', 'tabesh-v2')}</th>
+						<th style={{ fontWeight: 'bold', width: '25%' }}>{__('نوع محاسبه', 'tabesh-v2')}</th>
+						<th style={{ fontWeight: 'bold', width: '15%' }}>{__('تعداد صفحه', 'tabesh-v2')}</th>
+						<th style={{ fontWeight: 'bold', width: '15%' }}>{__('عملیات', 'tabesh-v2')}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -808,19 +1107,36 @@ const AdditionalServicesConfig = ({ additionalServices, getServicePricing, saveS
 						const isEditing = editingService === service.id;
 						
 						return (
-							<tr key={service.id}>
-								<td><strong>{service.name}</strong></td>
+							<tr key={service.id} style={{ backgroundColor: pricing ? '#f0fdf4' : '#fef2f2' }}>
+								<td>
+									<strong style={{ color: '#1f2937' }}>{service.name}</strong>
+								</td>
 								<td>
 									{isEditing ? (
 										<input
 											type="number"
 											value={tempData.price}
 											onChange={(e) => setTempData({ ...tempData, price: e.target.value })}
-											style={{ width: '120px' }}
+											style={{ 
+												width: '100%',
+												padding: '4px 8px',
+												border: '1px solid #3b82f6',
+												borderRadius: '3px'
+											}}
 											disabled={saving}
+											placeholder="0"
 										/>
 									) : (
-										<span>{pricing?.price || '0'} {__('تومان', 'tabesh-v2')}</span>
+										<span style={{ 
+											display: 'inline-block',
+											padding: '4px 12px',
+											backgroundColor: pricing?.price > 0 ? '#dbeafe' : '#fee2e2',
+											color: pricing?.price > 0 ? '#1e40af' : '#991b1b',
+											borderRadius: '3px',
+											fontWeight: '500'
+										}}>
+											{pricing?.price || '0'} {__('تومان', 'tabesh-v2')}
+										</span>
 									)}
 								</td>
 								<td>
@@ -828,7 +1144,12 @@ const AdditionalServicesConfig = ({ additionalServices, getServicePricing, saveS
 										<select
 											value={tempData.calculation_type}
 											onChange={(e) => setTempData({ ...tempData, calculation_type: e.target.value })}
-											style={{ width: '150px' }}
+											style={{ 
+												width: '100%',
+												padding: '4px 8px',
+												border: '1px solid #3b82f6',
+												borderRadius: '3px'
+											}}
 											disabled={saving}
 										>
 											<option value="fixed">{__('ثابت', 'tabesh-v2')}</option>
@@ -836,7 +1157,14 @@ const AdditionalServicesConfig = ({ additionalServices, getServicePricing, saveS
 											<option value="per_pages">{__('بر اساس تعداد صفحه', 'tabesh-v2')}</option>
 										</select>
 									) : (
-										<span>
+										<span style={{ 
+											display: 'inline-block',
+											padding: '4px 12px',
+											backgroundColor: '#e0e7ff',
+											color: '#3730a3',
+											borderRadius: '3px',
+											fontSize: '0.9em'
+										}}>
 											{pricing?.calculation_type === 'fixed' && __('ثابت', 'tabesh-v2')}
 											{pricing?.calculation_type === 'per_copy' && __('به ازای هر جلد', 'tabesh-v2')}
 											{pricing?.calculation_type === 'per_pages' && __('بر اساس تعداد صفحه', 'tabesh-v2')}
@@ -851,14 +1179,19 @@ const AdditionalServicesConfig = ({ additionalServices, getServicePricing, saveS
 											value={tempData.pages_per_unit}
 											onChange={(e) => setTempData({ ...tempData, pages_per_unit: e.target.value })}
 											placeholder={__('مثال: 10000', 'tabesh-v2')}
-											style={{ width: '120px' }}
+											style={{ 
+												width: '100%',
+												padding: '4px 8px',
+												border: '1px solid #3b82f6',
+												borderRadius: '3px'
+											}}
 											disabled={saving}
 										/>
 									) : (
-										<span>
+										<span style={{ color: '#6b7280', fontSize: '0.9em' }}>
 											{pricing?.calculation_type === 'per_pages' && pricing?.pages_per_unit
 												? `${pricing.pages_per_unit} ${__('صفحه', 'tabesh-v2')}`
-												: __('غیر فعال', 'tabesh-v2')}
+												: __('—', 'tabesh-v2')}
 										</span>
 									)}
 								</td>
@@ -870,10 +1203,10 @@ const AdditionalServicesConfig = ({ additionalServices, getServicePricing, saveS
 												className="button button-small button-primary"
 												onClick={() => handleSave(service.id)}
 												disabled={saving}
+												style={{ marginLeft: '4px' }}
 											>
 												{__('ذخیره', 'tabesh-v2')}
 											</button>
-											{' '}
 											<button
 												type="button"
 												className="button button-small"
@@ -888,6 +1221,11 @@ const AdditionalServicesConfig = ({ additionalServices, getServicePricing, saveS
 											type="button"
 											className="button button-small"
 											onClick={() => handleEdit(service.id)}
+											style={{ 
+												backgroundColor: '#3b82f6',
+												color: '#fff',
+												borderColor: '#3b82f6'
+											}}
 										>
 											{__('ویرایش', 'tabesh-v2')}
 										</button>
@@ -911,28 +1249,71 @@ const ServiceBindingRestrictions = ({ additionalServices, bindingTypes, getServi
 		await saveServiceRestriction(serviceId, bindingTypeId, existing ? !existing.is_enabled : 1);
 	};
 	
-	// Check if we have any data to display
+	// Check if we have any data to display - show helpful message
 	if (additionalServices.length === 0 || bindingTypes.length === 0) {
 		return (
-			<div className="tabesh-notice">
-				<p>{__('برای نمایش محدودیت‌های خدمات، ابتدا باید در بخش پارامتر محصول، خدمات اضافی و انواع صحافی را تعریف کنید.', 'tabesh-v2')}</p>
+			<div className="tabesh-notice tabesh-notice-info" style={{ 
+				padding: '20px', 
+				backgroundColor: '#e7f3ff', 
+				border: '1px solid #2271b1',
+				borderRadius: '4px',
+				marginBottom: '20px'
+			}}>
+				<h3 style={{ marginTop: '0', color: '#2271b1' }}>
+					{__('راهنمای تنظیم محدودیت‌های خدمات', 'tabesh-v2')}
+				</h3>
+				<p style={{ marginBottom: '10px' }}>
+					{__('برای تنظیم محدودیت‌های خدمات، ابتدا باید پارامترهای زیر را در بخش "پارامترهای چاپ کتاب" تعریف کنید:', 'tabesh-v2')}
+				</p>
+				<ul style={{ marginLeft: '20px', lineHeight: '1.8' }}>
+					<li>{additionalServices.length === 0 && '❌ '}{__('خدمات اضافی (مثال: شیرینک، نقره‌کوب، طلاکوب)', 'tabesh-v2')}</li>
+					<li>{bindingTypes.length === 0 && '❌ '}{__('انواع صحافی (مثال: شومیز، جلد سخت، منگنه)', 'tabesh-v2')}</li>
+				</ul>
+				<p style={{ marginTop: '15px', fontStyle: 'italic' }}>
+					💡 {__('نکته: به صورت پیش‌فرض، تمام خدمات برای تمام انواع صحافی فعال هستند.', 'tabesh-v2')}
+				</p>
 			</div>
 		);
 	}
 	
 	return (
 		<div className="service-binding-restrictions">
-			<h3>{__('محدودیت‌های خدمات اضافی بر اساس نوع صحافی', 'tabesh-v2')}</h3>
-			<p>{__('تعیین اینکه هر خدمت برای کدام نوع صحافی مجاز است', 'tabesh-v2')}</p>
+			<div style={{ 
+				backgroundColor: '#f0f6fc', 
+				padding: '15px', 
+				borderRadius: '4px', 
+				marginBottom: '20px',
+				border: '1px solid #d0e3f5'
+			}}>
+				<h3 style={{ marginTop: '0', color: '#1d4ed8' }}>
+					🔒 {__('محدودیت‌های خدمات اضافی بر اساس نوع صحافی', 'tabesh-v2')}
+				</h3>
+				<p style={{ marginBottom: '0', color: '#4b5563' }}>
+					{__('تعیین اینکه هر خدمت برای کدام نوع صحافی مجاز است. به صورت پیش‌فرض، تمام خدمات برای تمام انواع صحافی فعال هستند.', 'tabesh-v2')}
+				</p>
+			</div>
 			
 			{additionalServices.map((service) => (
-				<div key={service.id} className="service-restriction-section" style={{ marginBottom: '30px' }}>
-					<h4>{service.name}:</h4>
-					<table className="wp-list-table widefat fixed striped">
+				<div key={service.id} className="service-restriction-section" style={{ 
+					marginBottom: '30px',
+					backgroundColor: '#fff',
+					padding: '15px',
+					borderRadius: '6px',
+					boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+				}}>
+					<h4 style={{ 
+						color: '#1f2937', 
+						borderBottom: '2px solid #10b981',
+						paddingBottom: '8px',
+						marginBottom: '15px'
+					}}>
+						⚙️ {service.name}
+					</h4>
+					<table className="wp-list-table widefat fixed striped" style={{ borderRadius: '4px', overflow: 'hidden' }}>
 						<thead>
-							<tr>
-								<th>{__('نوع صحافی', 'tabesh-v2')}</th>
-								<th>{__('وضعیت', 'tabesh-v2')}</th>
+							<tr style={{ backgroundColor: '#f9fafb' }}>
+								<th style={{ fontWeight: 'bold', width: '40%' }}>{__('نوع صحافی', 'tabesh-v2')}</th>
+								<th style={{ fontWeight: 'bold' }}>{__('وضعیت', 'tabesh-v2')}</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -941,17 +1322,42 @@ const ServiceBindingRestrictions = ({ additionalServices, bindingTypes, getServi
 								const isEnabled = restriction ? Boolean(restriction.is_enabled) : true;
 								
 								return (
-									<tr key={bindingType.id}>
-										<td><strong>{bindingType.name}</strong></td>
+									<tr key={bindingType.id} style={{ backgroundColor: isEnabled ? '#f0fdf4' : '#fef2f2' }}>
+										<td style={{ fontWeight: 'bold' }}>{bindingType.name}</td>
 										<td>
-											<label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+											<label style={{ 
+												display: 'flex', 
+												alignItems: 'center', 
+												gap: '12px',
+												cursor: 'pointer',
+												margin: 0
+											}}>
 												<input
 													type="checkbox"
 													checked={isEnabled}
 													onChange={() => toggleRestriction(service.id, bindingType.id)}
 													disabled={saving}
+													style={{ 
+														width: '18px',
+														height: '18px',
+														cursor: 'pointer'
+													}}
 												/>
-												<span>{isEnabled ? __('فعال', 'tabesh-v2') : __('غیر فعال', 'tabesh-v2')}</span>
+												<span style={{ 
+													display: 'inline-block',
+													padding: '4px 12px',
+													backgroundColor: isEnabled ? '#d1fae5' : '#fee2e2',
+													color: isEnabled ? '#065f46' : '#991b1b',
+													borderRadius: '3px',
+													fontWeight: '500',
+													fontSize: '0.9em'
+												}}>
+													{isEnabled ? (
+														<>✓ {__('فعال', 'tabesh-v2')}</>
+													) : (
+														<>✗ {__('غیر فعال', 'tabesh-v2')}</>
+													)}
+												</span>
 											</label>
 										</td>
 									</tr>
@@ -971,64 +1377,118 @@ const ServiceBindingRestrictions = ({ additionalServices, bindingTypes, getServi
 const SizeLimitsForm = ({ sizeLimits, setSizeLimits, saveSizeLimits, saving }) => {
 	return (
 		<div className="size-limits-form">
-			<h3>{__('محدودیت‌های تیراژ و تعداد صفحه', 'tabesh-v2')}</h3>
-			<p>{__('تعیین حداقل، حداکثر و گام حرکتی برای تیراژ و تعداد صفحات', 'tabesh-v2')}</p>
+			<div style={{ 
+				backgroundColor: '#f0f6fc', 
+				padding: '15px', 
+				borderRadius: '4px', 
+				marginBottom: '20px',
+				border: '1px solid #d0e3f5'
+			}}>
+				<h3 style={{ marginTop: '0', color: '#1d4ed8' }}>
+					📊 {__('محدودیت‌های تیراژ و تعداد صفحه', 'tabesh-v2')}
+				</h3>
+				<p style={{ marginBottom: '0', color: '#4b5563' }}>
+					{__('تعیین حداقل، حداکثر و گام حرکتی برای تیراژ و تعداد صفحات. این محدودیت‌ها در فرم ثبت سفارش اعمال می‌شوند.', 'tabesh-v2')}
+				</p>
+			</div>
 			
-			<div style={{ maxWidth: '600px' }}>
-				<h4>{__('تیراژ', 'tabesh-v2')}</h4>
-				<FormGroup label={__('حد اقل تیراژ', 'tabesh-v2')}>
-					<TextInput
-						type="number"
-						value={sizeLimits.min_circulation}
-						onChange={(e) => setSizeLimits({ ...sizeLimits, min_circulation: e.target.value })}
-					/>
-				</FormGroup>
-				<FormGroup label={__('حد اکثر تیراژ', 'tabesh-v2')}>
-					<TextInput
-						type="number"
-						value={sizeLimits.max_circulation}
-						onChange={(e) => setSizeLimits({ ...sizeLimits, max_circulation: e.target.value })}
-					/>
-				</FormGroup>
-				<FormGroup label={__('گام تغییر تیراژ', 'tabesh-v2')}>
-					<TextInput
-						type="number"
-						value={sizeLimits.circulation_step}
-						onChange={(e) => setSizeLimits({ ...sizeLimits, circulation_step: e.target.value })}
-					/>
-				</FormGroup>
+			<div style={{ 
+				maxWidth: '800px',
+				backgroundColor: '#fff',
+				padding: '20px',
+				borderRadius: '6px',
+				boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+			}}>
+				<h4 style={{ 
+					color: '#1f2937',
+					borderBottom: '2px solid #f59e0b',
+					paddingBottom: '8px',
+					marginBottom: '20px'
+				}}>
+					📚 {__('تیراژ', 'tabesh-v2')}
+				</h4>
+				<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '30px' }}>
+					<FormGroup label={__('حد اقل تیراژ', 'tabesh-v2')}>
+						<TextInput
+							type="number"
+							value={sizeLimits.min_circulation}
+							onChange={(e) => setSizeLimits({ ...sizeLimits, min_circulation: e.target.value })}
+							placeholder="1"
+							style={{ width: '100%' }}
+						/>
+					</FormGroup>
+					<FormGroup label={__('حد اکثر تیراژ', 'tabesh-v2')}>
+						<TextInput
+							type="number"
+							value={sizeLimits.max_circulation}
+							onChange={(e) => setSizeLimits({ ...sizeLimits, max_circulation: e.target.value })}
+							placeholder="10000"
+							style={{ width: '100%' }}
+						/>
+					</FormGroup>
+					<FormGroup label={__('گام تغییر تیراژ', 'tabesh-v2')}>
+						<TextInput
+							type="number"
+							value={sizeLimits.circulation_step}
+							onChange={(e) => setSizeLimits({ ...sizeLimits, circulation_step: e.target.value })}
+							placeholder="1"
+							style={{ width: '100%' }}
+						/>
+					</FormGroup>
+				</div>
 				
-				<h4 style={{ marginTop: '30px' }}>{__('تعداد صفحه', 'tabesh-v2')}</h4>
-				<FormGroup label={__('حد اقل صفحه', 'tabesh-v2')}>
-					<TextInput
-						type="number"
-						value={sizeLimits.min_pages}
-						onChange={(e) => setSizeLimits({ ...sizeLimits, min_pages: e.target.value })}
-					/>
-				</FormGroup>
-				<FormGroup label={__('حد اکثر صفحه', 'tabesh-v2')}>
-					<TextInput
-						type="number"
-						value={sizeLimits.max_pages}
-						onChange={(e) => setSizeLimits({ ...sizeLimits, max_pages: e.target.value })}
-					/>
-				</FormGroup>
-				<FormGroup label={__('گام حرکتی صفحه', 'tabesh-v2')}>
-					<TextInput
-						type="number"
-						value={sizeLimits.pages_step}
-						onChange={(e) => setSizeLimits({ ...sizeLimits, pages_step: e.target.value })}
-					/>
-				</FormGroup>
+				<h4 style={{ 
+					color: '#1f2937',
+					borderBottom: '2px solid #f59e0b',
+					paddingBottom: '8px',
+					marginBottom: '20px'
+				}}>
+					📄 {__('تعداد صفحه', 'tabesh-v2')}
+				</h4>
+				<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+					<FormGroup label={__('حد اقل صفحه', 'tabesh-v2')}>
+						<TextInput
+							type="number"
+							value={sizeLimits.min_pages}
+							onChange={(e) => setSizeLimits({ ...sizeLimits, min_pages: e.target.value })}
+							placeholder="1"
+							style={{ width: '100%' }}
+						/>
+					</FormGroup>
+					<FormGroup label={__('حد اکثر صفحه', 'tabesh-v2')}>
+						<TextInput
+							type="number"
+							value={sizeLimits.max_pages}
+							onChange={(e) => setSizeLimits({ ...sizeLimits, max_pages: e.target.value })}
+							placeholder="1000"
+							style={{ width: '100%' }}
+						/>
+					</FormGroup>
+					<FormGroup label={__('گام حرکتی صفحه', 'tabesh-v2')}>
+						<TextInput
+							type="number"
+							value={sizeLimits.pages_step}
+							onChange={(e) => setSizeLimits({ ...sizeLimits, pages_step: e.target.value })}
+							placeholder="1"
+							style={{ width: '100%' }}
+						/>
+					</FormGroup>
+				</div>
 				
 				<button
 					type="button"
-					className="button button-primary"
+					className="button button-primary button-large"
 					onClick={saveSizeLimits}
 					disabled={saving}
-					style={{ marginTop: '20px' }}
+					style={{ 
+						marginTop: '20px',
+						padding: '10px 30px',
+						fontSize: '16px',
+						backgroundColor: '#3b82f6',
+						borderColor: '#3b82f6'
+					}}
 				>
-					{saving ? __('در حال ذخیره...', 'tabesh-v2') : __('ذخیره محدودیت‌ها', 'tabesh-v2')}
+					{saving ? __('در حال ذخیره...', 'tabesh-v2') : __('💾 ذخیره محدودیت‌ها', 'tabesh-v2')}
 				</button>
 			</div>
 		</div>
