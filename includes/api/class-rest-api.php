@@ -1862,8 +1862,18 @@ class Rest_Api {
 
 		$auth_handler = new \Tabesh_v2\Helpers\Auth_Handler();
 		
+		// Check if this is a new user
+		$user = get_user_by( 'login', $mobile );
+		$is_new_user = ! $user;
+		
+		// For new users, check if we have registration data
+		$has_registration_data = $request->get_param( 'first_name' ) && $request->get_param( 'last_name' );
+		
+		// If new user without registration data, skip token deletion (multi-step verification)
+		$skip_delete = $is_new_user && ! $has_registration_data;
+		
 		// First verify the OTP code.
-		$verify_result = $auth_handler->verify_otp( $mobile, $code );
+		$verify_result = $auth_handler->verify_otp( $mobile, $code, $skip_delete );
 		
 		if ( ! $verify_result['success'] ) {
 			return new \WP_REST_Response(
@@ -1875,7 +1885,19 @@ class Rest_Api {
 			);
 		}
 
-		// OTP is valid, now login or register.
+		// If new user and no registration info yet, prompt for it
+		if ( $is_new_user && ! $has_registration_data ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => true,
+					'message' => __( 'کد تأیید شد. لطفاً اطلاعات خود را تکمیل کنید.', 'tabesh-v2' ),
+					'require_registration' => true,
+				),
+				200
+			);
+		}
+
+		// OTP is valid, now login or register with user data.
 		$user_data = array(
 			'first_name'   => $request->get_param( 'first_name' ),
 			'last_name'    => $request->get_param( 'last_name' ),
