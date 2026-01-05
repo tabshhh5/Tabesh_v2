@@ -164,7 +164,7 @@ class Customer_Dashboard_Shortcode {
 			$asset = require $asset_file;
 		} else {
 			$asset = array(
-				'dependencies' => array( 'wp-element', 'wp-api-fetch', 'wp-i18n' ),
+				'dependencies' => array( 'wp-element', 'wp-api-fetch', 'wp-i18n', 'react', 'react-dom' ),
 				'version'      => TABESH_V2_VERSION,
 			);
 		}
@@ -196,9 +196,10 @@ class Customer_Dashboard_Shortcode {
 				'tabesh-auth-form',
 				'tabeshAuth',
 				array(
-					'apiUrl' => rest_url( 'tabesh/v2/' ),
-					'nonce'  => wp_create_nonce( 'wp_rest' ),
-					'isRTL'  => is_rtl(),
+					'apiUrl'       => rest_url( 'tabesh/v2/' ),
+					'nonce'        => wp_create_nonce( 'wp_rest' ),
+					'isRTL'        => is_rtl(),
+					'dashboardUrl' => home_url( '/panel' ), // Dashboard URL for redirect after login.
 				)
 			);
 

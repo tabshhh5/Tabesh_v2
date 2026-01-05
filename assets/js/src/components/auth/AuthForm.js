@@ -126,8 +126,10 @@ const AuthForm = () => {
 					type: 'success'
 				});
 				
+				// Use proper redirect instead of reload
 				setTimeout(() => {
-					window.location.reload();
+					const dashboardUrl = window.tabeshAuth?.dashboardUrl || '/panel';
+					window.location.href = dashboardUrl;
 				}, 1000);
 			} else {
 				setMessage({
