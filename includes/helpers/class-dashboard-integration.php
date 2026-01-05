@@ -56,7 +56,7 @@ class Dashboard_Integration {
 		$dashboard_page_id = $dashboard_settings['dashboard_page_id'] ?? 0;
 
 		// Check if we're on the dashboard page by slug.
-		$current_url = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+		$current_url = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 		$is_dashboard_url = false;
 
 		// Check by URL slug.
@@ -287,11 +287,8 @@ class Dashboard_Integration {
 			return;
 		}
 		
-		// Enqueue a dummy style handle to attach our inline styles.
-		wp_register_style( 'tabesh-dashboard-blank', false );
-		wp_enqueue_style( 'tabesh-dashboard-blank' );
-		
-		// Add inline styles to hide theme elements.
+		// Add inline styles to an existing WordPress style handle.
+		// We use 'wp-block-library' as it's always loaded on the frontend.
 		$custom_css = '
 			/* Hide all theme headers, footers, and sidebars */
 			body.tabesh-dashboard-blank-page {
@@ -370,6 +367,18 @@ class Dashboard_Integration {
 			}
 		';
 		
-		wp_add_inline_style( 'tabesh-dashboard-blank', $custom_css );
+		// Check if wp-block-library is enqueued, otherwise use any available handle.
+		if ( wp_style_is( 'wp-block-library', 'enqueued' ) ) {
+			wp_add_inline_style( 'wp-block-library', $custom_css );
+		} else {
+			// Fallback: output styles directly in head as last resort.
+			add_action(
+				'wp_head',
+				function () use ( $custom_css ) {
+					echo '<style type="text/css">' . $custom_css . '</style>';
+				},
+				999
+			);
+		}
 	}
 }
