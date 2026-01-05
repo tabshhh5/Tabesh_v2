@@ -93,6 +93,7 @@ class Customer_Dashboard_Shortcode {
 								required 
 								pattern="09[0-9]{9}"
 								maxlength="11"
+								inputmode="numeric"
 								dir="ltr"
 							/>
 						</div>
@@ -111,18 +112,15 @@ class Customer_Dashboard_Shortcode {
 						</p>
 						
 						<div class="form-group">
-							<label for="otp-code"><?php esc_html_e( 'کد تأیید', 'tabesh-v2' ); ?></label>
-							<input 
-								type="text" 
-								id="otp-code" 
-								name="code" 
-								placeholder="12345" 
-								required 
-								maxlength="5"
-								pattern="[0-9]{5}"
-								dir="ltr"
-								autocomplete="one-time-code"
-							/>
+							<label><?php esc_html_e( 'کد تأیید', 'tabesh-v2' ); ?></label>
+							<div id="otp-inputs-container" class="otp-inputs">
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="one-time-code" dir="ltr" />
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" dir="ltr" />
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" dir="ltr" />
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" dir="ltr" />
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" dir="ltr" />
+							</div>
+							<p class="otp-hint"><?php esc_html_e( 'کد به صورت خودکار تأیید می‌شود', 'tabesh-v2' ); ?></p>
 						</div>
 
 						<div id="tabesh-user-info-fields" style="display: none;">
@@ -168,7 +166,7 @@ class Customer_Dashboard_Shortcode {
 						</div>
 
 						<div class="button-group">
-							<button type="submit" class="button button-primary button-large">
+							<button type="submit" id="tabesh-otp-submit-btn" class="button button-primary button-large" style="display: none;">
 								<span class="dashicons dashicons-lock"></span>
 								<?php esc_html_e( 'تأیید و ورود', 'tabesh-v2' ); ?>
 							</button>
@@ -181,10 +179,6 @@ class Customer_Dashboard_Shortcode {
 				</div>
 
 				<div id="tabesh-auth-message"></div>
-				<div id="tabesh-auth-loading" style="display: none;">
-					<div class="tabesh-spinner"></div>
-					<p><?php esc_html_e( 'در حال پردازش...', 'tabesh-v2' ); ?></p>
-				</div>
 			</div>
 		</div>
 		<?php
