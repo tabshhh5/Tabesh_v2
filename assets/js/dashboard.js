@@ -128,10 +128,11 @@
 		});
 
 		if (allFilled && code.length === 5) {
-			// Auto-submit OTP verification
+			// Auto-submit OTP verification with slight delay to allow user to see complete input
+			const AUTO_SUBMIT_DELAY = 200; // milliseconds - allows visual feedback
 			setTimeout(function () {
 				handleOtpVerification(code);
-			}, 200);
+			}, AUTO_SUBMIT_DELAY);
 		}
 	}
 
@@ -371,9 +372,6 @@
 	 */
 	function showLoading(show) {
 		if (show) {
-			if ($('#tabesh-auth-loading').length === 0) {
-				$('.tabesh-auth-form').append('<div id="tabesh-auth-loading" style="display:none;"><div class="tabesh-spinner"></div><p>در حال پردازش...</p></div>');
-			}
 			$('#tabesh-auth-loading').show();
 			$('#tabesh-auth-step-1, #tabesh-auth-step-2').css('opacity', '0.6');
 			$('button').prop('disabled', true);

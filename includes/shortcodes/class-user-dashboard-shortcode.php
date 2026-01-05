@@ -140,6 +140,10 @@ class User_Dashboard_Shortcode {
 				</div>
 
 				<div id="tabesh-auth-message"></div>
+				<div id="tabesh-auth-loading" style="display: none;">
+					<div class="tabesh-spinner"></div>
+					<p><?php esc_html_e( 'در حال پردازش...', 'tabesh-v2' ); ?></p>
+				</div>
 			</div>
 		</div>
 		<?php
