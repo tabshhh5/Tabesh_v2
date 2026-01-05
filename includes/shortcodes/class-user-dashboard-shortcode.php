@@ -63,6 +63,7 @@ class User_Dashboard_Shortcode {
 								required 
 								pattern="09[0-9]{9}"
 								maxlength="11"
+								inputmode="numeric"
 							/>
 						</div>
 						<button type="submit" class="button button-primary button-large">
@@ -76,16 +77,15 @@ class User_Dashboard_Shortcode {
 						<p class="info-message"><?php esc_html_e( 'کد تأیید به شماره موبایل شما ارسال شد.', 'tabesh-v2' ); ?></p>
 						
 						<div class="form-group">
-							<label for="otp-code"><?php esc_html_e( 'کد تأیید', 'tabesh-v2' ); ?></label>
-							<input 
-								type="text" 
-								id="otp-code" 
-								name="code" 
-								placeholder="12345" 
-								required 
-								maxlength="5"
-								pattern="[0-9]{5}"
-							/>
+							<label><?php esc_html_e( 'کد تأیید', 'tabesh-v2' ); ?></label>
+							<div id="otp-inputs-container" class="otp-inputs">
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="one-time-code" />
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" />
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" />
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" />
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" />
+							</div>
+							<p class="otp-hint"><?php esc_html_e( 'کد به صورت خودکار تأیید می‌شود', 'tabesh-v2' ); ?></p>
 						</div>
 
 						<div id="tabesh-user-info-fields" style="display: none;">
@@ -110,13 +110,13 @@ class User_Dashboard_Shortcode {
 							</div>
 
 							<div class="form-group">
-								<label>
+								<label class="checkbox-label">
 									<input 
 										type="checkbox" 
 										id="is-corporate" 
 										name="is_corporate" 
 									/>
-									<?php esc_html_e( 'شخص حقوقی', 'tabesh-v2' ); ?>
+									<span><?php esc_html_e( 'شخص حقوقی', 'tabesh-v2' ); ?></span>
 								</label>
 							</div>
 
@@ -130,7 +130,7 @@ class User_Dashboard_Shortcode {
 							</div>
 						</div>
 
-						<button type="submit" class="button button-primary button-large">
+						<button type="submit" id="tabesh-otp-submit-btn" class="button button-primary button-large" style="display: none;">
 							<?php esc_html_e( 'تأیید و ورود', 'tabesh-v2' ); ?>
 						</button>
 						<button type="button" id="tabesh-back-btn" class="button button-secondary">

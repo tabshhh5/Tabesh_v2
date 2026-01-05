@@ -1675,6 +1675,24 @@ class Rest_Api {
 			)
 		);
 
+		// Check if user exists.
+		register_rest_route(
+			$this->namespace,
+			'/auth/check-user',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'check_user_exists' ),
+				'permission_callback' => '__return_true', // Public endpoint.
+				'args'                => array(
+					'mobile' => array(
+						'required'          => true,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+			)
+		);
+
 		// Verify OTP and login/register.
 		register_rest_route(
 			$this->namespace,
@@ -1787,6 +1805,25 @@ class Rest_Api {
 			array(
 				'success' => true,
 				'message' => $result['message'],
+			),
+			200
+		);
+	}
+
+	/**
+	 * Check if user exists by mobile number.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function check_user_exists( $request ) {
+		$mobile = $request->get_param( 'mobile' );
+		$user = get_user_by( 'login', $mobile );
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'exists'  => (bool) $user,
 			),
 			200
 		);
