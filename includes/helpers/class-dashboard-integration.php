@@ -29,6 +29,12 @@ class Dashboard_Integration {
 		
 		// Replace WooCommerce account menu.
 		add_action( 'woocommerce_before_account_navigation', array( $this, 'maybe_hide_woocommerce_menu' ), 1 );
+		
+		// Override template for dashboard pages to render blank page.
+		add_filter( 'template_include', array( $this, 'dashboard_blank_template' ), 999 );
+		
+		// Add custom styles to hide header/footer on dashboard pages.
+		add_action( 'wp_head', array( $this, 'add_dashboard_page_styles' ), 999 );
 	}
 
 	/**
@@ -243,5 +249,179 @@ class Dashboard_Integration {
 		}
 
 		return $orders_data;
+	}
+
+	/**
+	 * Override template for dashboard pages to render blank page.
+	 *
+	 * @param string $template Path to the template.
+	 * @return string Modified template path.
+	 */
+	public function dashboard_blank_template( $template ) {
+		global $tabesh_is_dashboard_page;
+		
+		// Check if this is a dashboard page.
+		if ( ! empty( $tabesh_is_dashboard_page ) ) {
+			// Create a minimal blank template.
+			$blank_template = TABESH_V2_PLUGIN_DIR . 'templates/dashboard-blank.php';
+			
+			// If our template exists, use it.
+			if ( file_exists( $blank_template ) ) {
+				return $blank_template;
+			}
+			
+			// Otherwise, create a temporary template in memory.
+			return $this->get_inline_blank_template();
+		}
+		
+		return $template;
+	}
+
+	/**
+	 * Get inline blank template for dashboard pages.
+	 *
+	 * @return string Path to temporary template file.
+	 */
+	private function get_inline_blank_template() {
+		// Create a temporary file for the blank template.
+		$temp_file = TABESH_V2_PLUGIN_DIR . 'templates/dashboard-blank-temp.php';
+		
+		// Ensure templates directory exists.
+		if ( ! file_exists( TABESH_V2_PLUGIN_DIR . 'templates' ) ) {
+			wp_mkdir_p( TABESH_V2_PLUGIN_DIR . 'templates' );
+		}
+		
+		// Create the blank template content.
+		$template_content = '<?php
+/**
+ * Blank Template for Tabesh Dashboard
+ * This template removes all theme headers, footers, and sidebars
+ * 
+ * @package Tabesh_v2
+ */
+
+// Prevent direct access.
+if ( ! defined( \'ABSPATH\' ) ) {
+	exit;
+}
+?>
+<!DOCTYPE html>
+<html <?php language_attributes(); ?> class="tabesh-blank-page">
+<head>
+	<meta charset="<?php bloginfo( \'charset\' ); ?>">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="robots" content="noindex,nofollow">
+	<?php wp_head(); ?>
+</head>
+<body <?php body_class( \'tabesh-dashboard-blank-page\' ); ?>>
+	<?php
+	// Output the page content.
+	while ( have_posts() ) {
+		the_post();
+		the_content();
+	}
+	?>
+	<?php wp_footer(); ?>
+</body>
+</html>';
+		
+		// Write the template to file.
+		file_put_contents( $temp_file, $template_content );
+		
+		return $temp_file;
+	}
+
+	/**
+	 * Add custom styles to hide header/footer on dashboard pages.
+	 *
+	 * @return void
+	 */
+	public function add_dashboard_page_styles() {
+		global $tabesh_is_dashboard_page;
+		
+		// Only add styles on dashboard pages.
+		if ( empty( $tabesh_is_dashboard_page ) ) {
+			return;
+		}
+		
+		?>
+		<style type="text/css">
+			/* Hide all theme headers, footers, and sidebars */
+			body.tabesh-dashboard-blank-page {
+				margin: 0 !important;
+				padding: 0 !important;
+				overflow-x: hidden;
+			}
+			
+			/* Hide common theme elements */
+			body.tabesh-dashboard-blank-page header,
+			body.tabesh-dashboard-blank-page .site-header,
+			body.tabesh-dashboard-blank-page .header,
+			body.tabesh-dashboard-blank-page #header,
+			body.tabesh-dashboard-blank-page .masthead,
+			body.tabesh-dashboard-blank-page footer,
+			body.tabesh-dashboard-blank-page .site-footer,
+			body.tabesh-dashboard-blank-page .footer,
+			body.tabesh-dashboard-blank-page #footer,
+			body.tabesh-dashboard-blank-page .sidebar,
+			body.tabesh-dashboard-blank-page aside,
+			body.tabesh-dashboard-blank-page #sidebar,
+			body.tabesh-dashboard-blank-page .widget-area,
+			body.tabesh-dashboard-blank-page nav.navigation,
+			body.tabesh-dashboard-blank-page .breadcrumbs,
+			body.tabesh-dashboard-blank-page .site-navigation,
+			body.tabesh-dashboard-blank-page #site-navigation {
+				display: none !important;
+			}
+			
+			/* Ensure main content takes full width */
+			body.tabesh-dashboard-blank-page .site-content,
+			body.tabesh-dashboard-blank-page #content,
+			body.tabesh-dashboard-blank-page main,
+			body.tabesh-dashboard-blank-page .content-area {
+				width: 100% !important;
+				max-width: 100% !important;
+				margin: 0 !important;
+				padding: 0 !important;
+			}
+			
+			/* Remove any container padding/margins */
+			body.tabesh-dashboard-blank-page .container,
+			body.tabesh-dashboard-blank-page .site-main {
+				max-width: 100% !important;
+				width: 100% !important;
+				padding: 0 !important;
+				margin: 0 !important;
+			}
+			
+			/* Ensure dashboard wrapper fills screen */
+			body.tabesh-dashboard-blank-page .tabesh-customer-dashboard-wrapper,
+			body.tabesh-dashboard-blank-page .tabesh-auth-container {
+				min-height: 100vh;
+				width: 100%;
+			}
+			
+			/* For authentication pages, center the form */
+			body.tabesh-dashboard-blank-page .tabesh-auth-container {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: #f8fafc;
+				padding: 20px;
+			}
+			
+			/* Full screen dashboard */
+			body.tabesh-dashboard-blank-page .tabesh-super-panel {
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				width: 100vw;
+				height: 100vh;
+				overflow: hidden;
+			}
+		</style>
+		<?php
 	}
 }
