@@ -77,13 +77,8 @@ class Melipayamak {
 				);
 			}
 
-			if ( empty( $this->sender_number ) ) {
-				return array(
-					'success' => false,
-					'message' => __( 'شماره فرستنده تنظیم نشده است.', 'tabesh-v2' ),
-					'code'    => 'missing_sender',
-				);
-			}
+			// Note: Sender number is NOT required for pattern-based SMS (SendByBaseNumber2).
+			// The pattern already has the sender number configured in Meli Payamak panel.
 
 			if ( empty( $pattern_id ) ) {
 				$settings = get_option( 'tabesh_v2_settings', array() );

@@ -354,114 +354,134 @@ const UserDashboardSettings = ( { settings, onChange } ) => {
 			<Section
 				title={ __( 'تنظیمات ملی پیامک', 'tabesh-v2' ) }
 				description={ __(
-					'پیکربندی اتصال به سرویس ملی پیامک برای ارسال OTP',
+					'پیکربندی اتصال به سرویس ملی پیامک برای ارسال OTP با استفاده از الگوی پیامکی',
 					'tabesh-v2'
 				) }
 			>
-				<FormGroup
-					label={ __( 'نام کاربری پنل ملی پیامک', 'tabesh-v2' ) }
-					description={ __(
-						'نام کاربری دریافتی از پنل ملی پیامک',
-						'tabesh-v2'
-					) }
-				>
-					<TextInput
-						value={ melipayamak.username || '' }
-						onChange={ ( e ) =>
-							handleMelipayamakChange(
-								'username',
-								e.target.value
-							)
-						}
-						placeholder=""
-					/>
-				</FormGroup>
-
-				<FormGroup
-					label={ __( 'رمز عبور پنل ملی پیامک', 'tabesh-v2' ) }
-					description={ __(
-						'رمز عبور دریافتی از پنل ملی پیامک',
-						'tabesh-v2'
-					) }
-				>
-					<TextInput
-						type="password"
-						value={ melipayamak.password || '' }
-						onChange={ ( e ) =>
-							handleMelipayamakChange(
-								'password',
-								e.target.value
-							)
-						}
-						placeholder=""
-					/>
-				</FormGroup>
-
-				<FormGroup
-					label={ __( 'شماره فرستنده (Base Number)', 'tabesh-v2' ) }
-					description={ __(
-						'شماره خط ارسال پیامک (معمولاً 10 رقمی)',
-						'tabesh-v2'
-					) }
-				>
-					<TextInput
-						value={ melipayamak.sender_number || '' }
-						onChange={ ( e ) =>
-							handleMelipayamakChange(
-								'sender_number',
-								e.target.value
-							)
-						}
-						placeholder="10000xxxxx"
-					/>
-				</FormGroup>
-
-				<FormGroup
-					label={ __( 'کد پترن (Pattern ID)', 'tabesh-v2' ) }
-					description={ __(
-						'شناسه الگوی پیامک (BodyId) برای ارسال OTP',
-						'tabesh-v2'
-					) }
-				>
-					<TextInput
-						value={ melipayamak.pattern_id || '' }
-						onChange={ ( e ) =>
-							handleMelipayamakChange(
-								'pattern_id',
-								e.target.value
-							)
-						}
-						placeholder="12345"
-					/>
-				</FormGroup>
-
-				<FormGroup
-					label={ __( 'تست اتصال', 'tabesh-v2' ) }
-					description={ __(
-						'برای تست اتصال و ارسال پیامک، شماره موبایل خود را وارد کنید.',
-						'tabesh-v2'
-					) }
-				>
-					<div style={ { display: 'flex', gap: '10px' } }>
-						<TextInput
-							value={ testMobile }
-							onChange={ ( e ) =>
-								setTestMobile( e.target.value )
-							}
-							placeholder="09xxxxxxxxx"
-						/>
-						<button
-							type="button"
-							className="button button-secondary"
-							onClick={ handleTestSms }
-							disabled={ testing }
-						>
-							{ testing
-								? __( 'در حال ارسال...', 'tabesh-v2' )
-								: __( 'ارسال پیامک آزمایشی', 'tabesh-v2' ) }
-						</button>
+				<div className="melipayamak-settings-container">
+					<div className="settings-notice info">
+						<span className="dashicons dashicons-info"></span>
+						<p>
+							{ __(
+								'توجه: در متد پترن (الگو) ملی پیامک، نیازی به تعیین شماره ارسال کننده نیست. شماره فرستنده در تنظیمات الگوی پیامک در پنل ملی پیامک تعریف شده است.',
+								'tabesh-v2'
+							) }
+						</p>
 					</div>
-				</FormGroup>
+
+					<FormGroup
+						label={ __( 'نام کاربری پنل ملی پیامک', 'tabesh-v2' ) }
+						description={ __(
+							'نام کاربری دریافتی از پنل ملی پیامک (الزامی)',
+							'tabesh-v2'
+						) }
+						required
+					>
+						<TextInput
+							value={ melipayamak.username || '' }
+							onChange={ ( e ) =>
+								handleMelipayamakChange(
+									'username',
+									e.target.value
+								)
+							}
+							placeholder="نام کاربری پنل"
+							required
+						/>
+					</FormGroup>
+
+					<FormGroup
+						label={ __( 'رمز عبور پنل ملی پیامک', 'tabesh-v2' ) }
+						description={ __(
+							'رمز عبور دریافتی از پنل ملی پیامک (الزامی)',
+							'tabesh-v2'
+						) }
+						required
+					>
+						<TextInput
+							type="password"
+							value={ melipayamak.password || '' }
+							onChange={ ( e ) =>
+								handleMelipayamakChange(
+									'password',
+									e.target.value
+								)
+							}
+							placeholder="••••••••"
+							required
+						/>
+					</FormGroup>
+
+					<FormGroup
+						label={ __( 'کد پترن (Pattern ID / BodyId)', 'tabesh-v2' ) }
+						description={ __(
+							'شناسه الگوی پیامک (BodyId) برای ارسال OTP - باید در پنل ملی پیامک ایجاد شده باشد (الزامی)',
+							'tabesh-v2'
+						) }
+						required
+					>
+						<TextInput
+							type="number"
+							value={ melipayamak.pattern_id || '' }
+							onChange={ ( e ) =>
+								handleMelipayamakChange(
+									'pattern_id',
+									e.target.value
+								)
+							}
+							placeholder="12345"
+							required
+						/>
+					</FormGroup>
+
+					<div className="settings-divider"></div>
+
+					<FormGroup
+						label={ __( 'تست اتصال و ارسال پیامک', 'tabesh-v2' ) }
+						description={ __(
+							'برای اطمینان از صحت تنظیمات، شماره موبایل خود را وارد کرده و دکمه تست را بزنید.',
+							'tabesh-v2'
+						) }
+					>
+						<div className="test-sms-container">
+							<TextInput
+								value={ testMobile }
+								onChange={ ( e ) =>
+									setTestMobile( e.target.value )
+								}
+								placeholder="09xxxxxxxxx"
+								dir="ltr"
+							/>
+							<button
+								type="button"
+								className="button button-primary"
+								onClick={ handleTestSms }
+								disabled={ testing }
+							>
+								{ testing ? (
+									<>
+										<span
+											className="dashicons dashicons-update spin"
+											style={ {
+												animation:
+													'rotation 2s infinite linear',
+											} }
+										></span>
+										{ __( 'در حال ارسال...', 'tabesh-v2' ) }
+									</>
+								) : (
+									<>
+										<span className="dashicons dashicons-email"></span>
+										{ __(
+											'ارسال پیامک آزمایشی',
+											'tabesh-v2'
+										) }
+									</>
+								) }
+							</button>
+						</div>
+					</FormGroup>
+				</div>
 			</Section>
 		</div>
 	);
