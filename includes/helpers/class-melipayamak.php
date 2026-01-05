@@ -29,20 +29,6 @@ class Melipayamak {
 	private $password;
 
 	/**
-	 * Sender number (base number).
-	 *
-	 * @var string
-	 */
-	private $sender_number;
-
-	/**
-	 * WSDL URL for SOAP connection.
-	 *
-	 * @var string
-	 */
-	private $wsdl_url;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param array $config Configuration array.
@@ -54,8 +40,6 @@ class Melipayamak {
 
 		$this->username = $config['username'] ?? $melipayamak['username'] ?? '';
 		$this->password = $config['password'] ?? $melipayamak['password'] ?? '';
-		$this->sender_number = $config['sender_number'] ?? $melipayamak['sender_number'] ?? '';
-		$this->wsdl_url = $config['wsdl_url'] ?? $melipayamak['wsdl_url'] ?? 'https://rest.payamak-panel.com/api/SendSMS/SendByBaseNumber2';
 	}
 
 	/**
@@ -79,6 +63,7 @@ class Melipayamak {
 
 			// Note: Sender number is NOT required for pattern-based SMS (SendByBaseNumber2).
 			// The pattern already has the sender number configured in Meli Payamak panel.
+			// This method uses the official Meli Payamak REST API for pattern-based SMS.
 
 			if ( empty( $pattern_id ) ) {
 				$settings = get_option( 'tabesh_v2_settings', array() );
@@ -104,22 +89,25 @@ class Melipayamak {
 			}
 
 			// Use REST API instead of SOAP for better compatibility.
-			$url = 'https://rest.payamak-panel.com/api/SendSMS/SendByBaseNumber2';
+			// Using SendByBaseNumber2 method according to Meli Payamak official documentation.
+			$url = 'https://rest.payamak-panel.com/api/SendSMS/BaseServiceNumber';
 			
+			// Parameters according to official Meli Payamak API documentation.
+			// The 'text' field contains variables separated by semicolon.
 			$params = array(
 				'username' => $this->username,
 				'password' => $this->password,
-				'text'     => $code,
+				'text'     => $code, // OTP code as the variable value.
 				'to'       => $mobile,
-				'bodyId'   => $pattern_id,
+				'bodyId'   => intval( $pattern_id ),
 			);
 
 			$response = wp_remote_post(
 				$url,
 				array(
-					'body'    => wp_json_encode( $params ),
+					'body'    => $params,
 					'headers' => array(
-						'Content-Type' => 'application/json',
+						'Content-Type' => 'application/x-www-form-urlencoded',
 					),
 					'timeout' => 15,
 				)
@@ -140,22 +128,38 @@ class Melipayamak {
 			$body = wp_remote_retrieve_body( $response );
 			$data = json_decode( $body, true );
 
-			// Check response status.
-			if ( isset( $data['RetStatus'] ) && 1 === $data['RetStatus'] ) {
+			// Check response based on Meli Payamak official documentation.
+			// Successful response: recId (a unique number > 15 digits).
+			// Error response: negative number or error code.
+			if ( isset( $data['Value'] ) ) {
+				$result_value = $data['Value'];
+				
+				// Check if it's a successful recId (positive number, typically > 1000000000000000).
+				if ( is_numeric( $result_value ) && $result_value > 1000000000000 ) {
+					return array(
+						'success' => true,
+						'message' => __( 'پیامک با موفقیت ارسال شد.', 'tabesh-v2' ),
+						'data'    => $data,
+						'recId'   => $result_value,
+					);
+				}
+				
+				// It's an error code.
+				$error_message = $this->get_error_message( intval( $result_value ) );
+				
 				return array(
-					'success' => true,
-					'message' => __( 'پیامک با موفقیت ارسال شد.', 'tabesh-v2' ),
+					'success' => false,
+					'message' => $error_message,
+					'code'    => 'api_error',
 					'data'    => $data,
 				);
 			}
 
-			// Handle error responses.
-			$error_message = $this->get_error_message( $data['RetStatus'] ?? 0 );
-			
+			// If no Value field, it's an error.
 			return array(
 				'success' => false,
-				'message' => $error_message,
-				'code'    => 'api_error',
+				'message' => __( 'پاسخ نامعتبر از سرویس پیامک دریافت شد.', 'tabesh-v2' ),
+				'code'    => 'invalid_response',
 				'data'    => $data,
 			);
 
@@ -214,22 +218,37 @@ class Melipayamak {
 
 	/**
 	 * Get error message from status code.
+	 * Based on Meli Payamak official documentation for SendByBaseNumber2.
 	 *
 	 * @param int $status Status code.
 	 * @return string Error message.
 	 */
 	private function get_error_message( $status ) {
 		$errors = array(
-			0  => __( 'خطای ناشناخته در ارسال پیامک.', 'tabesh-v2' ),
-			1  => __( 'پیامک با موفقیت ارسال شد.', 'tabesh-v2' ),
-			2  => __( 'نام کاربری یا رمز عبور اشتباه است.', 'tabesh-v2' ),
-			5  => __( 'اعتبار کافی نیست.', 'tabesh-v2' ),
-			6  => __( 'شماره فرستنده معتبر نیست.', 'tabesh-v2' ),
-			7  => __( 'شماره گیرنده معتبر نیست.', 'tabesh-v2' ),
-			10 => __( 'کد پترن یافت نشد.', 'tabesh-v2' ),
-			11 => __( 'پارامترهای پترن ناقص است.', 'tabesh-v2' ),
-			13 => __( 'آی‌پی شما مسدود شده است.', 'tabesh-v2' ),
-			14 => __( 'دسترسی به وب‌سرویس غیرفعال است.', 'tabesh-v2' ),
+			-111 => __( 'IP درخواست کننده نامعتبر است.', 'tabesh-v2' ),
+			-110 => __( 'الزام استفاده از ApiKey به جای رمز عبور.', 'tabesh-v2' ),
+			-109 => __( 'الزام تنظیم IP مجاز برای استفاده از API.', 'tabesh-v2' ),
+			-108 => __( 'مسدود شدن IP به دلیل تلاش ناموفق استفاده از API.', 'tabesh-v2' ),
+			-10  => __( 'در متغیر های ارسالی، لینک وجود دارد.', 'tabesh-v2' ),
+			-7   => __( 'خطایی در شماره فرستنده رخ داده است.', 'tabesh-v2' ),
+			-6   => __( 'خطای داخلی رخ داده است.', 'tabesh-v2' ),
+			-5   => __( 'متن ارسالی با توجه به متغیرهای مشخص شده در متن پیشفرض همخوانی ندارد.', 'tabesh-v2' ),
+			-4   => __( 'کد متن ارسالی صحیح نیست و یا توسط مدیر سامانه تأیید نشده است.', 'tabesh-v2' ),
+			-3   => __( 'خط ارسالی در سیستم تعریف نشده است.', 'tabesh-v2' ),
+			-2   => __( 'محدودیت تعداد شماره، محدودیت هر بار ارسال یک شماره موبایل است.', 'tabesh-v2' ),
+			-1   => __( 'دسترسی برای استفاده از این وبسرویس غیرفعال است.', 'tabesh-v2' ),
+			0    => __( 'نام کاربری یا رمز عبور صحیح نیست.', 'tabesh-v2' ),
+			2    => __( 'اعتبار کافی نیست.', 'tabesh-v2' ),
+			6    => __( 'سامانه در حال بروزرسانی است.', 'tabesh-v2' ),
+			7    => __( 'متن حاوی کلمه فیلتر شده است.', 'tabesh-v2' ),
+			10   => __( 'کاربر مورد نظر فعال نیست.', 'tabesh-v2' ),
+			11   => __( 'ارسال نشده.', 'tabesh-v2' ),
+			12   => __( 'مدارک کاربر کامل نیست.', 'tabesh-v2' ),
+			16   => __( 'شماره گیرنده ای یافت نشد.', 'tabesh-v2' ),
+			17   => __( 'متن پیامک خالی است.', 'tabesh-v2' ),
+			18   => __( 'شماره گیرنده نامعتبر است.', 'tabesh-v2' ),
+			19   => __( 'از محدودیت ساعتی فراتر رفته اید.', 'tabesh-v2' ),
+			35   => __( 'شماره موبایل گیرنده در لیست سیاه مخابرات است.', 'tabesh-v2' ),
 		);
 
 		return $errors[ $status ] ?? sprintf(
@@ -256,9 +275,9 @@ class Melipayamak {
 			$response = wp_remote_post(
 				$url,
 				array(
-					'body'    => wp_json_encode( $params ),
+					'body'    => $params,
 					'headers' => array(
-						'Content-Type' => 'application/json',
+						'Content-Type' => 'application/x-www-form-urlencoded',
 					),
 					'timeout' => 15,
 				)

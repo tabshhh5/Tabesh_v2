@@ -361,12 +361,26 @@ const UserDashboardSettings = ( { settings, onChange } ) => {
 				<div className="melipayamak-settings-container">
 					<div className="settings-notice info">
 						<span className="dashicons dashicons-info"></span>
-						<p>
-							{ __(
-								'توجه: در متد پترن (الگو) ملی پیامک، نیازی به تعیین شماره ارسال کننده نیست. شماره فرستنده در تنظیمات الگوی پیامک در پنل ملی پیامک تعریف شده است.',
-								'tabesh-v2'
-							) }
-						</p>
+						<div>
+							<p>
+								{ __(
+									'این افزونه از متد SendByBaseNumber2 (وب سرویس REST) برای ارسال پیامک الگویی استفاده می‌کند.',
+									'tabesh-v2'
+								) }
+							</p>
+							<p>
+								{ __(
+									'توجه: شماره فرستنده در تنظیمات الگوی پیامک در پنل ملی پیامک تعریف شده و نیازی به وارد کردن آن نیست.',
+									'tabesh-v2'
+								) }
+							</p>
+							<p style={{ fontSize: '12px', marginTop: '8px', opacity: 0.9 }}>
+								{ __(
+									'API Endpoint: https://rest.payamak-panel.com/api/SendSMS/BaseServiceNumber',
+									'tabesh-v2'
+								) }
+							</p>
+						</div>
 					</div>
 
 					<FormGroup

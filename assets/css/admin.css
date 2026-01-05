@@ -662,6 +662,19 @@
 	animation: slideIn 0.3s ease;
 }
 
+.settings-notice > div {
+	flex: 1;
+}
+
+.settings-notice p {
+	margin: 0 0 8px 0;
+	line-height: 1.6;
+}
+
+.settings-notice p:last-child {
+	margin-bottom: 0;
+}
+
 @keyframes slideIn {
 	from {
 		opacity: 0;
