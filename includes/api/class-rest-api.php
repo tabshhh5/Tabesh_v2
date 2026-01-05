@@ -742,9 +742,16 @@ class Rest_Api {
 
 			// Sanitize melipayamak sub-settings.
 			if ( isset( $settings['auth']['melipayamak'] ) && is_array( $settings['auth']['melipayamak'] ) ) {
+				// Validate password exists and is a string, but don't modify its content.
+				$password = $settings['auth']['melipayamak']['password'] ?? '';
+				if ( ! is_string( $password ) ) {
+					$password = '';
+				}
+				
 				$sanitized['auth']['melipayamak'] = array(
 					'username'   => sanitize_text_field( $settings['auth']['melipayamak']['username'] ?? '' ),
-					'password'   => sanitize_text_field( $settings['auth']['melipayamak']['password'] ?? '' ),
+					// Store password as-is to preserve exact characters required by API.
+					'password'   => $password,
 					'pattern_id' => sanitize_text_field( $settings['auth']['melipayamak']['pattern_id'] ?? '' ),
 				);
 			}
