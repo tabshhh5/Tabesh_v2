@@ -107,9 +107,13 @@
 					}
 				});
 
-				// Focus last filled input or first empty
-				const lastFilledIndex = Math.min(digits.length - 1, $inputs.length - 1);
-				$inputs.eq(lastFilledIndex).focus();
+				// Focus last filled input or first if none
+				if (digits.length > 0) {
+					const lastFilledIndex = Math.min(digits.length - 1, $inputs.length - 1);
+					$inputs.eq(lastFilledIndex).focus();
+				} else {
+					$inputs.eq(0).focus();
+				}
 				
 				checkOtpComplete();
 			});

@@ -148,21 +148,21 @@
 	text-align: center;
 	font-size: 24px;
 	font-weight: 600;
-	border: 2px solid #d1d5db;
+	border: 2px solid var(--tabesh-border-medium);
 	border-radius: 12px;
 	transition: all 0.2s ease;
-	background: #fff;
-	color: #111827;
-	caret-color: #3b82f6;
+	background: var(--tabesh-bg-white);
+	color: var(--tabesh-text-dark);
+	caret-color: var(--tabesh-primary);
 }
 
 .otp-input:hover {
-	border-color: #9ca3af;
+	border-color: var(--tabesh-border-dark);
 }
 
 .otp-input:focus {
 	outline: none;
-	border-color: #3b82f6;
+	border-color: var(--tabesh-primary);
 	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 	transform: scale(1.05);
 }
@@ -207,9 +207,9 @@
 }
 
 #otp-inputs-container.success .otp-input {
-	border-color: #10b981;
-	background: #f0fdf4;
-	color: #10b981;
+	border-color: var(--tabesh-success);
+	background: var(--tabesh-success-light);
+	color: var(--tabesh-success);
 	animation: successPop 0.3s ease-out;
 }
 
@@ -226,8 +226,8 @@
 }
 
 #otp-inputs-container.error .otp-input {
-	border-color: #ef4444;
-	background: #fef2f2;
+	border-color: var(--tabesh-error);
+	background: var(--tabesh-error-light);
 	animation: shake 0.5s ease-out;
 }
 
@@ -245,7 +245,7 @@
 
 .otp-hint {
 	text-align: center;
-	color: #6b7280;
+	color: var(--tabesh-text-light);
 	font-size: 12px;
 	margin-top: 8px;
 	font-style: italic;
