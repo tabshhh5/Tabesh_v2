@@ -115,10 +115,10 @@ class Customer_Dashboard_Shortcode {
 							<label><?php esc_html_e( 'کد تأیید', 'tabesh-v2' ); ?></label>
 							<div id="otp-inputs-container" class="otp-inputs">
 								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="one-time-code" dir="ltr" />
-								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" dir="ltr" />
-								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" dir="ltr" />
-								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" dir="ltr" />
-								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" dir="ltr" />
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" dir="ltr" />
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" dir="ltr" />
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" dir="ltr" />
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" dir="ltr" />
 							</div>
 							<p class="otp-hint"><?php esc_html_e( 'کد به صورت خودکار تأیید می‌شود', 'tabesh-v2' ); ?></p>
 						</div>

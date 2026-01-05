@@ -6,6 +6,11 @@
 (function ($) {
 	'use strict';
 
+	// Constants
+	const AUTO_SUBMIT_DELAY = 200; // milliseconds - allows visual feedback before validation
+	const OTP_LENGTH = 5;
+	const DIGIT_PATTERN = /^[0-9]*$/; // Validates numeric input only
+
 	let currentMobile = '';
 	let isNewUser = false;
 
@@ -63,7 +68,7 @@
 				const value = $this.val();
 
 				// Only allow digits
-				if (!/^\d*$/.test(value)) {
+				if (!DIGIT_PATTERN.test(value)) {
 					$this.val('');
 					return;
 				}
@@ -127,9 +132,8 @@
 			code += val;
 		});
 
-		if (allFilled && code.length === 5) {
+		if (allFilled && code.length === OTP_LENGTH) {
 			// Auto-submit OTP verification with slight delay to allow user to see complete input
-			const AUTO_SUBMIT_DELAY = 200; // milliseconds - allows visual feedback
 			setTimeout(function () {
 				handleOtpVerification(code);
 			}, AUTO_SUBMIT_DELAY);
@@ -204,7 +208,7 @@
 			});
 		}
 
-		if (!code || code.length !== 5) {
+		if (!code || code.length !== OTP_LENGTH) {
 			showMessage('کد تأیید باید 5 رقم باشد.', 'error');
 			return;
 		}

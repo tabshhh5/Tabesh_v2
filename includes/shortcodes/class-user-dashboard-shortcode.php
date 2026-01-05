@@ -80,10 +80,10 @@ class User_Dashboard_Shortcode {
 							<label><?php esc_html_e( 'کد تأیید', 'tabesh-v2' ); ?></label>
 							<div id="otp-inputs-container" class="otp-inputs">
 								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="one-time-code" />
-								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" />
-								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" />
-								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" />
-								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" />
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" />
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" />
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" />
+								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" />
 							</div>
 							<p class="otp-hint"><?php esc_html_e( 'کد به صورت خودکار تأیید می‌شود', 'tabesh-v2' ); ?></p>
 						</div>
