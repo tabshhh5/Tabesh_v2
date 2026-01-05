@@ -15,6 +15,11 @@ const OTPInput = ({ length = 5, value = '', onChange, onComplete, disabled = fal
 	const [otp, setOtp] = useState(Array(length).fill(''));
 	const inputRefs = useRef([]);
 
+	// Constants for digit normalization
+	const PERSIAN_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+	const ARABIC_DIGITS = '٠١٢٣٤٥٦٧٨٩';
+	const ENGLISH_DIGITS = '0123456789';
+
 	// Initialize refs
 	useEffect(() => {
 		inputRefs.current = inputRefs.current.slice(0, length);
@@ -47,18 +52,14 @@ const OTPInput = ({ length = 5, value = '', onChange, onComplete, disabled = fal
 	const normalizePersianDigits = (value) => {
 		if (!value) return '';
 		
-		const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
-		const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
-		const englishDigits = '0123456789';
-		
 		return value.split('').map(char => {
-			const persianIndex = persianDigits.indexOf(char);
+			const persianIndex = PERSIAN_DIGITS.indexOf(char);
 			if (persianIndex !== -1) {
-				return englishDigits[persianIndex];
+				return ENGLISH_DIGITS[persianIndex];
 			}
-			const arabicIndex = arabicDigits.indexOf(char);
+			const arabicIndex = ARABIC_DIGITS.indexOf(char);
 			if (arabicIndex !== -1) {
-				return englishDigits[arabicIndex];
+				return ENGLISH_DIGITS[arabicIndex];
 			}
 			return char;
 		}).join('');
