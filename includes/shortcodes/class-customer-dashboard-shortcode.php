@@ -76,113 +76,11 @@ class Customer_Dashboard_Shortcode {
 		
 		ob_start();
 		?>
-		<div class="tabesh-auth-container" id="tabesh-auth-root">
-			<div class="tabesh-auth-form">
-				<h2><?php esc_html_e( 'ورود / ثبت‌نام', 'tabesh-v2' ); ?></h2>
-				<p class="description"><?php esc_html_e( 'برای دسترسی به داشبورد، لطفاً وارد شوید.', 'tabesh-v2' ); ?></p>
-				
-				<div id="tabesh-auth-step-1">
-					<form id="tabesh-mobile-form">
-						<div class="form-group">
-							<label for="mobile"><?php esc_html_e( 'شماره موبایل', 'tabesh-v2' ); ?></label>
-							<input 
-								type="text" 
-								id="mobile" 
-								name="mobile" 
-								placeholder="09xxxxxxxxx" 
-								required 
-								pattern="09[0-9]{9}"
-								maxlength="11"
-								inputmode="numeric"
-								dir="ltr"
-							/>
-						</div>
-						<button type="submit" class="button button-primary button-large">
-							<span class="dashicons dashicons-smartphone"></span>
-							<?php esc_html_e( 'دریافت کد تأیید', 'tabesh-v2' ); ?>
-						</button>
-					</form>
-				</div>
-
-				<div id="tabesh-auth-step-2" style="display: none;">
-					<form id="tabesh-otp-form">
-						<p class="info-message">
-							<span class="dashicons dashicons-yes-alt"></span>
-							<?php esc_html_e( 'کد تأیید به شماره موبایل شما ارسال شد.', 'tabesh-v2' ); ?>
-						</p>
-						
-						<div class="form-group">
-							<label><?php esc_html_e( 'کد تأیید', 'tabesh-v2' ); ?></label>
-							<div id="otp-inputs-container" class="otp-inputs">
-								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="one-time-code" dir="ltr" />
-								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" dir="ltr" />
-								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" dir="ltr" />
-								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" dir="ltr" />
-								<input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" dir="ltr" />
-							</div>
-							<p class="otp-hint"><?php esc_html_e( 'کد به صورت خودکار تأیید می‌شود', 'tabesh-v2' ); ?></p>
-						</div>
-
-						<div id="tabesh-user-info-fields" style="display: none;">
-							<div class="form-group">
-								<label for="first-name"><?php esc_html_e( 'نام', 'tabesh-v2' ); ?></label>
-								<input 
-									type="text" 
-									id="first-name" 
-									name="first_name" 
-									required 
-								/>
-							</div>
-
-							<div class="form-group">
-								<label for="last-name"><?php esc_html_e( 'نام خانوادگی', 'tabesh-v2' ); ?></label>
-								<input 
-									type="text" 
-									id="last-name" 
-									name="last_name" 
-									required 
-								/>
-							</div>
-
-							<div class="form-group">
-								<label class="checkbox-label">
-									<input 
-										type="checkbox" 
-										id="is-corporate" 
-										name="is_corporate" 
-									/>
-									<span><?php esc_html_e( 'شخص حقوقی', 'tabesh-v2' ); ?></span>
-								</label>
-							</div>
-
-							<div class="form-group" id="company-name-field" style="display: none;">
-								<label for="company-name"><?php esc_html_e( 'نام سازمان', 'tabesh-v2' ); ?></label>
-								<input 
-									type="text" 
-									id="company-name" 
-									name="company_name" 
-								/>
-							</div>
-						</div>
-
-						<div class="button-group">
-							<button type="submit" id="tabesh-otp-submit-btn" class="button button-primary button-large" style="display: none;">
-								<span class="dashicons dashicons-lock"></span>
-								<?php esc_html_e( 'تأیید و ورود', 'tabesh-v2' ); ?>
-							</button>
-							<button type="button" id="tabesh-back-btn" class="button button-secondary">
-								<span class="dashicons dashicons-arrow-right-alt"></span>
-								<?php esc_html_e( 'بازگشت', 'tabesh-v2' ); ?>
-							</button>
-						</div>
-					</form>
-				</div>
-
-				<div id="tabesh-auth-message"></div>
-				<div id="tabesh-auth-loading" style="display: none;">
-					<div class="tabesh-spinner"></div>
-					<p><?php esc_html_e( 'در حال پردازش...', 'tabesh-v2' ); ?></p>
-				</div>
+		<div id="tabesh-auth-root">
+			<!-- React Auth Form will be mounted here -->
+			<div class="tabesh-loading-auth">
+				<div class="tabesh-spinner"></div>
+				<p><?php esc_html_e( 'در حال بارگذاری...', 'tabesh-v2' ); ?></p>
 			</div>
 		</div>
 		<?php
@@ -259,36 +157,55 @@ class Customer_Dashboard_Shortcode {
 	 * @return void
 	 */
 	private function enqueue_auth_assets() {
-		// Enqueue dashicons for icons.
-		wp_enqueue_style( 'dashicons' );
-		
+		$asset_file = TABESH_V2_PLUGIN_DIR . 'assets/js/build/auth.asset.php';
+
+		// Check if build file exists.
+		if ( file_exists( $asset_file ) ) {
+			$asset = require $asset_file;
+		} else {
+			$asset = array(
+				'dependencies' => array( 'wp-element', 'wp-api-fetch', 'wp-i18n', 'react', 'react-dom' ),
+				'version'      => TABESH_V2_VERSION,
+			);
+		}
+
 		// Enqueue authentication CSS.
-		wp_enqueue_style(
-			'tabesh-auth-form',
-			TABESH_V2_PLUGIN_URL . 'assets/css/dashboard.css',
-			array( 'dashicons' ),
-			TABESH_V2_VERSION
-		);
-		
+		$css_file = TABESH_V2_PLUGIN_DIR . 'assets/js/build/auth.css';
+		if ( file_exists( $css_file ) ) {
+			wp_enqueue_style(
+				'tabesh-auth-form',
+				TABESH_V2_PLUGIN_URL . 'assets/js/build/auth.css',
+				array(),
+				$asset['version']
+			);
+		}
+
 		// Enqueue authentication JavaScript.
-		wp_enqueue_script(
-			'tabesh-auth-form',
-			TABESH_V2_PLUGIN_URL . 'assets/js/dashboard.js',
-			array( 'jquery', 'wp-api-fetch' ),
-			TABESH_V2_VERSION,
-			true
-		);
-		
-		// Localize script with settings.
-		wp_localize_script(
-			'tabesh-auth-form',
-			'tabeshAuth',
-			array(
-				'apiUrl'  => rest_url( 'tabesh/v2/' ),
-				'nonce'   => wp_create_nonce( 'wp_rest' ),
-				'isRTL'   => is_rtl(),
-			)
-		);
+		$js_file = TABESH_V2_PLUGIN_DIR . 'assets/js/build/auth.js';
+		if ( file_exists( $js_file ) ) {
+			wp_enqueue_script(
+				'tabesh-auth-form',
+				TABESH_V2_PLUGIN_URL . 'assets/js/build/auth.js',
+				$asset['dependencies'],
+				$asset['version'],
+				true
+			);
+
+			// Localize script with settings.
+			wp_localize_script(
+				'tabesh-auth-form',
+				'tabeshAuth',
+				array(
+					'apiUrl'       => rest_url( 'tabesh/v2/' ),
+					'nonce'        => wp_create_nonce( 'wp_rest' ),
+					'isRTL'        => is_rtl(),
+					'dashboardUrl' => home_url( '/panel' ), // Dashboard URL for redirect after login.
+				)
+			);
+
+			// Set script translations.
+			wp_set_script_translations( 'tabesh-auth-form', 'tabesh-v2' );
+		}
 	}
 
 	/**
