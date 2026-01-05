@@ -262,73 +262,16 @@ class Dashboard_Integration {
 		
 		// Check if this is a dashboard page.
 		if ( ! empty( $tabesh_is_dashboard_page ) ) {
-			// Create a minimal blank template.
+			// Use our blank template.
 			$blank_template = TABESH_V2_PLUGIN_DIR . 'templates/dashboard-blank.php';
 			
 			// If our template exists, use it.
 			if ( file_exists( $blank_template ) ) {
 				return $blank_template;
 			}
-			
-			// Otherwise, create a temporary template in memory.
-			return $this->get_inline_blank_template();
 		}
 		
 		return $template;
-	}
-
-	/**
-	 * Get inline blank template for dashboard pages.
-	 *
-	 * @return string Path to temporary template file.
-	 */
-	private function get_inline_blank_template() {
-		// Create a temporary file for the blank template.
-		$temp_file = TABESH_V2_PLUGIN_DIR . 'templates/dashboard-blank-temp.php';
-		
-		// Ensure templates directory exists.
-		if ( ! file_exists( TABESH_V2_PLUGIN_DIR . 'templates' ) ) {
-			wp_mkdir_p( TABESH_V2_PLUGIN_DIR . 'templates' );
-		}
-		
-		// Create the blank template content.
-		$template_content = '<?php
-/**
- * Blank Template for Tabesh Dashboard
- * This template removes all theme headers, footers, and sidebars
- * 
- * @package Tabesh_v2
- */
-
-// Prevent direct access.
-if ( ! defined( \'ABSPATH\' ) ) {
-	exit;
-}
-?>
-<!DOCTYPE html>
-<html <?php language_attributes(); ?> class="tabesh-blank-page">
-<head>
-	<meta charset="<?php bloginfo( \'charset\' ); ?>">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="robots" content="noindex,nofollow">
-	<?php wp_head(); ?>
-</head>
-<body <?php body_class( \'tabesh-dashboard-blank-page\' ); ?>>
-	<?php
-	// Output the page content.
-	while ( have_posts() ) {
-		the_post();
-		the_content();
-	}
-	?>
-	<?php wp_footer(); ?>
-</body>
-</html>';
-		
-		// Write the template to file.
-		file_put_contents( $temp_file, $template_content );
-		
-		return $temp_file;
 	}
 
 	/**

@@ -49,7 +49,6 @@ yarn.lock
 *.swp
 *.swo
 *~
-/templates/dashboard-blank-temp.php
 
 # OS generated files
 .DS_Store

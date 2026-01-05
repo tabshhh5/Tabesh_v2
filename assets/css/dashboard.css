@@ -165,10 +165,6 @@
 	border-color: #e2e8f0;
 }
 
-.tabesh-auth-form .checkbox-label:hover {
-	background: #f1f5f9;
-}
-
 .tabesh-auth-form .checkbox-label input[type="checkbox"] {
 	width: 20px;
 	height: 20px;
