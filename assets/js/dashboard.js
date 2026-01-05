@@ -257,7 +257,7 @@
 					showMessage(response.message, 'success');
 					
 					// If new user and user info not yet collected, show fields
-					if (response.is_new && !$('#tabesh-user-info-fields').is(':visible')) {
+					if (isNewUser && !$('#tabesh-user-info-fields').is(':visible')) {
 						$('#tabesh-user-info-fields').slideDown(300);
 						$('#tabesh-otp-submit-btn').show();
 						showMessage('کد تأیید شد. لطفاً اطلاعات خود را تکمیل کنید.', 'success');
@@ -327,20 +327,15 @@
 	/**
 	 * Show step 2 (OTP input).
 	 *
-	 * @param {boolean} showUserFields Whether to show user info fields
+	 * @param {boolean} isNew Whether this is a new user registration
 	 */
-	function showStep2(showUserFields) {
+	function showStep2(isNew) {
 		$('#tabesh-auth-step-1').hide();
 		$('#tabesh-auth-step-2').show();
 		
-		// For new users, show user info fields immediately
-		if (showUserFields) {
-			$('#tabesh-user-info-fields').show();
-			$('#tabesh-otp-submit-btn').hide(); // Hide submit button, auto-validate on OTP complete
-		} else {
-			$('#tabesh-user-info-fields').hide();
-			$('#tabesh-otp-submit-btn').hide(); // Hide for existing users too, auto-validate
-		}
+		// Don't show user info fields yet - wait for OTP verification
+		$('#tabesh-user-info-fields').hide();
+		$('#tabesh-otp-submit-btn').hide();
 		
 		// Focus first OTP input
 		setTimeout(function () {
