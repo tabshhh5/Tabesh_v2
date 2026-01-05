@@ -728,6 +728,52 @@ class Rest_Api {
 			);
 		}
 
+		// Sanitize auth settings (OTP and Melipayamak).
+		if ( isset( $settings['auth'] ) && is_array( $settings['auth'] ) ) {
+			$sanitized['auth'] = array(
+				'otp_enabled'        => ! empty( $settings['auth']['otp_enabled'] ),
+				'otp_length'         => absint( $settings['auth']['otp_length'] ?? 5 ),
+				'otp_expiry'         => absint( $settings['auth']['otp_expiry'] ?? 120 ),
+				'replace_woocommerce' => ! empty( $settings['auth']['replace_woocommerce'] ),
+				'require_name'       => ! empty( $settings['auth']['require_name'] ),
+				'allow_corporate'    => ! empty( $settings['auth']['allow_corporate'] ),
+				'auto_create_user'   => ! empty( $settings['auth']['auto_create_user'] ),
+			);
+
+			// Sanitize melipayamak sub-settings.
+			if ( isset( $settings['auth']['melipayamak'] ) && is_array( $settings['auth']['melipayamak'] ) ) {
+				$sanitized['auth']['melipayamak'] = array(
+					'username'   => sanitize_text_field( $settings['auth']['melipayamak']['username'] ?? '' ),
+					'password'   => sanitize_text_field( $settings['auth']['melipayamak']['password'] ?? '' ),
+					'pattern_id' => sanitize_text_field( $settings['auth']['melipayamak']['pattern_id'] ?? '' ),
+				);
+			}
+		}
+
+		// Sanitize user dashboard settings.
+		if ( isset( $settings['user_dashboard'] ) && is_array( $settings['user_dashboard'] ) ) {
+			$sanitized['user_dashboard'] = array(
+				'enabled'           => ! empty( $settings['user_dashboard']['enabled'] ),
+				'page_slug'         => sanitize_title( $settings['user_dashboard']['page_slug'] ?? 'panel' ),
+				'dashboard_page_id' => absint( $settings['user_dashboard']['dashboard_page_id'] ?? 0 ),
+			);
+
+			// Sanitize menu items.
+			if ( isset( $settings['user_dashboard']['menu_items'] ) && is_array( $settings['user_dashboard']['menu_items'] ) ) {
+				$sanitized['user_dashboard']['menu_items'] = array();
+				foreach ( $settings['user_dashboard']['menu_items'] as $item ) {
+					if ( is_array( $item ) ) {
+						$sanitized['user_dashboard']['menu_items'][] = array(
+							'id'      => sanitize_key( $item['id'] ?? '' ),
+							'label'   => sanitize_text_field( $item['label'] ?? '' ),
+							'icon'    => sanitize_text_field( $item['icon'] ?? '' ),
+							'enabled' => ! empty( $item['enabled'] ),
+						);
+					}
+				}
+			}
+		}
+
 		return $sanitized;
 	}
 
@@ -1845,7 +1891,7 @@ class Rest_Api {
 				array(
 					'ID'           => $existing_page->ID,
 					'post_title'   => __( 'داشبورد کاربران', 'tabesh-v2' ),
-					'post_content' => '[tabesh_user_dashboard]',
+					'post_content' => '[tabesh_customer_dashboard]',
 					'post_status'  => 'publish',
 					'post_type'    => 'page',
 				)
@@ -1856,7 +1902,7 @@ class Rest_Api {
 				array(
 					'post_title'   => __( 'داشبورد کاربران', 'tabesh-v2' ),
 					'post_name'    => $slug,
-					'post_content' => '[tabesh_user_dashboard]',
+					'post_content' => '[tabesh_customer_dashboard]',
 					'post_status'  => 'publish',
 					'post_type'    => 'page',
 				)
