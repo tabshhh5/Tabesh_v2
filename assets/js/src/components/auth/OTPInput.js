@@ -39,12 +39,41 @@ const OTPInput = ({ length = 5, value = '', onChange, onComplete, disabled = fal
 	}, [value, length]);
 
 	/**
+	 * Normalize Persian/Arabic digits to English.
+	 * 
+	 * @param {string} value Input value.
+	 * @return {string} Normalized value.
+	 */
+	const normalizePersianDigits = (value) => {
+		if (!value) return '';
+		
+		const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+		const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+		const englishDigits = '0123456789';
+		
+		return value.split('').map(char => {
+			const persianIndex = persianDigits.indexOf(char);
+			if (persianIndex !== -1) {
+				return englishDigits[persianIndex];
+			}
+			const arabicIndex = arabicDigits.indexOf(char);
+			if (arabicIndex !== -1) {
+				return englishDigits[arabicIndex];
+			}
+			return char;
+		}).join('');
+	};
+
+	/**
 	 * Handle input change.
 	 */
 	const handleChange = (index, e) => {
-		const val = e.target.value;
+		let val = e.target.value;
 		
-		// Only allow digits
+		// Normalize Persian/Arabic digits to English
+		val = normalizePersianDigits(val);
+		
+		// Only allow English digits after normalization
 		if (val && !/^\d$/.test(val)) {
 			return;
 		}
@@ -115,7 +144,9 @@ const OTPInput = ({ length = 5, value = '', onChange, onComplete, disabled = fal
 	const handlePaste = (e) => {
 		e.preventDefault();
 		
-		const pastedData = e.clipboardData.getData('text/plain');
+		let pastedData = e.clipboardData.getData('text/plain');
+		// Normalize Persian/Arabic digits before extracting
+		pastedData = normalizePersianDigits(pastedData);
 		const digits = pastedData.replace(/\D/g, '').split('').slice(0, length);
 		
 		if (digits.length > 0) {

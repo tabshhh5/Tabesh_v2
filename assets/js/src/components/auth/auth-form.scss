@@ -176,6 +176,13 @@
 			margin-right: 0.25rem;
 		}
 	}
+
+	/* Additional spacing for registration form fields */
+	&#first-name,
+	&#last-name,
+	&#company-name {
+		margin-bottom: 1.5rem;
+	}
 }
 
 /* Input fields */

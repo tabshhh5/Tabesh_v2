@@ -585,15 +585,24 @@ class Rest_Api {
 	 * @return \WP_REST_Response
 	 */
 	public function update_settings( $request ) {
-		$settings = $request->get_json_params();
+		$new_settings = $request->get_json_params();
 		
-		// Sanitize settings before saving.
-		$sanitized_settings = $this->sanitize_settings( $settings );
+		// Get existing settings
+		$existing_settings = get_option( 'tabesh_v2_settings', array() );
 		
-		update_option( 'tabesh_v2_settings', $sanitized_settings );
+		// Sanitize new settings before saving.
+		$sanitized_new_settings = $this->sanitize_settings( $new_settings );
+		
+		// Merge with existing settings to preserve other sections
+		$merged_settings = array_replace_recursive( $existing_settings, $sanitized_new_settings );
+		
+		update_option( 'tabesh_v2_settings', $merged_settings );
 
 		return new \WP_REST_Response(
-			array( 'message' => __( 'Settings updated successfully', 'tabesh-v2' ) ),
+			array( 
+				'success' => true,
+				'message' => __( 'Settings updated successfully', 'tabesh-v2' ),
+			),
 			200
 		);
 	}
@@ -739,7 +748,19 @@ class Rest_Api {
 				'require_name'       => ! empty( $settings['auth']['require_name'] ),
 				'allow_corporate'    => ! empty( $settings['auth']['allow_corporate'] ),
 				'auto_create_user'   => ! empty( $settings['auth']['auto_create_user'] ),
+				'auto_submit_otp'    => ! empty( $settings['auth']['autoSubmitOtp'] ),
 				'min_mobile_length'  => absint( $settings['auth']['min_mobile_length'] ?? 11 ),
+				// Appearance settings
+				'primaryColor'                => sanitize_hex_color( $settings['auth']['primaryColor'] ?? '#4f46e5' ),
+				'backgroundColor'             => sanitize_hex_color( $settings['auth']['backgroundColor'] ?? '#667eea' ),
+				'secondaryBackgroundColor'    => sanitize_hex_color( $settings['auth']['secondaryBackgroundColor'] ?? '#764ba2' ),
+				'logoUrl'                     => esc_url_raw( $settings['auth']['logoUrl'] ?? '' ),
+				'brandTitle'                  => sanitize_text_field( $settings['auth']['brandTitle'] ?? 'ورود به داشبورد' ),
+				'brandSubtitle'               => sanitize_text_field( $settings['auth']['brandSubtitle'] ?? 'سیستم مدیریت چاپ تابش' ),
+				// Layout settings
+				'cardWidth'                   => absint( $settings['auth']['cardWidth'] ?? 480 ),
+				'cardPadding'                 => absint( $settings['auth']['cardPadding'] ?? 48 ),
+				'borderRadius'                => absint( $settings['auth']['borderRadius'] ?? 16 ),
 			);
 
 			// Sanitize melipayamak sub-settings.
