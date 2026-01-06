@@ -170,8 +170,6 @@ class Settings_Panel {
 				'replace_woocommerce'         => false,
 				'auto_create_user'            => true,
 				'min_mobile_length'           => 11,
-				// Template settings
-				'template'                    => 'minimal',
 				// Appearance settings
 				'primaryColor'                => '#4f46e5',
 				'backgroundColor'             => '#667eea',
@@ -183,16 +181,6 @@ class Settings_Panel {
 				'cardWidth'                   => 480,
 				'cardPadding'                 => 48,
 				'borderRadius'                => 16,
-				// Desktop banner/slider settings
-				'desktopBannerEnabled'        => false,
-				'desktopBannerUrl'            => '',
-				'desktopBannerPosition'       => 'left',
-				// Background settings
-				'backgroundType'              => 'gradient',
-				'backgroundImageUrl'          => '',
-				// Animation settings
-				'animationEnabled'            => true,
-				'formAnimation'               => 'slideUp',
 			),
 		);
 	}
