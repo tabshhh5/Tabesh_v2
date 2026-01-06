@@ -8,6 +8,7 @@ import './auth-form.scss';
  * Modern Authentication Form Component.
  * 
  * Handles both login and registration with OTP verification.
+ * Supports customization via admin settings.
  */
 const AuthForm = () => {
 	const [step, setStep] = useState('mobile'); // 'mobile', 'otp', 'register'
@@ -22,6 +23,22 @@ const AuthForm = () => {
 	const [lastName, setLastName] = useState('');
 	const [isCorporate, setIsCorporate] = useState(false);
 	const [companyName, setCompanyName] = useState('');
+
+	// Get settings from localized script
+	const authSettings = window.tabeshAuth?.settings || {};
+	const brandTitle = authSettings.brandTitle || __('ورود به داشبورد', 'tabesh-v2');
+	const brandSubtitle = authSettings.brandSubtitle || __('سیستم مدیریت چاپ تابش', 'tabesh-v2');
+	const logoUrl = authSettings.logoUrl || '';
+	const otpLength = authSettings.otpLength || 5;
+	const requireName = authSettings.requireName !== false;
+	const allowCorporate = authSettings.allowCorporate !== false;
+	
+	// Template and design settings
+	const template = authSettings.template || 'minimal';
+	const desktopBannerUrl = authSettings.desktopBannerUrl || '';
+	const backgroundImageUrl = authSettings.backgroundImageUrl || '';
+	const animationEnabled = authSettings.animationEnabled !== false;
+	const formAnimation = authSettings.formAnimation || 'slideUp';
 
 	/**
 	 * Handle mobile number submission.
@@ -164,8 +181,50 @@ const AuthForm = () => {
 			return;
 		}
 
-		// Re-verify OTP with user data
-		await handleOtpVerification(otp);
+		setLoading(true);
+		setMessage({ text: '', type: '' });
+
+		// Send registration data with stored OTP (token preserved from initial verification)
+		try {
+			const response = await apiFetch({
+				path: '/tabesh/v2/auth/verify-otp',
+				method: 'POST',
+				data: {
+					mobile,
+					code: otp,
+					first_name: firstName,
+					last_name: lastName,
+					is_corporate: isCorporate,
+					company_name: isCorporate ? companyName : ''
+				}
+			});
+
+			if (response.success) {
+				setMessage({
+					text: response.message,
+					type: 'success'
+				});
+				
+				// Redirect to dashboard
+				setTimeout(() => {
+					const dashboardUrl = window.tabeshAuth?.dashboardUrl || '/panel';
+					window.location.href = dashboardUrl;
+				}, 1000);
+			} else {
+				setMessage({
+					text: response.message,
+					type: 'error'
+				});
+			}
+		} catch (error) {
+			setMessage({
+				text: __('خطا در ثبت‌نام. لطفاً دوباره تلاش کنید.', 'tabesh-v2'),
+				type: 'error'
+			});
+			console.error('Error during registration:', error);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	/**
@@ -189,30 +248,37 @@ const AuthForm = () => {
 		setMessage({ text: '', type: '' });
 	};
 
-	return (
-		<div className="tabesh-auth-wrapper">
-			<div className="tabesh-auth-container">
-				<div className="tabesh-auth-card">
-					{/* Logo/Brand */}
-					<div className="tabesh-auth-brand">
-						<div className="tabesh-auth-logo">
-							<svg viewBox="0 0 24 24" fill="currentColor">
-								<path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-							</svg>
-						</div>
-						<h1>{__('ورود به داشبورد', 'tabesh-v2')}</h1>
-						<p>{__('سیستم مدیریت چاپ تابش', 'tabesh-v2')}</p>
+	/**
+	 * Render the authentication card content.
+	 */
+	const renderAuthCard = () => (
+		<div className={`tabesh-auth-card ${animationEnabled ? 'animated' : ''} animation-${formAnimation}`}>
+			{/* Logo/Brand */}
+			<div className="tabesh-auth-brand">
+				{logoUrl ? (
+					<div className="tabesh-auth-logo custom-logo">
+						<img src={logoUrl} alt={brandTitle} />
 					</div>
+				) : (
+					<div className="tabesh-auth-logo">
+						<svg viewBox="0 0 24 24" fill="currentColor">
+							<path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+						</svg>
+					</div>
+				)}
+				<h1>{brandTitle}</h1>
+				<p>{brandSubtitle}</p>
+			</div>
 
-					{/* Step 1: Mobile Input */}
-					{step === 'mobile' && (
-						<form onSubmit={handleMobileSubmit} className="tabesh-auth-form fade-in">
-							<div className="tabesh-form-group">
-								<label htmlFor="mobile">
-									{__('شماره موبایل', 'tabesh-v2')}
-								</label>
-								<input
-									type="text"
+			{/* Step 1: Mobile Input */}
+			{step === 'mobile' && (
+				<form onSubmit={handleMobileSubmit} className="tabesh-auth-form fade-in">
+					<div className="tabesh-form-group">
+						<label htmlFor="mobile">
+							{__('شماره موبایل', 'tabesh-v2')}
+						</label>
+						<input
+							type="text"
 									id="mobile"
 									value={mobile}
 									onChange={(e) => setMobile(e.target.value)}
@@ -261,9 +327,9 @@ const AuthForm = () => {
 							</div>
 
 							<div className="tabesh-form-group">
-								<label>{__('کد تأیید 5 رقمی', 'tabesh-v2')}</label>
+								<label>{__('کد تأیید', 'tabesh-v2')} {otpLength} {__('رقمی', 'tabesh-v2')}</label>
 								<OTPInput
-									length={5}
+									length={otpLength}
 									value={otp}
 									onChange={setOtp}
 									onComplete={handleOtpVerification}
@@ -318,19 +384,21 @@ const AuthForm = () => {
 								/>
 							</div>
 
-							<div className="tabesh-form-group">
-								<label className="tabesh-checkbox-label">
-									<input
-										type="checkbox"
-										checked={isCorporate}
-										onChange={(e) => setIsCorporate(e.target.checked)}
-										disabled={loading}
-									/>
-									<span>{__('شخص حقوقی', 'tabesh-v2')}</span>
-								</label>
-							</div>
+							{allowCorporate && (
+								<div className="tabesh-form-group">
+									<label className="tabesh-checkbox-label">
+										<input
+											type="checkbox"
+											checked={isCorporate}
+											onChange={(e) => setIsCorporate(e.target.checked)}
+											disabled={loading}
+										/>
+										<span>{__('شخص حقوقی', 'tabesh-v2')}</span>
+									</label>
+								</div>
+							)}
 
-							{isCorporate && (
+							{isCorporate && allowCorporate && (
 								<div className="tabesh-form-group fade-in">
 									<label htmlFor="company-name">
 										{__('نام سازمان', 'tabesh-v2')}
@@ -398,6 +466,103 @@ const AuthForm = () => {
 						</div>
 					)}
 				</div>
+	);
+
+	/**
+	 * Render banner/image side panel for templates with banners.
+	 */
+	const renderBannerPanel = () => {
+		if (!desktopBannerUrl) {
+			return (
+				<div className="tabesh-auth-banner-placeholder">
+					<div className="placeholder-content">
+						<svg viewBox="0 0 24 24" fill="currentColor" width="64" height="64">
+							<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7l-3 3.72L9 13l-3 4h12l-4-5z"/>
+						</svg>
+						<p>{__('تصویر یا اسلایدر بنر', 'tabesh-v2')}</p>
+					</div>
+				</div>
+			);
+		}
+		return (
+			<div className="tabesh-auth-banner">
+				<img src={desktopBannerUrl} alt={__('بنر ورود', 'tabesh-v2')} />
+			</div>
+		);
+	};
+
+	/**
+	 * Get wrapper class based on template.
+	 */
+	const getWrapperClass = () => {
+		let classes = ['tabesh-auth-wrapper'];
+		classes.push(`template-${template}`);
+		if (backgroundImageUrl && template === 'background-image') {
+			classes.push('has-background-image');
+		}
+		return classes.join(' ');
+	};
+
+	/**
+	 * Get wrapper style based on template.
+	 */
+	const getWrapperStyle = () => {
+		if (template === 'background-image' && backgroundImageUrl) {
+			return {
+				backgroundImage: `url(${backgroundImageUrl})`,
+				backgroundSize: 'cover',
+				backgroundPosition: 'center',
+			};
+		}
+		return {};
+	};
+
+	// Render based on template
+	if (template === 'banner-left') {
+		return (
+			<div className={getWrapperClass()} style={getWrapperStyle()}>
+				<div className="tabesh-auth-split-layout">
+					<div className="tabesh-auth-banner-side left">
+						{renderBannerPanel()}
+					</div>
+					<div className="tabesh-auth-form-side">
+						<div className="tabesh-auth-container">
+							{renderAuthCard()}
+							<div className="tabesh-auth-footer">
+								<p>{__('© 2024 تابش. تمامی حقوق محفوظ است.', 'tabesh-v2')}</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	if (template === 'banner-right') {
+		return (
+			<div className={getWrapperClass()} style={getWrapperStyle()}>
+				<div className="tabesh-auth-split-layout">
+					<div className="tabesh-auth-form-side">
+						<div className="tabesh-auth-container">
+							{renderAuthCard()}
+							<div className="tabesh-auth-footer">
+								<p>{__('© 2024 تابش. تمامی حقوق محفوظ است.', 'tabesh-v2')}</p>
+							</div>
+						</div>
+					</div>
+					<div className="tabesh-auth-banner-side right">
+						{renderBannerPanel()}
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	// Default minimal template
+	return (
+		<div className={getWrapperClass()} style={getWrapperStyle()}>
+			<div className="tabesh-auth-container">
+				{renderAuthCard()}
 
 				{/* Footer */}
 				<div className="tabesh-auth-footer">
