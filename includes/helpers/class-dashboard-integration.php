@@ -108,7 +108,7 @@ class Dashboard_Integration {
 			$action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
 			
 			// Allow certain actions that need wp-login.php.
-			$allowed_actions = array( 'logout', 'postpass', 'rp', 'resetpass', 'lostpassword' );
+			$allowed_actions = array( 'logout', 'postpass', 'rp', 'resetpass', 'lostpassword', 'retrievepassword' );
 			
 			if ( ! in_array( $action, $allowed_actions, true ) ) {
 				wp_safe_redirect( $this->get_panel_url() );
@@ -120,6 +120,19 @@ class Dashboard_Integration {
 		if ( 'wp-register.php' === $pagenow ) {
 			wp_safe_redirect( $this->get_panel_url() );
 			exit;
+		}
+		
+		// Redirect non-admin users trying to access wp-admin.
+		if ( is_admin() && ! current_user_can( 'manage_options' ) && ! wp_doing_ajax() ) {
+			// Don't redirect if user is doing specific admin tasks.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$allowed_pages = array( 'profile.php', 'user-edit.php', 'admin-ajax.php' );
+			$current_page = isset( $_SERVER['SCRIPT_NAME'] ) ? basename( sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) ) : '';
+			
+			if ( ! in_array( $current_page, $allowed_pages, true ) ) {
+				wp_safe_redirect( $this->get_panel_url() );
+				exit;
+			}
 		}
 	}
 
@@ -234,21 +247,54 @@ class Dashboard_Integration {
 			return;
 		}
 		
+		// Get settings.
+		$settings = get_option( 'tabesh_v2_settings', array() );
+		$auth_settings = $settings['auth'] ?? array();
+		$replace_wc = ! empty( $auth_settings['replace_woocommerce'] );
+		
 		// Redirect my-account page for non-logged-in users.
 		if ( is_account_page() && ! is_user_logged_in() ) {
 			wp_safe_redirect( $this->get_panel_url() );
 			exit;
 		}
 		
-		// For logged-in non-admin users, redirect main my-account to custom panel.
-		if ( is_account_page() && is_user_logged_in() && ! current_user_can( 'manage_options' ) ) {
-			// Only redirect main account page, not endpoints like orders, downloads, etc.
-			if ( ! is_wc_endpoint_url() ) {
-				$settings = get_option( 'tabesh_v2_settings', array() );
-				$auth_settings = $settings['auth'] ?? array();
+		// For logged-in non-admin users, redirect WooCommerce account pages if replacement is enabled.
+		if ( is_account_page() && is_user_logged_in() && ! current_user_can( 'manage_options' ) && $replace_wc ) {
+			// List of WooCommerce endpoints to redirect.
+			$wc_endpoints = array(
+				'orders',
+				'view-order',
+				'downloads',
+				'edit-address',
+				'edit-account',
+				'customer-logout',
+				'payment-methods',
+				'lost-password',
+				'add-payment-method',
+			);
+			
+			// Check if we're on any WooCommerce endpoint or main account page.
+			$is_wc_endpoint = false;
+			foreach ( $wc_endpoints as $endpoint ) {
+				if ( is_wc_endpoint_url( $endpoint ) ) {
+					$is_wc_endpoint = true;
+					break;
+				}
+			}
+			
+			// Redirect main account page or specific endpoints.
+			if ( ! $is_wc_endpoint || is_account_page() ) {
+				// Check if this is the main my-account page.
+				global $wp;
+				$current_url = home_url( $wp->request );
+				$account_page_url = wc_get_page_permalink( 'myaccount' );
 				
-				// Only redirect if WooCommerce replacement is enabled.
-				if ( ! empty( $auth_settings['replace_woocommerce'] ) ) {
+				// Remove trailing slashes for comparison.
+				$current_url = untrailingslashit( $current_url );
+				$account_page_url = untrailingslashit( $account_page_url );
+				
+				// Only redirect if on main account page or dashboard endpoint.
+				if ( $current_url === $account_page_url || is_wc_endpoint_url( 'dashboard' ) || ( is_account_page() && ! $is_wc_endpoint ) ) {
 					wp_safe_redirect( $this->get_panel_url() );
 					exit;
 				}
