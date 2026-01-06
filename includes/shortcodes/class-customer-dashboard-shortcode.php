@@ -312,18 +312,44 @@ class Customer_Dashboard_Shortcode {
 					'isRTL'        => is_rtl(),
 					'dashboardUrl' => $dashboard_url,
 					'settings'     => array(
-						'brandTitle'         => $auth_settings['brandTitle'] ?? __( 'ورود به داشبورد', 'tabesh-v2' ),
-						'brandSubtitle'      => $auth_settings['brandSubtitle'] ?? __( 'سیستم مدیریت چاپ تابش', 'tabesh-v2' ),
-						'logoUrl'            => $auth_settings['logoUrl'] ?? '',
-						'otpLength'          => $auth_settings['otp_length'] ?? 5,
-						'requireName'        => $auth_settings['require_name'] ?? true,
-						'allowCorporate'     => $auth_settings['allow_corporate'] ?? true,
-						// Template settings
-						'template'           => $auth_settings['template'] ?? 'minimal',
-						'desktopBannerUrl'   => $auth_settings['desktopBannerUrl'] ?? '',
-						'backgroundImageUrl' => $auth_settings['backgroundImageUrl'] ?? '',
-						'animationEnabled'   => $auth_settings['animationEnabled'] ?? true,
-						'formAnimation'      => $auth_settings['formAnimation'] ?? 'slideUp',
+						// Branding
+						'brandTitle'              => $auth_settings['brandTitle'] ?? __( 'ورود به داشبورد', 'tabesh-v2' ),
+						'brandSubtitle'           => $auth_settings['brandSubtitle'] ?? __( 'سیستم مدیریت چاپ تابش', 'tabesh-v2' ),
+						'logoUrl'                 => $auth_settings['logoUrl'] ?? '',
+						
+						// OTP Settings
+						'otpLength'               => $auth_settings['otp_length'] ?? 5,
+						'requireName'             => $auth_settings['require_name'] ?? true,
+						'allowCorporate'          => $auth_settings['allow_corporate'] ?? true,
+						
+						// Template (minimal, split, fullBg, gradient)
+						'template'                => $auth_settings['template'] ?? 'minimal',
+						
+						// Desktop Banner/Slider settings (for split template)
+						'desktopBannerEnabled'    => $auth_settings['desktopBannerEnabled'] ?? false,
+						'desktopBannerUrl'        => $auth_settings['desktopBannerUrl'] ?? '',
+						'desktopBannerPosition'   => $auth_settings['desktopBannerPosition'] ?? 'left',
+						'desktopSliderShortcode'  => $auth_settings['desktopSliderShortcode'] ?? '',
+						
+						// Background settings
+						'backgroundType'          => $auth_settings['backgroundType'] ?? 'gradient',
+						'backgroundImageUrl'      => $auth_settings['backgroundImageUrl'] ?? '',
+						'backgroundOverlayOpacity'=> $auth_settings['backgroundOverlayOpacity'] ?? 0.5,
+						
+						// Animation settings
+						'animationEnabled'        => $auth_settings['animationEnabled'] ?? true,
+						'formAnimation'           => $auth_settings['formAnimation'] ?? 'slideUp',
+						'transitionAnimation'     => $auth_settings['transitionAnimation'] ?? 'flip',
+						
+						// Glassmorphism settings (for fullBg template)
+						'glassEffect'             => $auth_settings['glassEffect'] ?? true,
+						'glassBlur'               => $auth_settings['glassBlur'] ?? 20,
+						'glassOpacity'            => $auth_settings['glassOpacity'] ?? 0.95,
+						
+						// Appearance colors
+						'primaryColor'            => $auth_settings['primaryColor'] ?? '#4f46e5',
+						'backgroundColorStart'    => $auth_settings['backgroundColor'] ?? '#667eea',
+						'backgroundColorEnd'      => $auth_settings['secondaryBackgroundColor'] ?? '#764ba2',
 					),
 				)
 			);
