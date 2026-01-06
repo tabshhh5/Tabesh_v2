@@ -201,15 +201,7 @@ class Auth_Handler {
 		$is_corporate = $user_data['is_corporate'] ?? false;
 		$company_name = $user_data['company_name'] ?? '';
 
-		// Set display name based on user type.
-		if ( $is_corporate && ! empty( $company_name ) ) {
-			// For corporate users: Company Name + Last Name.
-			$display_name = trim( $company_name . ' ' . $last_name );
-		} else {
-			// For personal users: First Name + Last Name.
-			$display_name = trim( $first_name . ' ' . $last_name );
-		}
-		
+		$display_name = trim( $first_name . ' ' . $last_name );
 		if ( empty( $display_name ) ) {
 			$display_name = $mobile;
 		}

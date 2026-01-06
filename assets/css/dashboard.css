@@ -1,28 +1,7 @@
 /**
  * Tabesh User Dashboard Frontend Styles.
- * Modern, minimal authentication forms with clean design
+ * Modern, clean authentication forms with full-page layout
  */
-
-/* CSS Custom Properties */
-:root {
-	--tabesh-bg-primary: #f5f7fa;
-	--tabesh-bg-secondary: #c3cfe2;
-	--tabesh-bg-white: #ffffff;
-	--tabesh-border-light: #e5e7eb;
-	--tabesh-border-medium: #d1d5db;
-	--tabesh-border-dark: #9ca3af;
-	--tabesh-text-dark: #111827;
-	--tabesh-text-medium: #374151;
-	--tabesh-text-light: #6b7280;
-	--tabesh-primary: #3b82f6;
-	--tabesh-primary-dark: #2563eb;
-	--tabesh-success: #10b981;
-	--tabesh-success-light: #f0fdf4;
-	--tabesh-error: #ef4444;
-	--tabesh-error-light: #fef2f2;
-	--tabesh-info: #3b82f6;
-	--tabesh-info-light: #eff6ff;
-}
 
 /* Authentication Container - Full Page Layout */
 .tabesh-auth-container {
@@ -30,7 +9,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: linear-gradient(135deg, var(--tabesh-bg-primary) 0%, var(--tabesh-bg-secondary) 100%);
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 	padding: 20px;
 	direction: rtl;
 	position: relative;
@@ -46,30 +25,31 @@
 	right: 0;
 	bottom: 0;
 	background: 
-		radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
-		radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.3) 0%, transparent 50%);
+		radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+		radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
 	pointer-events: none;
 }
 
 .tabesh-auth-form {
-	background: var(--tabesh-bg-white);
-	border: 1px solid var(--tabesh-border-light);
-	border-radius: 16px;
+	background: rgba(255, 255, 255, 0.98);
+	backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 24px;
 	padding: 48px 40px;
 	box-shadow: 
-		0 10px 40px rgba(0, 0, 0, 0.08),
-		0 2px 8px rgba(0, 0, 0, 0.04);
+		0 20px 60px rgba(0, 0, 0, 0.3),
+		0 4px 16px rgba(0, 0, 0, 0.15);
 	max-width: 440px;
 	width: 100%;
 	position: relative;
 	z-index: 1;
-	animation: slideUp 0.4s ease-out;
+	animation: slideUp 0.5s ease-out;
 }
 
 @keyframes slideUp {
 	from {
 		opacity: 0;
-		transform: translateY(20px);
+		transform: translateY(30px);
 	}
 	to {
 		opacity: 1;
@@ -79,188 +59,75 @@
 
 .tabesh-auth-form h2 {
 	margin-top: 0;
-	margin-bottom: 8px;
+	margin-bottom: 12px;
 	text-align: center;
-	color: var(--tabesh-text-dark);
-	font-size: 28px;
+	color: #1e293b;
+	font-size: 32px;
 	font-weight: 700;
 	letter-spacing: -0.5px;
 }
 
 .tabesh-auth-form .description {
 	text-align: center;
-	color: var(--tabesh-text-light);
+	color: #64748b;
 	margin-bottom: 32px;
-	font-size: 14px;
-	line-height: 1.5;
+	font-size: 15px;
+	line-height: 1.6;
 	font-weight: 400;
 }
 
 .tabesh-auth-form .form-group {
-	margin-bottom: 20px;
+	margin-bottom: 24px;
 }
 
 .tabesh-auth-form .form-group label {
 	display: block;
-	margin-bottom: 8px;
+	margin-bottom: 10px;
 	font-weight: 600;
-	color: var(--tabesh-text-medium);
+	color: #334155;
 	font-size: 14px;
+	letter-spacing: 0.2px;
 }
 
 .tabesh-auth-form .form-group input[type="text"],
 .tabesh-auth-form .form-group input[type="password"] {
 	width: 100%;
-	padding: 12px 16px;
-	border: 1.5px solid var(--tabesh-border-medium);
-	border-radius: 8px;
+	padding: 14px 18px;
+	border: 2px solid #e2e8f0;
+	border-radius: 12px;
 	font-size: 15px;
-	transition: all 0.2s ease;
-	background: var(--tabesh-bg-white);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	background: #fff;
 	box-sizing: border-box;
 	font-family: inherit;
-	color: var(--tabesh-text-dark);
 }
 
 .tabesh-auth-form .form-group input[type="text"]:hover,
 .tabesh-auth-form .form-group input[type="password"]:hover {
-	border-color: var(--tabesh-border-dark);
+	border-color: #cbd5e1;
 }
 
 .tabesh-auth-form .form-group input[type="text"]:focus,
 .tabesh-auth-form .form-group input[type="password"]:focus {
 	outline: none;
-	border-color: var(--tabesh-primary);
-	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* Segmented OTP Input Boxes */
-.otp-inputs {
-	display: flex;
-	gap: 12px;
-	justify-content: center;
-	margin: 16px 0;
-}
-
-.otp-input {
-	width: 56px;
-	height: 56px;
-	text-align: center;
-	font-size: 24px;
-	font-weight: 600;
-	border: 2px solid var(--tabesh-border-medium);
-	border-radius: 12px;
-	transition: all 0.2s ease;
-	background: var(--tabesh-bg-white);
-	color: var(--tabesh-text-dark);
-	caret-color: var(--tabesh-primary);
-}
-
-.otp-input:hover {
-	border-color: var(--tabesh-border-dark);
-}
-
-.otp-input:focus {
-	outline: none;
-	border-color: var(--tabesh-primary);
-	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-	transform: scale(1.05);
-}
-
-/* OTP Input States */
-#otp-inputs-container.verifying .otp-input {
-	border-color: var(--tabesh-primary);
-	animation: pulse 1s ease-in-out infinite;
-}
-
-@keyframes pulse {
-	0%, 100% {
-		opacity: 1;
-	}
-	50% {
-		opacity: 0.6;
-	}
-}
-
-/* Disable animations for users with motion sensitivity */
-@media (prefers-reduced-motion: reduce) {
-	#otp-inputs-container.verifying .otp-input {
-		animation: none;
-		opacity: 0.8;
-	}
-	
-	#otp-inputs-container.success .otp-input,
-	#otp-inputs-container.error .otp-input {
-		animation: none;
-	}
-	
-	.tabesh-auth-form,
-	#tabesh-auth-message,
-	.tabesh-auth-form .info-message {
-		animation: none;
-	}
-	
-	#tabesh-auth-loading .tabesh-spinner {
-		animation: none;
-		border-color: var(--tabesh-primary);
-	}
-}
-
-#otp-inputs-container.success .otp-input {
-	border-color: var(--tabesh-success);
-	background: var(--tabesh-success-light);
-	color: var(--tabesh-success);
-	animation: successPop 0.3s ease-out;
-}
-
-@keyframes successPop {
-	0% {
-		transform: scale(1);
-	}
-	50% {
-		transform: scale(1.1);
-	}
-	100% {
-		transform: scale(1);
-	}
-}
-
-#otp-inputs-container.error .otp-input {
-	border-color: var(--tabesh-error);
-	background: var(--tabesh-error-light);
-	animation: shake 0.5s ease-out;
-}
-
-@keyframes shake {
-	0%, 100% {
-		transform: translateX(0);
-	}
-	25% {
-		transform: translateX(-8px);
-	}
-	75% {
-		transform: translateX(8px);
-	}
-}
-
-.otp-hint {
-	text-align: center;
-	color: var(--tabesh-text-light);
-	font-size: 12px;
-	margin-top: 8px;
-	font-style: italic;
+	border-color: #667eea;
+	box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+	transform: translateY(-1px);
 }
 
 .tabesh-auth-form .info-message {
-	background: #eff6ff;
-	border: 1px solid #bfdbfe;
-	border-right: 3px solid #3b82f6;
-	padding: 12px 16px;
-	border-radius: 8px;
-	margin-bottom: 20px;
-	color: #1e40af;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+	border: 1px solid #bae6fd;
+	border-right: 4px solid #0284c7;
+	padding: 16px 18px;
+	border-radius: 12px;
+	margin-bottom: 24px;
+	color: #075985;
 	font-size: 14px;
-	line-height: 1.5;
+	line-height: 1.6;
 	animation: fadeIn 0.3s ease-out;
 }
 
@@ -273,97 +140,112 @@
 	}
 }
 
+.tabesh-auth-form .info-message .dashicons {
+	color: #0284c7;
+	font-size: 22px;
+	width: 22px;
+	height: 22px;
+	flex-shrink: 0;
+}
+
 .tabesh-auth-form .checkbox-label {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 12px;
 	cursor: pointer;
-	padding: 10px 12px;
-	background: #f9fafb;
-	border: 1.5px solid transparent;
-	border-radius: 8px;
+	padding: 12px;
+	background: #f8fafc;
+	border: 2px solid transparent;
+	border-radius: 10px;
 	transition: all 0.2s ease;
 	user-select: none;
 }
 
 .tabesh-auth-form .checkbox-label:hover {
-	background: #f3f4f6;
-	border-color: #d1d5db;
+	background: #f1f5f9;
+	border-color: #e2e8f0;
 }
 
 .tabesh-auth-form .checkbox-label input[type="checkbox"] {
-	width: 18px;
-	height: 18px;
+	width: 20px;
+	height: 20px;
 	cursor: pointer;
 	margin: 0;
-	accent-color: #3b82f6;
-}
-
-.tabesh-auth-form .checkbox-label span {
-	color: #374151;
-	font-size: 14px;
-	font-weight: 500;
+	accent-color: #667eea;
 }
 
 .tabesh-auth-form .button {
 	width: 100%;
-	padding: 14px 24px;
+	padding: 16px 24px;
 	border: none;
-	border-radius: 8px;
-	font-size: 15px;
+	border-radius: 12px;
+	font-size: 16px;
 	font-weight: 600;
 	cursor: pointer;
-	transition: all 0.2s ease;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 8px;
+	gap: 10px;
 	box-sizing: border-box;
 	font-family: inherit;
+	letter-spacing: 0.3px;
 }
 
 .tabesh-auth-form .button:disabled {
-	opacity: 0.5;
+	opacity: 0.6;
 	cursor: not-allowed;
 	transform: none !important;
 }
 
 .tabesh-auth-form .button-primary {
-	background: #3b82f6;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 	color: #fff;
-	box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
-	margin-bottom: 10px;
+	box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4);
+	margin-bottom: 12px;
 }
 
 .tabesh-auth-form .button-primary:hover:not(:disabled) {
-	background: #2563eb;
-	box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
-	transform: translateY(-1px);
+	transform: translateY(-2px);
+	box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
 }
 
 .tabesh-auth-form .button-primary:active:not(:disabled) {
 	transform: translateY(0);
-	box-shadow: 0 1px 4px rgba(59, 130, 246, 0.2);
+	box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .tabesh-auth-form .button-secondary {
 	background: #fff;
-	color: #6b7280;
-	border: 1.5px solid #d1d5db;
+	color: #64748b;
+	border: 2px solid #e2e8f0;
 }
 
 .tabesh-auth-form .button-secondary:hover:not(:disabled) {
-	background: #f9fafb;
-	border-color: #9ca3af;
-	color: #374151;
+	background: #f8fafc;
+	border-color: #cbd5e1;
+	color: #475569;
+	transform: translateY(-1px);
+}
+
+.tabesh-auth-form .button .dashicons {
+	font-size: 20px;
+	width: 20px;
+	height: 20px;
+}
+
+.tabesh-auth-form .button-group {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
 }
 
 #tabesh-auth-message {
-	margin-top: 20px;
-	padding: 12px 16px;
-	border-radius: 8px;
+	margin-top: 24px;
+	padding: 14px 18px;
+	border-radius: 12px;
 	font-size: 14px;
-	line-height: 1.5;
+	line-height: 1.6;
 	display: none;
 	animation: slideIn 0.3s ease-out;
 }
@@ -380,41 +262,41 @@
 }
 
 #tabesh-auth-message.success {
-	background: #f0fdf4;
+	background: linear-gradient(135deg, #dcfce7 0%, #d1fae5 100%);
 	border: 1px solid #bbf7d0;
-	border-right: 3px solid #10b981;
+	border-right: 4px solid #10b981;
 	color: #166534;
 }
 
 #tabesh-auth-message.error {
-	background: #fef2f2;
+	background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
 	border: 1px solid #fecaca;
-	border-right: 3px solid #ef4444;
+	border-right: 4px solid #ef4444;
 	color: #991b1b;
 }
 
 #tabesh-auth-message.info {
-	background: #eff6ff;
-	border: 1px solid #bfdbfe;
-	border-right: 3px solid #3b82f6;
-	color: #1e40af;
+	background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+	border: 1px solid #bae6fd;
+	border-right: 4px solid #0284c7;
+	color: #075985;
 }
 
 #tabesh-auth-loading {
 	text-align: center;
-	padding: 24px;
+	padding: 32px;
 	animation: fadeIn 0.3s ease-out;
 }
 
 #tabesh-auth-loading .tabesh-spinner {
 	display: inline-block;
-	width: 40px;
-	height: 40px;
-	border: 3px solid rgba(59, 130, 246, 0.2);
-	border-top-color: #3b82f6;
+	width: 48px;
+	height: 48px;
+	border: 4px solid rgba(102, 126, 234, 0.2);
+	border-top-color: #667eea;
 	border-radius: 50%;
 	animation: spin 0.8s linear infinite;
-	margin-bottom: 12px;
+	margin-bottom: 16px;
 }
 
 @keyframes spin {
@@ -424,10 +306,44 @@
 }
 
 #tabesh-auth-loading p {
-	color: #6b7280;
+	color: #64748b;
 	margin: 0;
 	font-size: 14px;
 	font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+	.tabesh-auth-container {
+		padding: 16px;
+	}
+	
+	.tabesh-auth-form {
+		padding: 32px 24px;
+	}
+	
+	.tabesh-auth-form h2 {
+		font-size: 26px;
+	}
+	
+	.tabesh-auth-form .description {
+		font-size: 14px;
+	}
+	
+	.tabesh-auth-form .button {
+		padding: 14px 20px;
+		font-size: 15px;
+	}
+}
+
+@media (max-width: 400px) {
+	.tabesh-auth-form {
+		padding: 24px 20px;
+	}
+	
+	.tabesh-auth-form h2 {
+		font-size: 24px;
+	}
 }
 
 /* Messages */
@@ -452,18 +368,18 @@
 
 .dashboard-menu-item {
 	background: #fff;
-	border: 1px solid #e5e7eb;
+	border: 1px solid #ddd;
 	border-radius: 8px;
 	padding: 20px;
 	text-align: center;
 	text-decoration: none;
-	color: #111827;
-	transition: all 0.2s ease;
+	color: #333;
+	transition: all 0.3s ease;
 }
 
 .dashboard-menu-item:hover {
-	border-color: #3b82f6;
-	box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+	border-color: #0073aa;
+	box-shadow: 0 2px 8px rgba(0, 115, 170, 0.2);
 	transform: translateY(-2px);
 }
 
@@ -471,7 +387,6 @@
 	font-size: 32px;
 	display: block;
 	margin-bottom: 10px;
-	color: #3b82f6;
 }
 
 .dashboard-menu-item .label {
@@ -482,70 +397,70 @@
 
 .dashboard-content {
 	background: #fff;
-	border: 1px solid #e5e7eb;
+	border: 1px solid #ddd;
 	border-radius: 8px;
 	padding: 30px;
 	margin-top: 30px;
 }
 
-/* Responsive Design */
-@media (max-width: 600px) {
-	.tabesh-auth-container {
-		padding: 16px;
-	}
-	
-	.tabesh-auth-form {
-		padding: 32px 24px;
-	}
-	
-	.tabesh-auth-form h2 {
-		font-size: 24px;
-	}
-	
-	.tabesh-auth-form .description {
-		font-size: 13px;
-	}
-	
-	.tabesh-auth-form .button {
-		padding: 12px 20px;
-		font-size: 14px;
-	}
-	
-	.otp-inputs {
-		gap: 8px;
-	}
-	
-	.otp-input {
-		width: 48px;
-		height: 48px;
-		font-size: 20px;
-	}
+/* Menu items management in admin */
+.menu-items-list {
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background: #fafafa;
 }
 
-@media (max-width: 400px) {
-	.tabesh-auth-form {
-		padding: 24px 20px;
-	}
-	
-	.tabesh-auth-form h2 {
-		font-size: 22px;
-	}
-	
-	.otp-inputs {
-		gap: 6px;
-	}
-	
-	.otp-input {
-		width: 44px;
-		height: 44px;
-		font-size: 18px;
-	}
+.menu-item-row {
+	display: grid;
+	grid-template-columns: 40px 1fr 1fr 100px;
+	gap: 10px;
+	align-items: center;
+	padding: 15px;
+	background: #fff;
+	border-bottom: 1px solid #ddd;
 }
 
+.menu-item-row:last-child {
+	border-bottom: none;
+}
+
+.menu-item-handle {
+	cursor: move;
+	font-size: 20px;
+	color: #999;
+	text-align: center;
+}
+
+.menu-item-row input[type="text"] {
+	padding: 8px 12px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+.menu-item-row label {
+	margin: 0;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
+	.tabesh-auth-container {
+		margin: 20px;
+	}
+
 	.dashboard-menu {
 		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
 		gap: 15px;
 	}
-}
 
+	.menu-item-row {
+		grid-template-columns: 1fr;
+		gap: 10px;
+	}
+
+	.menu-item-handle {
+		display: none;
+	}
+}
