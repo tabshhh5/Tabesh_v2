@@ -8,6 +8,7 @@ import './auth-form.scss';
  * Modern Authentication Form Component.
  * 
  * Handles both login and registration with OTP verification.
+ * Supports customization via admin settings.
  */
 const AuthForm = () => {
 	const [step, setStep] = useState('mobile'); // 'mobile', 'otp', 'register'
@@ -22,6 +23,15 @@ const AuthForm = () => {
 	const [lastName, setLastName] = useState('');
 	const [isCorporate, setIsCorporate] = useState(false);
 	const [companyName, setCompanyName] = useState('');
+
+	// Get settings from localized script
+	const authSettings = window.tabeshAuth?.settings || {};
+	const brandTitle = authSettings.brandTitle || __('ورود به داشبورد', 'tabesh-v2');
+	const brandSubtitle = authSettings.brandSubtitle || __('سیستم مدیریت چاپ تابش', 'tabesh-v2');
+	const logoUrl = authSettings.logoUrl || '';
+	const otpLength = authSettings.otpLength || 5;
+	const requireName = authSettings.requireName !== false;
+	const allowCorporate = authSettings.allowCorporate !== false;
 
 	/**
 	 * Handle mobile number submission.
@@ -164,8 +174,50 @@ const AuthForm = () => {
 			return;
 		}
 
-		// Re-verify OTP with user data
-		await handleOtpVerification(otp);
+		setLoading(true);
+		setMessage({ text: '', type: '' });
+
+		// Send registration data with stored OTP (token preserved from initial verification)
+		try {
+			const response = await apiFetch({
+				path: '/tabesh/v2/auth/verify-otp',
+				method: 'POST',
+				data: {
+					mobile,
+					code: otp,
+					first_name: firstName,
+					last_name: lastName,
+					is_corporate: isCorporate,
+					company_name: isCorporate ? companyName : ''
+				}
+			});
+
+			if (response.success) {
+				setMessage({
+					text: response.message,
+					type: 'success'
+				});
+				
+				// Redirect to dashboard
+				setTimeout(() => {
+					const dashboardUrl = window.tabeshAuth?.dashboardUrl || '/panel';
+					window.location.href = dashboardUrl;
+				}, 1000);
+			} else {
+				setMessage({
+					text: response.message,
+					type: 'error'
+				});
+			}
+		} catch (error) {
+			setMessage({
+				text: __('خطا در ثبت‌نام. لطفاً دوباره تلاش کنید.', 'tabesh-v2'),
+				type: 'error'
+			});
+			console.error('Error during registration:', error);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	/**
@@ -195,13 +247,19 @@ const AuthForm = () => {
 				<div className="tabesh-auth-card">
 					{/* Logo/Brand */}
 					<div className="tabesh-auth-brand">
-						<div className="tabesh-auth-logo">
-							<svg viewBox="0 0 24 24" fill="currentColor">
-								<path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-							</svg>
-						</div>
-						<h1>{__('ورود به داشبورد', 'tabesh-v2')}</h1>
-						<p>{__('سیستم مدیریت چاپ تابش', 'tabesh-v2')}</p>
+						{logoUrl ? (
+							<div className="tabesh-auth-logo custom-logo">
+								<img src={logoUrl} alt={brandTitle} />
+							</div>
+						) : (
+							<div className="tabesh-auth-logo">
+								<svg viewBox="0 0 24 24" fill="currentColor">
+									<path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+								</svg>
+							</div>
+						)}
+						<h1>{brandTitle}</h1>
+						<p>{brandSubtitle}</p>
 					</div>
 
 					{/* Step 1: Mobile Input */}
@@ -261,9 +319,9 @@ const AuthForm = () => {
 							</div>
 
 							<div className="tabesh-form-group">
-								<label>{__('کد تأیید 5 رقمی', 'tabesh-v2')}</label>
+								<label>{__('کد تأیید', 'tabesh-v2')} {otpLength} {__('رقمی', 'tabesh-v2')}</label>
 								<OTPInput
-									length={5}
+									length={otpLength}
 									value={otp}
 									onChange={setOtp}
 									onComplete={handleOtpVerification}
@@ -318,19 +376,21 @@ const AuthForm = () => {
 								/>
 							</div>
 
-							<div className="tabesh-form-group">
-								<label className="tabesh-checkbox-label">
-									<input
-										type="checkbox"
-										checked={isCorporate}
-										onChange={(e) => setIsCorporate(e.target.checked)}
-										disabled={loading}
-									/>
-									<span>{__('شخص حقوقی', 'tabesh-v2')}</span>
-								</label>
-							</div>
+							{allowCorporate && (
+								<div className="tabesh-form-group">
+									<label className="tabesh-checkbox-label">
+										<input
+											type="checkbox"
+											checked={isCorporate}
+											onChange={(e) => setIsCorporate(e.target.checked)}
+											disabled={loading}
+										/>
+										<span>{__('شخص حقوقی', 'tabesh-v2')}</span>
+									</label>
+								</div>
+							)}
 
-							{isCorporate && (
+							{isCorporate && allowCorporate && (
 								<div className="tabesh-form-group fade-in">
 									<label htmlFor="company-name">
 										{__('نام سازمان', 'tabesh-v2')}

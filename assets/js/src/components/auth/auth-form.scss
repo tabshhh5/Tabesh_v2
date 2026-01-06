@@ -1,9 +1,10 @@
 /**
  * Modern Authentication Form Styles
  * Clean, minimal design with smooth animations
+ * Supports fullscreen layout and custom theming
  */
 
-/* CSS Variables */
+/* CSS Variables with fallback defaults */
 :root {
 	--tabesh-primary: #4f46e5;
 	--tabesh-primary-hover: #4338ca;
@@ -28,19 +29,41 @@
 	--tabesh-radius: 12px;
 	--tabesh-radius-lg: 16px;
 	--tabesh-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	
+	/* Customizable via admin settings */
+	--tabesh-auth-bg-start: #667eea;
+	--tabesh-auth-bg-end: #764ba2;
+	--tabesh-auth-card-width: 480px;
+	--tabesh-auth-card-padding: 48px;
+	--tabesh-auth-border-radius: 16px;
+}
+
+/* Fullscreen container for auth pages */
+.tabesh-auth-fullscreen {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100vw;
+	height: 100vh;
+	z-index: 999999;
+	overflow: auto;
 }
 
 /* Wrapper - Full page layout */
 .tabesh-auth-wrapper {
 	min-height: 100vh;
+	width: 100%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	background: linear-gradient(135deg, var(--tabesh-auth-bg-start) 0%, var(--tabesh-auth-bg-end) 100%);
 	padding: 1.5rem;
 	direction: rtl;
 	position: relative;
 	overflow: hidden;
+	box-sizing: border-box;
 
 	/* Animated background shapes */
 	&::before,
@@ -80,7 +103,7 @@
 
 /* Main container */
 .tabesh-auth-container {
-	max-width: 480px;
+	max-width: var(--tabesh-auth-card-width);
 	width: 100%;
 	position: relative;
 	z-index: 1;
@@ -89,8 +112,8 @@
 /* Auth card */
 .tabesh-auth-card {
 	background: var(--tabesh-white);
-	border-radius: var(--tabesh-radius-lg);
-	padding: 3rem 2.5rem;
+	border-radius: var(--tabesh-auth-border-radius);
+	padding: var(--tabesh-auth-card-padding);
 	box-shadow: var(--tabesh-shadow-xl);
 	backdrop-filter: blur(10px);
 	animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -128,6 +151,24 @@
 			height: 36px;
 			color: var(--tabesh-white);
 		}
+
+		&.custom-logo {
+			background: transparent;
+			box-shadow: none;
+			width: auto;
+			height: auto;
+			max-width: 200px;
+			max-height: 80px;
+			border-radius: 0;
+
+			img {
+				max-width: 100%;
+				max-height: 80px;
+				width: auto;
+				height: auto;
+				object-fit: contain;
+			}
+		}
 	}
 
 	h1 {
@@ -162,11 +203,11 @@
 
 /* Form group */
 .tabesh-form-group {
-	margin-bottom: 1.5rem;
+	margin-bottom: 1.25rem;
 
 	label {
 		display: block;
-		margin-bottom: 0.5rem;
+		margin-bottom: 0.625rem;
 		font-size: 0.95rem;
 		font-weight: 600;
 		color: var(--tabesh-text-medium);
@@ -177,11 +218,16 @@
 		}
 	}
 
-	/* Additional spacing for registration form fields */
-	&#first-name,
-	&#last-name,
-	&#company-name {
-		margin-bottom: 1.5rem;
+	/* Consistent spacing for all form groups */
+	&:last-of-type {
+		margin-bottom: 0;
+	}
+}
+
+/* Registration form specific styles */
+.tabesh-auth-form {
+	.tabesh-form-group + .tabesh-form-group {
+		margin-top: 1rem;
 	}
 }
 
@@ -219,12 +265,14 @@
 	}
 }
 
-/* OTP Input Container */
+/* OTP Input Container - LTR direction for proper digit filling */
 .tabesh-otp-container {
 	display: flex;
+	flex-direction: row;
 	gap: 0.75rem;
 	justify-content: center;
 	margin: 1rem 0;
+	direction: ltr;
 }
 
 .tabesh-otp-input {

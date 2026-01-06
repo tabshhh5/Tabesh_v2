@@ -748,8 +748,10 @@ class Rest_Api {
 				'require_name'       => ! empty( $settings['auth']['require_name'] ),
 				'allow_corporate'    => ! empty( $settings['auth']['allow_corporate'] ),
 				'auto_create_user'   => ! empty( $settings['auth']['auto_create_user'] ),
-				'auto_submit_otp'    => ! empty( $settings['auth']['autoSubmitOtp'] ),
+				'autoSubmitOtp'      => ! empty( $settings['auth']['autoSubmitOtp'] ),
 				'min_mobile_length'  => absint( $settings['auth']['min_mobile_length'] ?? 11 ),
+				// Template settings
+				'template'                    => sanitize_text_field( $settings['auth']['template'] ?? 'minimal' ),
 				// Appearance settings
 				'primaryColor'                => sanitize_hex_color( $settings['auth']['primaryColor'] ?? '#4f46e5' ),
 				'backgroundColor'             => sanitize_hex_color( $settings['auth']['backgroundColor'] ?? '#667eea' ),
@@ -761,6 +763,16 @@ class Rest_Api {
 				'cardWidth'                   => absint( $settings['auth']['cardWidth'] ?? 480 ),
 				'cardPadding'                 => absint( $settings['auth']['cardPadding'] ?? 48 ),
 				'borderRadius'                => absint( $settings['auth']['borderRadius'] ?? 16 ),
+				// Desktop banner/slider settings
+				'desktopBannerEnabled'        => ! empty( $settings['auth']['desktopBannerEnabled'] ),
+				'desktopBannerUrl'            => esc_url_raw( $settings['auth']['desktopBannerUrl'] ?? '' ),
+				'desktopBannerPosition'       => sanitize_text_field( $settings['auth']['desktopBannerPosition'] ?? 'left' ),
+				// Background settings
+				'backgroundType'              => sanitize_text_field( $settings['auth']['backgroundType'] ?? 'gradient' ),
+				'backgroundImageUrl'          => esc_url_raw( $settings['auth']['backgroundImageUrl'] ?? '' ),
+				// Animation settings
+				'animationEnabled'            => $settings['auth']['animationEnabled'] !== false,
+				'formAnimation'               => sanitize_text_field( $settings['auth']['formAnimation'] ?? 'slideUp' ),
 			);
 
 			// Sanitize melipayamak sub-settings.

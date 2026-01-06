@@ -20,6 +20,52 @@ class Customer_Dashboard_Shortcode {
 	public function __construct() {
 		add_shortcode( 'tabesh_customer_dashboard', array( $this, 'render_dashboard' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_dashboard_assets' ) );
+		add_filter( 'template_include', array( $this, 'maybe_use_blank_template' ) );
+	}
+
+	/**
+	 * Maybe use blank template for login/auth pages.
+	 *
+	 * @param string $template Current template path.
+	 * @return string Template path.
+	 */
+	public function maybe_use_blank_template( $template ) {
+		// Only apply to dashboard page when user is not logged in
+		if ( ! is_user_logged_in() && $this->is_dashboard_page() ) {
+			$blank_template = TABESH_V2_PLUGIN_DIR . 'templates/dashboard-blank.php';
+			if ( file_exists( $blank_template ) ) {
+				return $blank_template;
+			}
+		}
+		return $template;
+	}
+
+	/**
+	 * Check if current page is the dashboard page.
+	 *
+	 * @return bool
+	 */
+	private function is_dashboard_page() {
+		global $post;
+		
+		if ( ! is_singular( 'page' ) || ! $post ) {
+			return false;
+		}
+
+		// Check if this page contains the shortcode
+		if ( has_shortcode( $post->post_content, 'tabesh_customer_dashboard' ) ) {
+			return true;
+		}
+
+		// Also check settings for dashboard page ID
+		$settings = get_option( 'tabesh_v2_settings', array() );
+		$dashboard_page_id = $settings['user_dashboard']['dashboard_page_id'] ?? 0;
+		
+		if ( $dashboard_page_id && $post->ID === (int) $dashboard_page_id ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -67,6 +113,7 @@ class Customer_Dashboard_Shortcode {
 
 	/**
 	 * Render login/registration form for non-logged users.
+	 * Uses fullscreen layout for better UX.
 	 *
 	 * @return string HTML output.
 	 */
@@ -74,9 +121,19 @@ class Customer_Dashboard_Shortcode {
 		// Enqueue auth-specific assets.
 		$this->enqueue_auth_assets();
 		
+		// Get auth settings for customization
+		$settings = get_option( 'tabesh_v2_settings', array() );
+		$auth_settings = $settings['auth'] ?? array();
+		
+		// Build CSS custom properties from settings
+		$custom_styles = $this->build_auth_custom_styles( $auth_settings );
+		
 		ob_start();
 		?>
-		<div id="tabesh-auth-root">
+		<div id="tabesh-auth-root" class="tabesh-auth-fullscreen">
+			<?php if ( $custom_styles ) : ?>
+			<style id="tabesh-auth-custom-styles"><?php echo $custom_styles; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></style>
+			<?php endif; ?>
 			<!-- React Auth Form will be mounted here -->
 			<div class="tabesh-loading-auth">
 				<div class="tabesh-spinner"></div>
@@ -85,6 +142,50 @@ class Customer_Dashboard_Shortcode {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Build custom CSS styles from auth settings.
+	 *
+	 * @param array $auth_settings Auth settings array.
+	 * @return string CSS styles.
+	 */
+	private function build_auth_custom_styles( $auth_settings ) {
+		$styles = array();
+		
+		// Primary color
+		if ( ! empty( $auth_settings['primaryColor'] ) ) {
+			$styles[] = '--tabesh-primary: ' . sanitize_hex_color( $auth_settings['primaryColor'] ) . ';';
+		}
+		
+		// Background colors
+		if ( ! empty( $auth_settings['backgroundColor'] ) ) {
+			$bg_start = sanitize_hex_color( $auth_settings['backgroundColor'] );
+			$bg_end = ! empty( $auth_settings['secondaryBackgroundColor'] ) 
+				? sanitize_hex_color( $auth_settings['secondaryBackgroundColor'] ) 
+				: $bg_start;
+			$styles[] = '--tabesh-auth-bg-start: ' . $bg_start . ';';
+			$styles[] = '--tabesh-auth-bg-end: ' . $bg_end . ';';
+		}
+		
+		// Layout settings
+		if ( ! empty( $auth_settings['cardWidth'] ) ) {
+			$styles[] = '--tabesh-auth-card-width: ' . absint( $auth_settings['cardWidth'] ) . 'px;';
+		}
+		
+		if ( ! empty( $auth_settings['cardPadding'] ) ) {
+			$styles[] = '--tabesh-auth-card-padding: ' . absint( $auth_settings['cardPadding'] ) . 'px;';
+		}
+		
+		if ( ! empty( $auth_settings['borderRadius'] ) ) {
+			$styles[] = '--tabesh-auth-border-radius: ' . absint( $auth_settings['borderRadius'] ) . 'px;';
+		}
+		
+		if ( empty( $styles ) ) {
+			return '';
+		}
+		
+		return ':root { ' . implode( ' ', $styles ) . ' }';
 	}
 
 	/**
@@ -191,6 +292,14 @@ class Customer_Dashboard_Shortcode {
 				true
 			);
 
+			// Get auth settings for the form
+			$settings = get_option( 'tabesh_v2_settings', array() );
+			$auth_settings = $settings['auth'] ?? array();
+			$dashboard_settings = $settings['user_dashboard'] ?? array();
+			
+			// Build dashboard URL
+			$dashboard_url = home_url( '/' . ( $dashboard_settings['page_slug'] ?? 'panel' ) );
+
 			// Localize script with settings.
 			wp_localize_script(
 				'tabesh-auth-form',
@@ -199,7 +308,15 @@ class Customer_Dashboard_Shortcode {
 					'apiUrl'       => rest_url( 'tabesh/v2/' ),
 					'nonce'        => wp_create_nonce( 'wp_rest' ),
 					'isRTL'        => is_rtl(),
-					'dashboardUrl' => home_url( '/panel' ), // Dashboard URL for redirect after login.
+					'dashboardUrl' => $dashboard_url,
+					'settings'     => array(
+						'brandTitle'    => $auth_settings['brandTitle'] ?? __( 'ورود به داشبورد', 'tabesh-v2' ),
+						'brandSubtitle' => $auth_settings['brandSubtitle'] ?? __( 'سیستم مدیریت چاپ تابش', 'tabesh-v2' ),
+						'logoUrl'       => $auth_settings['logoUrl'] ?? '',
+						'otpLength'     => $auth_settings['otp_length'] ?? 5,
+						'requireName'   => $auth_settings['require_name'] ?? true,
+						'allowCorporate' => $auth_settings['allow_corporate'] ?? true,
+					),
 				)
 			);
 

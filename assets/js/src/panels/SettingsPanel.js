@@ -7,7 +7,6 @@ import ProductParametersTab from '../components/ProductParametersTab';
 import PricingSettingsTab from '../components/PricingSettingsTab';
 import SMSSettingsTab from '../components/SMSSettingsTab';
 import LoadingSpinner from '../components/LoadingSpinner';
-import AuthSettingsTab from '../components/auth/AuthSettingsTab';
 import {
 	FirewallSettingsTab,
 	FileSettingsTab,
@@ -17,6 +16,7 @@ import {
 
 /**
  * Settings Panel Component - Super Configuration Panel.
+ * Note: Auth settings have been moved to User Dashboard Settings (داشبورد کاربران menu)
  */
 const SettingsPanel = () => {
 	const [ settings, setSettings ] = useState( {} );
@@ -120,11 +120,6 @@ const SettingsPanel = () => {
 			),
 		},
 		{
-			id: 'auth',
-			title: __( 'ورود و ثبت‌نام', 'tabesh-v2' ),
-			content: <AuthSettingsTab />,
-		},
-		{
 			id: 'firewall',
 			title: __( 'تنظیمات فایروال', 'tabesh-v2' ),
 			content: (
@@ -173,6 +168,12 @@ const SettingsPanel = () => {
 				<p className="description">
 					{ __(
 						'تنظیمات جامع افزونه مدیریت سفارشات چاپ',
+						'tabesh-v2'
+					) }
+				</p>
+				<p className="notice notice-info" style={{ padding: '10px', marginTop: '10px' }}>
+					{ __(
+						'توجه: تنظیمات ورود و ثبت‌نام به منوی «داشبورد کاربران» منتقل شده است.',
 						'tabesh-v2'
 					) }
 				</p>
