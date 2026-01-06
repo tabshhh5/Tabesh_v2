@@ -82,10 +82,9 @@ class Auth_Handler {
 	 *
 	 * @param string $mobile Mobile number.
 	 * @param string $code OTP code to verify.
-	 * @param bool   $skip_delete Whether to skip deleting the token (for multi-step verification).
 	 * @return array Result with success status and message.
 	 */
-	public function verify_otp( $mobile, $code, $skip_delete = false ) {
+	public function verify_otp( $mobile, $code ) {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'tabesh_otp_tokens';
 
@@ -119,13 +118,11 @@ class Auth_Handler {
 			);
 		}
 
-		// Delete used token (unless skip_delete is true for multi-step verification).
-		if ( ! $skip_delete ) {
-			$wpdb->delete(
-				$table_name,
-				array( 'id' => $token->id )
-			);
-		}
+		// Delete used token.
+		$wpdb->delete(
+			$table_name,
+			array( 'id' => $token->id )
+		);
 
 		return array(
 			'success' => true,
@@ -167,8 +164,6 @@ class Auth_Handler {
 	 * @return array Result with success status and user data.
 	 */
 	public function login_or_register( $mobile, $user_data = array() ) {
-		global $wpdb;
-		
 		// Check if user exists.
 		$user = get_user_by( 'login', $mobile );
 
@@ -177,13 +172,6 @@ class Auth_Handler {
 			wp_clear_auth_cookie();
 			wp_set_current_user( $user->ID );
 			wp_set_auth_cookie( $user->ID );
-			
-			// Clean up any OTP tokens for this mobile
-			$table_name = $wpdb->prefix . 'tabesh_otp_tokens';
-			$wpdb->delete(
-				$table_name,
-				array( 'mobile' => $mobile )
-			);
 
 			return array(
 				'success' => true,
@@ -271,13 +259,6 @@ class Auth_Handler {
 		wp_clear_auth_cookie();
 		wp_set_current_user( $user_id );
 		wp_set_auth_cookie( $user_id );
-		
-		// Clean up any OTP tokens for this mobile
-		$table_name = $wpdb->prefix . 'tabesh_otp_tokens';
-		$wpdb->delete(
-			$table_name,
-			array( 'mobile' => $mobile )
-		);
 
 		return array(
 			'success' => true,
