@@ -8,7 +8,6 @@ import './auth-settings.scss';
  * Auth Settings Tab Component.
  * 
  * Allows admins to customize login/registration page appearance.
- * Includes template selection, banner support, and animation options.
  */
 const AuthSettingsTab = () => {
 	const [loading, setLoading] = useState(true);
@@ -17,9 +16,6 @@ const AuthSettingsTab = () => {
 	
 	// Settings state
 	const [settings, setSettings] = useState({
-		// Template
-		template: 'minimal',
-		
 		// Appearance
 		primaryColor: '#4f46e5',
 		backgroundColor: '#667eea',
@@ -32,19 +28,6 @@ const AuthSettingsTab = () => {
 		cardWidth: 480,
 		cardPadding: 48,
 		borderRadius: 16,
-		
-		// Desktop Banner/Slider
-		desktopBannerEnabled: false,
-		desktopBannerUrl: '',
-		desktopBannerPosition: 'left',
-		
-		// Background
-		backgroundType: 'gradient',
-		backgroundImageUrl: '',
-		
-		// Animation
-		animationEnabled: true,
-		formAnimation: 'slideUp',
 		
 		// OTP Settings
 		otpLength: 5,
@@ -140,7 +123,6 @@ const AuthSettingsTab = () => {
 	const handleReset = () => {
 		if (confirm(__('آیا می‌خواهید تنظیمات را به حالت پیش‌فرض بازگردانید؟', 'tabesh-v2'))) {
 			setSettings({
-				template: 'minimal',
 				primaryColor: '#4f46e5',
 				backgroundColor: '#667eea',
 				secondaryBackgroundColor: '#764ba2',
@@ -150,13 +132,6 @@ const AuthSettingsTab = () => {
 				cardWidth: 480,
 				cardPadding: 48,
 				borderRadius: 16,
-				desktopBannerEnabled: false,
-				desktopBannerUrl: '',
-				desktopBannerPosition: 'left',
-				backgroundType: 'gradient',
-				backgroundImageUrl: '',
-				animationEnabled: true,
-				formAnimation: 'slideUp',
 				otpLength: 5,
 				otpExpiry: 120,
 				autoSubmitOtp: true,
@@ -253,73 +228,7 @@ const AuthSettingsTab = () => {
 				{/* Settings Panels */}
 				<div className="tabesh-settings-panels">
 					<Panel>
-						<PanelBody title={__('انتخاب قالب', 'tabesh-v2')} initialOpen={true}>
-							<PanelRow>
-								<SelectControl
-									label={__('قالب صفحه ورود', 'tabesh-v2')}
-									value={settings.template}
-									onChange={(value) => updateSetting('template', value)}
-									options={[
-										{ label: __('مینیمال (پیش‌فرض)', 'tabesh-v2'), value: 'minimal' },
-										{ label: __('با بنر سمت چپ', 'tabesh-v2'), value: 'banner-left' },
-										{ label: __('با بنر سمت راست', 'tabesh-v2'), value: 'banner-right' },
-										{ label: __('تصویر پس‌زمینه', 'tabesh-v2'), value: 'background-image' },
-									]}
-									help={__('نوع چیدمان صفحه ورود در حالت دسکتاپ', 'tabesh-v2')}
-								/>
-							</PanelRow>
-
-							{(settings.template === 'banner-left' || settings.template === 'banner-right') && (
-								<PanelRow>
-									<TextControl
-										label={__('آدرس تصویر بنر', 'tabesh-v2')}
-										value={settings.desktopBannerUrl || ''}
-										onChange={(value) => updateSetting('desktopBannerUrl', value)}
-										help={__('آدرس تصویر یا اسلایدر برای نمایش در کنار فرم (اندازه پیشنهادی: 800x1200)', 'tabesh-v2')}
-									/>
-								</PanelRow>
-							)}
-
-							{settings.template === 'background-image' && (
-								<PanelRow>
-									<TextControl
-										label={__('آدرس تصویر پس‌زمینه', 'tabesh-v2')}
-										value={settings.backgroundImageUrl || ''}
-										onChange={(value) => updateSetting('backgroundImageUrl', value)}
-										help={__('آدرس تصویر پس‌زمینه تمام صفحه', 'tabesh-v2')}
-									/>
-								</PanelRow>
-							)}
-						</PanelBody>
-
-						<PanelBody title={__('انیمیشن‌ها', 'tabesh-v2')}>
-							<PanelRow>
-								<ToggleControl
-									label={__('فعال‌سازی انیمیشن‌ها', 'tabesh-v2')}
-									checked={settings.animationEnabled !== false}
-									onChange={(value) => updateSetting('animationEnabled', value)}
-									help={__('انیمیشن‌های ورود و خروج فرم', 'tabesh-v2')}
-								/>
-							</PanelRow>
-
-							{settings.animationEnabled !== false && (
-								<PanelRow>
-									<SelectControl
-										label={__('نوع انیمیشن فرم', 'tabesh-v2')}
-										value={settings.formAnimation || 'slideUp'}
-										onChange={(value) => updateSetting('formAnimation', value)}
-										options={[
-											{ label: __('اسلاید به بالا', 'tabesh-v2'), value: 'slideUp' },
-											{ label: __('محو شدن', 'tabesh-v2'), value: 'fadeIn' },
-											{ label: __('چرخش کارت', 'tabesh-v2'), value: 'flip' },
-											{ label: __('زوم', 'tabesh-v2'), value: 'zoom' },
-										]}
-									/>
-								</PanelRow>
-							)}
-						</PanelBody>
-
-						<PanelBody title={__('ظاهر و رنگ‌بندی', 'tabesh-v2')}>
+						<PanelBody title={__('ظاهر و رنگ‌بندی', 'tabesh-v2')} initialOpen={true}>
 							<PanelRow>
 								<div className="tabesh-color-control">
 									<label>{__('رنگ اصلی', 'tabesh-v2')}</label>
