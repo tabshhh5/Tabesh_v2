@@ -611,12 +611,13 @@ input[inputmode="numeric"] {
 	display: flex;
 	min-height: 100vh;
 	width: 100%;
+	flex-direction: row;
 }
 
 .tabesh-auth-banner-side {
 	flex: 1;
 	display: none;
-	background: rgba(0, 0, 0, 0.1);
+	background: rgba(0, 0, 0, 0.05);
 	position: relative;
 	overflow: hidden;
 
@@ -628,10 +629,12 @@ input[inputmode="numeric"] {
 
 	&.left {
 		order: -1;
+		border-left: 1px solid rgba(255, 255, 255, 0.1);
 	}
 
 	&.right {
 		order: 1;
+		border-right: 1px solid rgba(255, 255, 255, 0.1);
 	}
 }
 
@@ -642,6 +645,7 @@ input[inputmode="numeric"] {
 	justify-content: center;
 	padding: 2rem;
 	min-height: 100vh;
+	background: transparent;
 	
 	@media (min-width: 1024px) {
 		max-width: 50%;
@@ -655,11 +659,13 @@ input[inputmode="numeric"] {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	padding: 2rem;
 
 	img {
 		width: 100%;
 		height: 100%;
-		object-fit: cover;
+		max-height: 80vh;
+		object-fit: contain;
 	}
 }
 
@@ -687,38 +693,65 @@ input[inputmode="numeric"] {
 	}
 }
 
-/* Background Image Template */
-.template-background-image {
+/* Background Image Template (fullBg) */
+.template-fullBg {
 	&.has-background-image {
 		background-size: cover;
 		background-position: center;
 		background-repeat: no-repeat;
-
-		&::before {
-			content: '';
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			background: rgba(0, 0, 0, 0.5);
-			z-index: 0;
-		}
+		position: relative;
 
 		.tabesh-auth-container {
-			z-index: 1;
+			z-index: 2;
 		}
-
+	}
+	
+	/* Glassmorphism effect */
+	&.glass-effect {
 		.tabesh-auth-card {
 			background: rgba(255, 255, 255, 0.95);
 			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			border: 1px solid rgba(255, 255, 255, 0.3);
+			box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 		}
 	}
 }
 
+/* Overlay for background images */
+.tabesh-auth-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 1;
+}
+
+/* Gradient Motion Template */
+.template-gradient {
+	&.has-gradient {
+		background: linear-gradient(135deg, var(--tabesh-auth-bg-start) 0%, var(--tabesh-auth-bg-end) 100%);
+		background-size: 200% 200%;
+		animation: gradientMotion 10s ease infinite;
+	}
+}
+
+@keyframes gradientMotion {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
 /* Template Specific Styles */
-.template-banner-left,
-.template-banner-right {
+.template-split {
 	padding: 0;
 
 	&::before,
@@ -730,6 +763,10 @@ input[inputmode="numeric"] {
 		max-width: 100%;
 		width: 100%;
 	}
+	
+	.tabesh-auth-wrapper {
+		padding: 0;
+	}
 }
 
 /* Animation Variants */
@@ -739,7 +776,8 @@ input[inputmode="numeric"] {
 			animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 		}
 
-		&.animation-fadeIn {
+		&.animation-fadeIn,
+		&.animation-fade {
 			animation: fadeInCard 0.5s ease-out;
 		}
 
@@ -750,6 +788,29 @@ input[inputmode="numeric"] {
 		&.animation-zoom {
 			animation: zoomIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 		}
+		
+		&.animation-slide {
+			animation: slideInFromRight 0.5s ease-out;
+		}
+	}
+}
+
+/* Transition animations for step changes */
+.tabesh-auth-form {
+	&.animation-flip {
+		animation: formFlip 0.5s ease-out;
+	}
+	
+	&.animation-slide {
+		animation: formSlide 0.4s ease-out;
+	}
+	
+	&.animation-fade {
+		animation: fadeIn 0.3s ease-out;
+	}
+	
+	&.animation-zoom {
+		animation: formZoom 0.4s ease-out;
 	}
 }
 
@@ -777,6 +838,54 @@ input[inputmode="numeric"] {
 	from {
 		opacity: 0;
 		transform: scale(0.8);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@keyframes slideInFromRight {
+	from {
+		opacity: 0;
+		transform: translateX(30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+/* Form transition animations */
+@keyframes formFlip {
+	0% {
+		opacity: 0;
+		transform: rotateX(-90deg);
+	}
+	50% {
+		opacity: 0.5;
+	}
+	100% {
+		opacity: 1;
+		transform: rotateX(0deg);
+	}
+}
+
+@keyframes formSlide {
+	from {
+		opacity: 0;
+		transform: translateX(-30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes formZoom {
+	from {
+		opacity: 0;
+		transform: scale(0.95);
 	}
 	to {
 		opacity: 1;

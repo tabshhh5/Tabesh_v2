@@ -750,7 +750,7 @@ class Rest_Api {
 				'auto_create_user'   => ! empty( $settings['auth']['auto_create_user'] ),
 				'autoSubmitOtp'      => ! empty( $settings['auth']['autoSubmitOtp'] ),
 				'min_mobile_length'  => absint( $settings['auth']['min_mobile_length'] ?? 11 ),
-				// Template settings
+				// Template settings (minimal, split, fullBg, gradient)
 				'template'                    => sanitize_text_field( $settings['auth']['template'] ?? 'minimal' ),
 				// Appearance settings
 				'primaryColor'                => sanitize_hex_color( $settings['auth']['primaryColor'] ?? '#4f46e5' ),
@@ -767,12 +767,19 @@ class Rest_Api {
 				'desktopBannerEnabled'        => ! empty( $settings['auth']['desktopBannerEnabled'] ),
 				'desktopBannerUrl'            => esc_url_raw( $settings['auth']['desktopBannerUrl'] ?? '' ),
 				'desktopBannerPosition'       => sanitize_text_field( $settings['auth']['desktopBannerPosition'] ?? 'left' ),
+				'desktopSliderShortcode'      => wp_kses_post( $settings['auth']['desktopSliderShortcode'] ?? '' ),
 				// Background settings
 				'backgroundType'              => sanitize_text_field( $settings['auth']['backgroundType'] ?? 'gradient' ),
 				'backgroundImageUrl'          => esc_url_raw( $settings['auth']['backgroundImageUrl'] ?? '' ),
-				// Animation settings
+				'backgroundOverlayOpacity'    => floatval( $settings['auth']['backgroundOverlayOpacity'] ?? 0.5 ),
+				// Animation settings (slideUp, fade, flip, zoom, slide)
 				'animationEnabled'            => $settings['auth']['animationEnabled'] !== false,
 				'formAnimation'               => sanitize_text_field( $settings['auth']['formAnimation'] ?? 'slideUp' ),
+				'transitionAnimation'         => sanitize_text_field( $settings['auth']['transitionAnimation'] ?? 'flip' ),
+				// Glassmorphism effect for fullBg template
+				'glassEffect'                 => ! empty( $settings['auth']['glassEffect'] ),
+				'glassBlur'                   => absint( $settings['auth']['glassBlur'] ?? 20 ),
+				'glassOpacity'                => floatval( $settings['auth']['glassOpacity'] ?? 0.95 ),
 			);
 
 			// Sanitize melipayamak sub-settings.
