@@ -310,12 +310,18 @@ class Customer_Dashboard_Shortcode {
 					'isRTL'        => is_rtl(),
 					'dashboardUrl' => $dashboard_url,
 					'settings'     => array(
-						'brandTitle'    => $auth_settings['brandTitle'] ?? __( 'ورود به داشبورد', 'tabesh-v2' ),
-						'brandSubtitle' => $auth_settings['brandSubtitle'] ?? __( 'سیستم مدیریت چاپ تابش', 'tabesh-v2' ),
-						'logoUrl'       => $auth_settings['logoUrl'] ?? '',
-						'otpLength'     => $auth_settings['otp_length'] ?? 5,
-						'requireName'   => $auth_settings['require_name'] ?? true,
-						'allowCorporate' => $auth_settings['allow_corporate'] ?? true,
+						'brandTitle'         => $auth_settings['brandTitle'] ?? __( 'ورود به داشبورد', 'tabesh-v2' ),
+						'brandSubtitle'      => $auth_settings['brandSubtitle'] ?? __( 'سیستم مدیریت چاپ تابش', 'tabesh-v2' ),
+						'logoUrl'            => $auth_settings['logoUrl'] ?? '',
+						'otpLength'          => $auth_settings['otp_length'] ?? 5,
+						'requireName'        => $auth_settings['require_name'] ?? true,
+						'allowCorporate'     => $auth_settings['allow_corporate'] ?? true,
+						// Template settings
+						'template'           => $auth_settings['template'] ?? 'minimal',
+						'desktopBannerUrl'   => $auth_settings['desktopBannerUrl'] ?? '',
+						'backgroundImageUrl' => $auth_settings['backgroundImageUrl'] ?? '',
+						'animationEnabled'   => $auth_settings['animationEnabled'] ?? true,
+						'formAnimation'      => $auth_settings['formAnimation'] ?? 'slideUp',
 					),
 				)
 			);
