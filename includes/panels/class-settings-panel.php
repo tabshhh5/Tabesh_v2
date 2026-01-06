@@ -170,7 +170,7 @@ class Settings_Panel {
 				'replace_woocommerce'         => false,
 				'auto_create_user'            => true,
 				'min_mobile_length'           => 11,
-				// Template settings (minimal, split, fullBg, gradient)
+				// Template settings
 				'template'                    => 'minimal',
 				// Appearance settings
 				'primaryColor'                => '#4f46e5',
@@ -186,20 +186,13 @@ class Settings_Panel {
 				// Desktop banner/slider settings
 				'desktopBannerEnabled'        => false,
 				'desktopBannerUrl'            => '',
-				'desktopBannerPosition'       => 'left', // 'left' or 'right'
-				'desktopSliderShortcode'      => '', // For Revolution Slider or other slider shortcodes
+				'desktopBannerPosition'       => 'left',
 				// Background settings
-				'backgroundType'              => 'gradient', // 'gradient', 'image', 'solid'
+				'backgroundType'              => 'gradient',
 				'backgroundImageUrl'          => '',
-				'backgroundOverlayOpacity'    => 0.5, // 0-1 for image overlay
-				// Animation settings (slideUp, fade, flip, zoom, slide)
+				// Animation settings
 				'animationEnabled'            => true,
 				'formAnimation'               => 'slideUp',
-				'transitionAnimation'         => 'flip', // Animation between mobile -> OTP -> register steps
-				// Glassmorphism effect for fullBg template
-				'glassEffect'                 => true,
-				'glassBlur'                   => 20, // px
-				'glassOpacity'                => 0.95, // 0-1
 			),
 		);
 	}

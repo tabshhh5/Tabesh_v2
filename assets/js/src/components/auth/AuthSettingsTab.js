@@ -17,7 +17,7 @@ const AuthSettingsTab = () => {
 	
 	// Settings state - using snake_case to match backend API
 	const [settings, setSettings] = useState({
-		// Template (minimal, split, fullBg, gradient)
+		// Template
 		template: 'minimal',
 		
 		// Appearance
@@ -37,22 +37,14 @@ const AuthSettingsTab = () => {
 		desktopBannerEnabled: false,
 		desktopBannerUrl: '',
 		desktopBannerPosition: 'left',
-		desktopSliderShortcode: '',
 		
 		// Background
 		backgroundType: 'gradient',
 		backgroundImageUrl: '',
-		backgroundOverlayOpacity: 0.5,
 		
 		// Animation
 		animationEnabled: true,
 		formAnimation: 'slideUp',
-		transitionAnimation: 'flip',
-		
-		// Glassmorphism for fullBg template
-		glassEffect: true,
-		glassBlur: 20,
-		glassOpacity: 0.95,
 		
 		// OTP Settings - using snake_case to match backend
 		otp_length: 5,
@@ -161,16 +153,10 @@ const AuthSettingsTab = () => {
 				desktopBannerEnabled: false,
 				desktopBannerUrl: '',
 				desktopBannerPosition: 'left',
-				desktopSliderShortcode: '',
 				backgroundType: 'gradient',
 				backgroundImageUrl: '',
-				backgroundOverlayOpacity: 0.5,
 				animationEnabled: true,
 				formAnimation: 'slideUp',
-				transitionAnimation: 'flip',
-				glassEffect: true,
-				glassBlur: 20,
-				glassOpacity: 0.95,
 				otp_length: 5,
 				otp_expiry: 120,
 				autoSubmitOtp: true,
@@ -275,143 +261,34 @@ const AuthSettingsTab = () => {
 									onChange={(value) => updateSetting('template', value)}
 									options={[
 										{ label: __('مینیمال (پیش‌فرض)', 'tabesh-v2'), value: 'minimal' },
-										{ label: __('صفحه تقسیم شده (Split Screen)', 'tabesh-v2'), value: 'split' },
-										{ label: __('پس‌زمینه تمام صفحه (Full Background)', 'tabesh-v2'), value: 'fullBg' },
-										{ label: __('گرادیان متحرک (Gradient Motion)', 'tabesh-v2'), value: 'gradient' },
+										{ label: __('با بنر سمت چپ', 'tabesh-v2'), value: 'banner-left' },
+										{ label: __('با بنر سمت راست', 'tabesh-v2'), value: 'banner-right' },
+										{ label: __('تصویر پس‌زمینه', 'tabesh-v2'), value: 'background-image' },
 									]}
-									help={__('نوع چیدمان صفحه ورود - هر قالب ویژگی‌های منحصر به فرد دارد', 'tabesh-v2')}
-								/>
-							</PanelRow>
-							
-							{/* Background Type Selection */}
-							<PanelRow>
-								<SelectControl
-									label={__('نوع پس‌زمینه', 'tabesh-v2')}
-									value={settings.backgroundType || 'gradient'}
-									onChange={(value) => updateSetting('backgroundType', value)}
-									options={[
-										{ label: __('گرادیان (Gradient)', 'tabesh-v2'), value: 'gradient' },
-										{ label: __('تصویر (Image)', 'tabesh-v2'), value: 'image' },
-										{ label: __('رنگ ساده (Solid)', 'tabesh-v2'), value: 'solid' },
-									]}
-									help={__('نوع پس‌زمینه صفحه ورود', 'tabesh-v2')}
+									help={__('نوع چیدمان صفحه ورود در حالت دسکتاپ', 'tabesh-v2')}
 								/>
 							</PanelRow>
 
-							{/* Banner Settings for Split Template */}
-							{settings.template === 'split' && (
-								<>
-									<PanelRow>
-										<ToggleControl
-											label={__('نمایش بنر در دسکتاپ', 'tabesh-v2')}
-											checked={settings.desktopBannerEnabled !== false}
-											onChange={(value) => updateSetting('desktopBannerEnabled', value)}
-											help={__('فعال‌سازی بنر یا اسلایدر در کنار فرم', 'tabesh-v2')}
-										/>
-									</PanelRow>
-									
-									{settings.desktopBannerEnabled && (
-										<>
-											<PanelRow>
-												<SelectControl
-													label={__('موقعیت بنر', 'tabesh-v2')}
-													value={settings.desktopBannerPosition || 'left'}
-													onChange={(value) => updateSetting('desktopBannerPosition', value)}
-													options={[
-														{ label: __('سمت چپ', 'tabesh-v2'), value: 'left' },
-														{ label: __('سمت راست', 'tabesh-v2'), value: 'right' },
-													]}
-												/>
-											</PanelRow>
-											
-											<PanelRow>
-												<TextControl
-													label={__('آدرس تصویر بنر', 'tabesh-v2')}
-													value={settings.desktopBannerUrl || ''}
-													onChange={(value) => updateSetting('desktopBannerUrl', value)}
-													help={__('آدرس تصویر برای نمایش در کنار فرم (اندازه پیشنهادی: 800x1200)', 'tabesh-v2')}
-												/>
-											</PanelRow>
-											
-											<PanelRow>
-												<TextControl
-													label={__('شورتکد اسلایدر', 'tabesh-v2')}
-													value={settings.desktopSliderShortcode || ''}
-													onChange={(value) => updateSetting('desktopSliderShortcode', value)}
-													help={__('شورتکد اسلایدر (مثلاً Revolution Slider) به جای تصویر ثابت', 'tabesh-v2')}
-												/>
-											</PanelRow>
-										</>
-									)}
-								</>
+							{(settings.template === 'banner-left' || settings.template === 'banner-right') && (
+								<PanelRow>
+									<TextControl
+										label={__('آدرس تصویر بنر', 'tabesh-v2')}
+										value={settings.desktopBannerUrl || ''}
+										onChange={(value) => updateSetting('desktopBannerUrl', value)}
+										help={__('آدرس تصویر یا اسلایدر برای نمایش در کنار فرم (اندازه پیشنهادی: 800x1200)', 'tabesh-v2')}
+									/>
+								</PanelRow>
 							)}
 
-							{/* Background Image Settings */}
-							{settings.backgroundType === 'image' && (
-								<>
-									<PanelRow>
-										<TextControl
-											label={__('آدرس تصویر پس‌زمینه', 'tabesh-v2')}
-											value={settings.backgroundImageUrl || ''}
-											onChange={(value) => updateSetting('backgroundImageUrl', value)}
-											help={__('آدرس تصویر پس‌زمینه تمام صفحه', 'tabesh-v2')}
-										/>
-									</PanelRow>
-									
-									<PanelRow>
-										<RangeControl
-											label={__('شفافیت لایه روی تصویر', 'tabesh-v2')}
-											value={settings.backgroundOverlayOpacity || 0.5}
-											onChange={(value) => updateSetting('backgroundOverlayOpacity', value)}
-											min={0}
-											max={1}
-											step={0.1}
-											help={__('میزان تیرگی لایه روی تصویر پس‌زمینه (0 = شفاف، 1 = کاملاً تیره)', 'tabesh-v2')}
-										/>
-									</PanelRow>
-								</>
-							)}
-							
-							{/* Glassmorphism Settings for fullBg Template */}
-							{settings.template === 'fullBg' && (
-								<>
-									<PanelRow>
-										<ToggleControl
-											label={__('افکت شیشه‌ای (Glassmorphism)', 'tabesh-v2')}
-											checked={settings.glassEffect !== false}
-											onChange={(value) => updateSetting('glassEffect', value)}
-											help={__('افکت شیشه‌ای شفاف برای کارت ورود', 'tabesh-v2')}
-										/>
-									</PanelRow>
-									
-									{settings.glassEffect !== false && (
-										<>
-											<PanelRow>
-												<RangeControl
-													label={__('میزان تاری (Blur)', 'tabesh-v2')}
-													value={settings.glassBlur || 20}
-													onChange={(value) => updateSetting('glassBlur', value)}
-													min={0}
-													max={50}
-													step={5}
-													help={__('میزان تاری پس‌زمینه شیشه (0-50px)', 'tabesh-v2')}
-												/>
-											</PanelRow>
-											
-											<PanelRow>
-												<RangeControl
-													label={__('شفافیت شیشه', 'tabesh-v2')}
-													value={settings.glassOpacity || 0.95}
-													onChange={(value) => updateSetting('glassOpacity', value)}
-													min={0.5}
-													max={1}
-													step={0.05}
-													help={__('شفافیت کارت شیشه‌ای (0.5-1)', 'tabesh-v2')}
-												/>
-											</PanelRow>
-										</>
-									)}
-								</>
+							{settings.template === 'background-image' && (
+								<PanelRow>
+									<TextControl
+										label={__('آدرس تصویر پس‌زمینه', 'tabesh-v2')}
+										value={settings.backgroundImageUrl || ''}
+										onChange={(value) => updateSetting('backgroundImageUrl', value)}
+										help={__('آدرس تصویر پس‌زمینه تمام صفحه', 'tabesh-v2')}
+									/>
+								</PanelRow>
 							)}
 						</PanelBody>
 
@@ -426,38 +303,19 @@ const AuthSettingsTab = () => {
 							</PanelRow>
 
 							{settings.animationEnabled !== false && (
-								<>
-									<PanelRow>
-										<SelectControl
-											label={__('انیمیشن کارت ورود', 'tabesh-v2')}
-											value={settings.formAnimation || 'slideUp'}
-											onChange={(value) => updateSetting('formAnimation', value)}
-											options={[
-												{ label: __('اسلاید به بالا (Slide Up)', 'tabesh-v2'), value: 'slideUp' },
-												{ label: __('محو شدن (Fade)', 'tabesh-v2'), value: 'fade' },
-												{ label: __('چرخش کارت (Flip)', 'tabesh-v2'), value: 'flip' },
-												{ label: __('زوم (Zoom)', 'tabesh-v2'), value: 'zoom' },
-												{ label: __('اسلاید (Slide)', 'tabesh-v2'), value: 'slide' },
-											]}
-											help={__('انیمیشن هنگام نمایش اولیه کارت', 'tabesh-v2')}
-										/>
-									</PanelRow>
-									
-									<PanelRow>
-										<SelectControl
-											label={__('انیمیشن تغییر مراحل', 'tabesh-v2')}
-											value={settings.transitionAnimation || 'flip'}
-											onChange={(value) => updateSetting('transitionAnimation', value)}
-											options={[
-												{ label: __('چرخش (Flip)', 'tabesh-v2'), value: 'flip' },
-												{ label: __('اسلاید (Slide)', 'tabesh-v2'), value: 'slide' },
-												{ label: __('محو شدن (Fade)', 'tabesh-v2'), value: 'fade' },
-												{ label: __('زوم (Zoom)', 'tabesh-v2'), value: 'zoom' },
-											]}
-											help={__('انیمیشن هنگام تغییر از موبایل به OTP یا ثبت‌نام', 'tabesh-v2')}
-										/>
-									</PanelRow>
-								</>
+								<PanelRow>
+									<SelectControl
+										label={__('نوع انیمیشن فرم', 'tabesh-v2')}
+										value={settings.formAnimation || 'slideUp'}
+										onChange={(value) => updateSetting('formAnimation', value)}
+										options={[
+											{ label: __('اسلاید به بالا', 'tabesh-v2'), value: 'slideUp' },
+											{ label: __('محو شدن', 'tabesh-v2'), value: 'fadeIn' },
+											{ label: __('چرخش کارت', 'tabesh-v2'), value: 'flip' },
+											{ label: __('زوم', 'tabesh-v2'), value: 'zoom' },
+										]}
+									/>
+								</PanelRow>
 							)}
 						</PanelBody>
 
