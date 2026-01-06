@@ -71,9 +71,6 @@ class Customer_Dashboard_Shortcode {
 	 * @return string HTML output.
 	 */
 	private function render_login_form() {
-		// Enqueue auth-specific assets.
-		$this->enqueue_auth_assets();
-		
 		ob_start();
 		?>
 		<div class="tabesh-auth-container" id="tabesh-auth-root">
@@ -253,44 +250,6 @@ class Customer_Dashboard_Shortcode {
 			// Set script translations.
 			wp_set_script_translations( 'tabesh-customer-dashboard', 'tabesh-v2' );
 		}
-	}
-
-	/**
-	 * Enqueue authentication form assets.
-	 *
-	 * @return void
-	 */
-	private function enqueue_auth_assets() {
-		// Enqueue dashicons for icons.
-		wp_enqueue_style( 'dashicons' );
-		
-		// Enqueue authentication CSS.
-		wp_enqueue_style(
-			'tabesh-auth-form',
-			TABESH_V2_PLUGIN_URL . 'assets/css/dashboard.css',
-			array( 'dashicons' ),
-			TABESH_V2_VERSION
-		);
-		
-		// Enqueue authentication JavaScript.
-		wp_enqueue_script(
-			'tabesh-auth-form',
-			TABESH_V2_PLUGIN_URL . 'assets/js/dashboard.js',
-			array( 'jquery', 'wp-api-fetch' ),
-			TABESH_V2_VERSION,
-			true
-		);
-		
-		// Localize script with settings.
-		wp_localize_script(
-			'tabesh-auth-form',
-			'tabeshAuth',
-			array(
-				'apiUrl'  => rest_url( 'tabesh/v2/' ),
-				'nonce'   => wp_create_nonce( 'wp_rest' ),
-				'isRTL'   => is_rtl(),
-			)
-		);
 	}
 
 	/**
