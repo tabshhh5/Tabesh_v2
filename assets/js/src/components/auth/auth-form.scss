@@ -224,10 +224,16 @@
 	}
 }
 
-/* Registration form specific styles */
+/* Registration form specific styles - improved spacing */
 .tabesh-auth-form {
 	.tabesh-form-group + .tabesh-form-group {
-		margin-top: 1rem;
+		margin-top: 1.5rem;
+	}
+	
+	/* Better spacing for name fields in registration */
+	#first-name,
+	#last-name {
+		margin-bottom: 0.5rem;
 	}
 }
 
@@ -256,12 +262,25 @@
 
 	&::placeholder {
 		color: var(--tabesh-text-light);
+		text-align: right;
 	}
 
 	&:disabled {
 		background: var(--tabesh-bg);
 		cursor: not-allowed;
 		opacity: 0.6;
+	}
+}
+
+/* Mobile number input - LTR for proper numeric input */
+input#mobile,
+input[type="tel"],
+input[inputmode="numeric"] {
+	direction: ltr;
+	text-align: left;
+	
+	&::placeholder {
+		text-align: left;
 	}
 }
 

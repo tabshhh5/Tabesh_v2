@@ -21,6 +21,23 @@ class Dashboard_Integration {
 		// Hook into template redirect to handle dashboard pages.
 		add_action( 'template_redirect', array( $this, 'handle_dashboard_redirect' ), 10 );
 		
+		// Redirect WordPress login/register pages to custom panel.
+		add_action( 'init', array( $this, 'redirect_wp_login_pages' ), 1 );
+		
+		// Filter login URL.
+		add_filter( 'login_url', array( $this, 'custom_login_url' ), 999, 3 );
+		
+		// Filter registration URL.
+		add_filter( 'register_url', array( $this, 'custom_register_url' ), 999 );
+		
+		// Filter logout redirect.
+		add_filter( 'logout_redirect', array( $this, 'custom_logout_redirect' ), 999, 3 );
+		
+		// WooCommerce specific redirects.
+		add_filter( 'woocommerce_login_redirect', array( $this, 'wc_login_redirect' ), 999, 2 );
+		add_filter( 'woocommerce_registration_redirect', array( $this, 'wc_registration_redirect' ), 999 );
+		add_action( 'template_redirect', array( $this, 'redirect_wc_account_pages' ), 5 );
+		
 		// Filter WooCommerce my account page.
 		add_filter( 'woocommerce_account_content', array( $this, 'replace_woocommerce_account' ), 999 );
 		
@@ -35,6 +52,208 @@ class Dashboard_Integration {
 		
 		// Add custom styles to hide header/footer on dashboard pages.
 		add_action( 'wp_head', array( $this, 'add_dashboard_page_styles' ), 999 );
+	}
+
+	/**
+	 * Get the custom panel URL.
+	 *
+	 * @return string Panel URL.
+	 */
+	private function get_panel_url() {
+		$settings = get_option( 'tabesh_v2_settings', array() );
+		$dashboard_settings = $settings['user_dashboard'] ?? array();
+		$page_slug = $dashboard_settings['page_slug'] ?? 'panel';
+		return home_url( '/' . $page_slug . '/' );
+	}
+
+	/**
+	 * Check if custom panel redirect is enabled.
+	 *
+	 * @return bool Whether redirect is enabled.
+	 */
+	private function is_redirect_enabled() {
+		$settings = get_option( 'tabesh_v2_settings', array() );
+		$dashboard_settings = $settings['user_dashboard'] ?? array();
+		$auth_settings = $settings['auth'] ?? array();
+		
+		// Both dashboard and OTP must be enabled for redirects.
+		return ! empty( $dashboard_settings['enabled'] ) && ! empty( $auth_settings['otp_enabled'] );
+	}
+
+	/**
+	 * Redirect WordPress login and register pages to custom panel.
+	 *
+	 * @return void
+	 */
+	public function redirect_wp_login_pages() {
+		global $pagenow;
+		
+		if ( ! $this->is_redirect_enabled() ) {
+			return;
+		}
+		
+		// Skip for AJAX, REST API, admin users, and wp-cli.
+		if ( wp_doing_ajax() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			return;
+		}
+		
+		// Skip for admin users accessing wp-login.php (allow access to backend).
+		if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		
+		// Redirect wp-login.php for non-admin actions.
+		if ( 'wp-login.php' === $pagenow ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
+			
+			// Allow certain actions that need wp-login.php.
+			$allowed_actions = array( 'logout', 'postpass', 'rp', 'resetpass', 'lostpassword' );
+			
+			if ( ! in_array( $action, $allowed_actions, true ) ) {
+				wp_safe_redirect( $this->get_panel_url() );
+				exit;
+			}
+		}
+		
+		// Redirect wp-register.php.
+		if ( 'wp-register.php' === $pagenow ) {
+			wp_safe_redirect( $this->get_panel_url() );
+			exit;
+		}
+	}
+
+	/**
+	 * Filter login URL to point to custom panel.
+	 *
+	 * @param string $login_url    The login URL.
+	 * @param string $redirect     The path to redirect to on login.
+	 * @param bool   $force_reauth Whether to force reauthorization.
+	 * @return string Modified login URL.
+	 */
+	public function custom_login_url( $login_url, $redirect = '', $force_reauth = false ) {
+		if ( ! $this->is_redirect_enabled() ) {
+			return $login_url;
+		}
+		
+		// Don't redirect for admin users.
+		if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+			return $login_url;
+		}
+		
+		$panel_url = $this->get_panel_url();
+		
+		if ( ! empty( $redirect ) ) {
+			$panel_url = add_query_arg( 'redirect_to', rawurlencode( $redirect ), $panel_url );
+		}
+		
+		return $panel_url;
+	}
+
+	/**
+	 * Filter registration URL to point to custom panel.
+	 *
+	 * @param string $register_url The registration URL.
+	 * @return string Modified registration URL.
+	 */
+	public function custom_register_url( $register_url ) {
+		if ( ! $this->is_redirect_enabled() ) {
+			return $register_url;
+		}
+		
+		return $this->get_panel_url();
+	}
+
+	/**
+	 * Filter logout redirect URL.
+	 *
+	 * @param string $redirect_to           The redirect destination URL.
+	 * @param string $requested_redirect_to The requested redirect destination URL.
+	 * @param \WP_User $user                 The user logging out.
+	 * @return string Modified redirect URL.
+	 */
+	public function custom_logout_redirect( $redirect_to, $requested_redirect_to, $user ) {
+		if ( ! $this->is_redirect_enabled() ) {
+			return $redirect_to;
+		}
+		
+		// Redirect non-admin users to panel after logout.
+		if ( ! user_can( $user, 'manage_options' ) ) {
+			return $this->get_panel_url();
+		}
+		
+		return $redirect_to;
+	}
+
+	/**
+	 * WooCommerce login redirect.
+	 *
+	 * @param string   $redirect The redirect URL.
+	 * @param \WP_User $user     The user.
+	 * @return string Modified redirect URL.
+	 */
+	public function wc_login_redirect( $redirect, $user ) {
+		if ( ! $this->is_redirect_enabled() ) {
+			return $redirect;
+		}
+		
+		// Redirect non-admin users to custom panel.
+		if ( ! user_can( $user, 'manage_options' ) ) {
+			return $this->get_panel_url();
+		}
+		
+		return $redirect;
+	}
+
+	/**
+	 * WooCommerce registration redirect.
+	 *
+	 * @param string $redirect The redirect URL.
+	 * @return string Modified redirect URL.
+	 */
+	public function wc_registration_redirect( $redirect ) {
+		if ( ! $this->is_redirect_enabled() ) {
+			return $redirect;
+		}
+		
+		return $this->get_panel_url();
+	}
+
+	/**
+	 * Redirect WooCommerce account pages to custom panel.
+	 *
+	 * @return void
+	 */
+	public function redirect_wc_account_pages() {
+		if ( ! $this->is_redirect_enabled() ) {
+			return;
+		}
+		
+		// Check if WooCommerce is active.
+		if ( ! function_exists( 'is_account_page' ) ) {
+			return;
+		}
+		
+		// Redirect my-account page for non-logged-in users.
+		if ( is_account_page() && ! is_user_logged_in() ) {
+			wp_safe_redirect( $this->get_panel_url() );
+			exit;
+		}
+		
+		// For logged-in non-admin users, redirect main my-account to custom panel.
+		if ( is_account_page() && is_user_logged_in() && ! current_user_can( 'manage_options' ) ) {
+			// Only redirect main account page, not endpoints like orders, downloads, etc.
+			if ( ! is_wc_endpoint_url() ) {
+				$settings = get_option( 'tabesh_v2_settings', array() );
+				$auth_settings = $settings['auth'] ?? array();
+				
+				// Only redirect if WooCommerce replacement is enabled.
+				if ( ! empty( $auth_settings['replace_woocommerce'] ) ) {
+					wp_safe_redirect( $this->get_panel_url() );
+					exit;
+				}
+			}
+		}
 	}
 
 	/**
