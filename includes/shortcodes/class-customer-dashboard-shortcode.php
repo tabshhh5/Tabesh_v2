@@ -243,7 +243,6 @@ class Customer_Dashboard_Shortcode {
 					'lang'           => is_rtl() ? 'fa' : 'en',
 					'user'           => $this->get_current_user_data(),
 					'woocommerce'    => $this->get_woocommerce_data(),
-					'dashboardSettings' => $this->get_dashboard_settings(),
 				)
 			);
 
@@ -301,26 +300,6 @@ class Customer_Dashboard_Shortcode {
 			'downloadsUrl'  => wc_get_account_endpoint_url( 'downloads' ),
 			'totalOrders'   => function_exists( 'wc_get_customer_order_count' ) ? wc_get_customer_order_count( $user_id ) : 0,
 			'totalSpent'    => function_exists( 'wc_get_customer_total_spent' ) ? wc_get_customer_total_spent( $user_id ) : 0,
-		);
-	}
-
-	/**
-	 * Get dashboard settings for frontend.
-	 *
-	 * @return array
-	 */
-	private function get_dashboard_settings() {
-		$settings = get_option( 'tabesh_v2_settings', array() );
-		$dashboard_settings = $settings['user_dashboard'] ?? array();
-		$auth_settings = $settings['auth'] ?? array();
-		
-		return array(
-			'enabled'       => ! empty( $dashboard_settings['enabled'] ),
-			'pageSlug'      => $dashboard_settings['page_slug'] ?? 'panel',
-			'menuItems'     => $dashboard_settings['menu_items'] ?? array(),
-			'authEnabled'   => ! empty( $auth_settings['otp_enabled'] ),
-			'requireName'   => ! empty( $auth_settings['require_name'] ),
-			'allowCorporate' => ! empty( $auth_settings['allow_corporate'] ),
 		);
 	}
 }
