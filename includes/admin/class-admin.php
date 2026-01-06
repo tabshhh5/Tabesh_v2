@@ -39,36 +39,6 @@ class Admin {
 			30
 		);
 
-		// Customers panel.
-		add_submenu_page(
-			'tabesh-v2',
-			__( 'Customers Panel', 'tabesh-v2' ),
-			__( 'Customers', 'tabesh-v2' ),
-			'manage_options',
-			'tabesh-customers',
-			array( $this, 'render_customers_page' )
-		);
-
-		// Managers panel.
-		add_submenu_page(
-			'tabesh-v2',
-			__( 'Managers Panel', 'tabesh-v2' ),
-			__( 'Managers', 'tabesh-v2' ),
-			'manage_options',
-			'tabesh-managers',
-			array( $this, 'render_managers_page' )
-		);
-
-		// Employees panel.
-		add_submenu_page(
-			'tabesh-v2',
-			__( 'Employees Panel', 'tabesh-v2' ),
-			__( 'Employees', 'tabesh-v2' ),
-			'manage_options',
-			'tabesh-employees',
-			array( $this, 'render_employees_page' )
-		);
-
 		// Settings panel.
 		add_submenu_page(
 			'tabesh-v2',
@@ -87,33 +57,6 @@ class Admin {
 	 */
 	public function render_main_page() {
 		echo '<div id="tabesh-v2-app" class="wrap"></div>';
-	}
-
-	/**
-	 * Render customers page.
-	 *
-	 * @return void
-	 */
-	public function render_customers_page() {
-		echo '<div id="tabesh-v2-customers" class="wrap"></div>';
-	}
-
-	/**
-	 * Render managers page.
-	 *
-	 * @return void
-	 */
-	public function render_managers_page() {
-		echo '<div id="tabesh-v2-managers" class="wrap"></div>';
-	}
-
-	/**
-	 * Render employees page.
-	 *
-	 * @return void
-	 */
-	public function render_employees_page() {
-		echo '<div id="tabesh-v2-employees" class="wrap"></div>';
 	}
 
 	/**
