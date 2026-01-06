@@ -129,7 +129,6 @@ class Assets {
 			'tabesh-v2_page_tabesh-customers',
 			'tabesh-v2_page_tabesh-managers',
 			'tabesh-v2_page_tabesh-employees',
-			'tabesh-v2_page_tabesh-user-dashboard',
 			'tabesh-v2_page_tabesh-settings',
 		);
 

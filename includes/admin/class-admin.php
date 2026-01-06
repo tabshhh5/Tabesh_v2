@@ -69,16 +69,6 @@ class Admin {
 			array( $this, 'render_employees_page' )
 		);
 
-		// User Dashboard panel.
-		add_submenu_page(
-			'tabesh-v2',
-			__( 'داشبورد کاربران', 'tabesh-v2' ),
-			__( 'داشبورد کاربران', 'tabesh-v2' ),
-			'manage_options',
-			'tabesh-user-dashboard',
-			array( $this, 'render_user_dashboard_page' )
-		);
-
 		// Settings panel.
 		add_submenu_page(
 			'tabesh-v2',
@@ -124,15 +114,6 @@ class Admin {
 	 */
 	public function render_employees_page() {
 		echo '<div id="tabesh-v2-employees" class="wrap"></div>';
-	}
-
-	/**
-	 * Render user dashboard page.
-	 *
-	 * @return void
-	 */
-	public function render_user_dashboard_page() {
-		echo '<div id="tabesh-v2-user-dashboard" class="wrap"></div>';
 	}
 
 	/**

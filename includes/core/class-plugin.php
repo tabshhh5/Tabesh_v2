@@ -114,9 +114,6 @@ class Plugin {
 		// Initialize Customer Dashboard Shortcode.
 		new \Tabesh_v2\Shortcodes\Customer_Dashboard_Shortcode();
 
-		// Initialize User Dashboard Shortcode.
-		new \Tabesh_v2\Shortcodes\User_Dashboard_Shortcode();
-
 		// Initialize Admin (only in admin area).
 		if ( is_admin() ) {
 			$this->admin = new \Tabesh_v2\Admin\Admin();
@@ -194,7 +191,7 @@ class Plugin {
 	 */
 	public function maybe_upgrade_database() {
 		$current_db_version = get_option( 'tabesh_v2_db_version', '0.0.0' );
-		$required_db_version = '1.4.0';
+		$required_db_version = '1.1.0';
 
 		if ( version_compare( $current_db_version, $required_db_version, '<' ) ) {
 			$database = new Database();
