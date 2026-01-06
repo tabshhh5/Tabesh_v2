@@ -5,7 +5,6 @@ module.exports = {
 	...defaultConfig,
 	entry: {
 		index: path.resolve( process.cwd(), 'assets/js/src', 'index.js' ),
-		'customer-dashboard': path.resolve( process.cwd(), 'assets/js/src', 'customer-dashboard.js' ),
 	},
 	output: {
 		filename: '[name].js',
