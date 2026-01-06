@@ -1820,6 +1820,29 @@ class Rest_Api {
 	 */
 	public function send_otp( $request ) {
 		$mobile = $request->get_param( 'mobile' );
+		
+		// Validate mobile number format (Iran: 09xxxxxxxxx)
+		if ( ! preg_match( '/^09[0-9]{9}$/', $mobile ) ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'شماره موبایل نامعتبر است.', 'tabesh-v2' ),
+				),
+				400
+			);
+		}
+		
+		// Rate limiting: Check if too many requests from this IP or mobile
+		$rate_limit_check = $this->check_otp_rate_limit( $mobile );
+		if ( ! $rate_limit_check['allowed'] ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => $rate_limit_check['message'],
+				),
+				429 // Too Many Requests
+			);
+		}
 
 		$auth_handler = new \Tabesh_v2\Helpers\Auth_Handler();
 		$result = $auth_handler->send_otp( $mobile );
@@ -1841,6 +1864,77 @@ class Rest_Api {
 			),
 			200
 		);
+	}
+	
+	/**
+	 * Check OTP rate limiting.
+	 *
+	 * @param string $mobile Mobile number.
+	 * @return array Rate limit check result.
+	 */
+	private function check_otp_rate_limit( $mobile ) {
+		$ip_address = $this->get_client_ip();
+		$rate_key_mobile = 'tabesh_otp_rate_' . md5( $mobile );
+		$rate_key_ip = 'tabesh_otp_rate_ip_' . md5( $ip_address );
+		
+		// Get rate limit settings
+		$settings = get_option( 'tabesh_v2_settings', array() );
+		$firewall = $settings['firewall'] ?? array();
+		$rate_limit_enabled = $firewall['rate_limiting'] ?? true;
+		
+		if ( ! $rate_limit_enabled ) {
+			return array( 'allowed' => true );
+		}
+		
+		// Check mobile-based rate limit (max 5 OTPs per 10 minutes per mobile)
+		$mobile_requests = get_transient( $rate_key_mobile );
+		if ( $mobile_requests >= 5 ) {
+			return array(
+				'allowed' => false,
+				'message' => __( 'تعداد درخواست‌های ارسال کد بیش از حد مجاز است. لطفاً ۱۰ دقیقه صبر کنید.', 'tabesh-v2' ),
+			);
+		}
+		
+		// Check IP-based rate limit (max 20 OTPs per 10 minutes per IP)
+		$ip_requests = get_transient( $rate_key_ip );
+		if ( $ip_requests >= 20 ) {
+			return array(
+				'allowed' => false,
+				'message' => __( 'تعداد درخواست‌ها از این آدرس بیش از حد مجاز است. لطفاً بعداً تلاش کنید.', 'tabesh-v2' ),
+			);
+		}
+		
+		// Increment counters
+		set_transient( $rate_key_mobile, ( $mobile_requests ? $mobile_requests + 1 : 1 ), 600 ); // 10 minutes
+		set_transient( $rate_key_ip, ( $ip_requests ? $ip_requests + 1 : 1 ), 600 ); // 10 minutes
+		
+		return array( 'allowed' => true );
+	}
+	
+	/**
+	 * Get client IP address.
+	 *
+	 * @return string Client IP address.
+	 */
+	private function get_client_ip() {
+		$ip = '';
+		
+		// Check for forwarded IP (behind proxy/load balancer)
+		if ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+			$ips = explode( ',', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) );
+			$ip = trim( $ips[0] );
+		} elseif ( ! empty( $_SERVER['HTTP_X_REAL_IP'] ) ) {
+			$ip = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_REAL_IP'] ) );
+		} elseif ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
+			$ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+		}
+		
+		// Validate IP address
+		if ( ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+			$ip = '0.0.0.0';
+		}
+		
+		return $ip;
 	}
 
 	/**
@@ -1871,6 +1965,42 @@ class Rest_Api {
 	public function verify_otp( $request ) {
 		$mobile = $request->get_param( 'mobile' );
 		$code = $request->get_param( 'code' );
+		
+		// Validate mobile number format
+		if ( ! preg_match( '/^09[0-9]{9}$/', $mobile ) ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'شماره موبایل نامعتبر است.', 'tabesh-v2' ),
+				),
+				400
+			);
+		}
+		
+		// Validate OTP code format (only digits, proper length)
+		$settings = get_option( 'tabesh_v2_settings', array() );
+		$otp_length = $settings['auth']['otp_length'] ?? 5;
+		if ( ! preg_match( '/^[0-9]{' . $otp_length . '}$/', $code ) ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'فرمت کد تأیید نامعتبر است.', 'tabesh-v2' ),
+				),
+				400
+			);
+		}
+		
+		// Rate limiting for OTP verification attempts (prevent brute force)
+		$verify_limit_check = $this->check_verify_rate_limit( $mobile );
+		if ( ! $verify_limit_check['allowed'] ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => $verify_limit_check['message'],
+				),
+				429
+			);
+		}
 
 		$auth_handler = new \Tabesh_v2\Helpers\Auth_Handler();
 		
@@ -1888,6 +2018,9 @@ class Rest_Api {
 		$verify_result = $auth_handler->verify_otp( $mobile, $code, $skip_delete );
 		
 		if ( ! $verify_result['success'] ) {
+			// Increment failed attempts counter
+			$this->increment_failed_verify_attempts( $mobile );
+			
 			return new \WP_REST_Response(
 				array(
 					'success' => false,
@@ -1896,6 +2029,9 @@ class Rest_Api {
 				400
 			);
 		}
+		
+		// Reset failed attempts on successful verification
+		$this->reset_failed_verify_attempts( $mobile );
 
 		// If new user and no registration info yet, prompt for it
 		if ( $is_new_user && ! $has_registration_data ) {
@@ -2241,6 +2377,50 @@ class Rest_Api {
 			),
 			200
 		);
+	}
+
+	/**
+	 * Check rate limiting for OTP verification attempts.
+	 *
+	 * @param string $mobile Mobile number.
+	 * @return array Rate limit check result.
+	 */
+	private function check_verify_rate_limit( $mobile ) {
+		$rate_key = 'tabesh_verify_attempts_' . md5( $mobile );
+		$attempts = get_transient( $rate_key );
+		
+		// Max 10 verification attempts per 5 minutes
+		if ( $attempts >= 10 ) {
+			return array(
+				'allowed' => false,
+				'message' => __( 'تعداد تلاش‌های نادرست بیش از حد مجاز است. لطفاً ۵ دقیقه صبر کنید.', 'tabesh-v2' ),
+			);
+		}
+		
+		return array( 'allowed' => true );
+	}
+	
+	/**
+	 * Increment failed verification attempts counter.
+	 *
+	 * @param string $mobile Mobile number.
+	 * @return void
+	 */
+	private function increment_failed_verify_attempts( $mobile ) {
+		$rate_key = 'tabesh_verify_attempts_' . md5( $mobile );
+		$attempts = get_transient( $rate_key );
+		set_transient( $rate_key, ( $attempts ? $attempts + 1 : 1 ), 300 ); // 5 minutes
+	}
+	
+	/**
+	 * Reset failed verification attempts counter on success.
+	 *
+	 * @param string $mobile Mobile number.
+	 * @return void
+	 */
+	private function reset_failed_verify_attempts( $mobile ) {
+		$rate_key = 'tabesh_verify_attempts_' . md5( $mobile );
+		delete_transient( $rate_key );
 	}
 }
 

@@ -132,7 +132,7 @@ class Customer_Dashboard_Shortcode {
 		?>
 		<div id="tabesh-auth-root" class="tabesh-auth-fullscreen">
 			<?php if ( $custom_styles ) : ?>
-			<style id="tabesh-auth-custom-styles"><?php echo $custom_styles; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></style>
+			<style id="tabesh-auth-custom-styles"><?php echo wp_strip_all_tags( $custom_styles ); ?></style>
 			<?php endif; ?>
 			<!-- React Auth Form will be mounted here -->
 			<div class="tabesh-loading-auth">
