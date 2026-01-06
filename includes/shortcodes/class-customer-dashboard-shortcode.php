@@ -24,16 +24,14 @@ class Customer_Dashboard_Shortcode {
 	}
 
 	/**
-	 * Maybe use blank template for dashboard pages.
-	 * Uses blank template for BOTH logged-in and non-logged-in users
-	 * to ensure fullscreen layout without theme headers/footers.
+	 * Maybe use blank template for login/auth pages.
 	 *
 	 * @param string $template Current template path.
 	 * @return string Template path.
 	 */
 	public function maybe_use_blank_template( $template ) {
-		// Apply blank template to dashboard page for ALL users (logged-in or not)
-		if ( $this->is_dashboard_page() ) {
+		// Only apply to dashboard page when user is not logged in
+		if ( ! is_user_logged_in() && $this->is_dashboard_page() ) {
 			$blank_template = TABESH_V2_PLUGIN_DIR . 'templates/dashboard-blank.php';
 			if ( file_exists( $blank_template ) ) {
 				return $blank_template;
