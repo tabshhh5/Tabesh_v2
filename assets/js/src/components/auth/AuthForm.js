@@ -143,7 +143,9 @@ const AuthForm = () => {
 		setLoading(true);
 		setMessage({ text: '', type: '' });
 		
-		// Store the OTP value in state for potential use in registration step
+		// Store OTP value in state to fix registration error when new users
+		// complete name/lastname fields after OTP verification. Without this,
+		// the registration form would have an empty OTP value when submitting.
 		setOtp(otpValue);
 
 		const data = {
