@@ -1,6 +1,5 @@
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { ThemeProvider } from '../contexts/ThemeContext';
 import MegaMenu from './MegaMenu';
 import GlobalHeader from './GlobalHeader';
 import DashboardHome from './sections/DashboardHome';
@@ -26,8 +25,7 @@ import Advertisements from './sections/Advertisements';
  */
 const CustomerSuperPanel = () => {
 	const [ activeSection, setActiveSection ] = useState( 'dashboard' );
-	// Menu now starts as open and persists its state
-	const [ isMegaMenuOpen, setIsMegaMenuOpen ] = useState( true );
+	const [ isMegaMenuOpen, setIsMegaMenuOpen ] = useState( false );
 
 	// Define all available sections.
 	const sections = {
@@ -128,7 +126,7 @@ const CustomerSuperPanel = () => {
 
 	const handleSectionChange = ( sectionId ) => {
 		setActiveSection( sectionId );
-		// Don't close menu on section change - keep it side-by-side
+		setIsMegaMenuOpen( false );
 	};
 
 	const toggleMegaMenu = () => {
@@ -136,29 +134,27 @@ const CustomerSuperPanel = () => {
 	};
 
 	return (
-		<ThemeProvider>
-			<div className="tabesh-super-panel">
-				<MegaMenu
-					sections={ sections }
-					activeSection={ activeSection }
-					onSectionChange={ handleSectionChange }
-					isOpen={ isMegaMenuOpen }
-					onToggle={ toggleMegaMenu }
+		<div className="tabesh-super-panel">
+			<MegaMenu
+				sections={ sections }
+				activeSection={ activeSection }
+				onSectionChange={ handleSectionChange }
+				isOpen={ isMegaMenuOpen }
+				onToggle={ toggleMegaMenu }
+			/>
+			
+			<div className="tabesh-workspace">
+				<GlobalHeader
+					title={ currentSection.title }
+					icon={ currentSection.icon }
+					onMenuToggle={ toggleMegaMenu }
 				/>
 				
-				<div className={ `tabesh-workspace ${ isMegaMenuOpen ? 'menu-open' : '' }` }>
-					<GlobalHeader
-						title={ currentSection.title }
-						icon={ currentSection.icon }
-						onMenuToggle={ toggleMegaMenu }
-					/>
-					
-					<div className="tabesh-content">
-						<CurrentComponent />
-					</div>
+				<div className="tabesh-content">
+					<CurrentComponent />
 				</div>
 			</div>
-		</ThemeProvider>
+		</div>
 	);
 };
 

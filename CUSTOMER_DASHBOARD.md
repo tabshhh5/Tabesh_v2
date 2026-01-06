@@ -4,23 +4,6 @@
 
 The Customer Super Panel is a modern, professional dashboard interface for print shop customers. It provides a comprehensive workspace with multiple sections for managing orders, files, communications, and more.
 
-## Recent Updates (v2.0)
-
-### 🎨 Complete Redesign
-- **Dark/Light Theme Toggle**: Users can switch between dark and light modes with a button in the header
-- **Persistent Side-by-Side Menu**: Mega menu stays open, allowing simultaneous work in menu and content
-- **Modern Animations**: Smooth transitions, staggered card animations, and interactive hover effects
-- **Enhanced UX**: Inspired by YouTube, Steam, and ChatGPT for a professional feel
-- **Improved Responsiveness**: Better mobile and tablet experience
-
-### 🚀 Key Features
-- Theme persistence with localStorage
-- CSS variables for consistent theming
-- Smooth cubic-bezier transitions
-- Ripple effects on buttons
-- Staggered animations for better visual hierarchy
-- Side-by-side layout with adjustable workspace
-
 ## Features
 
 ### UI/UX
@@ -88,12 +71,10 @@ includes/
 
 assets/js/src/
 ├── customer-dashboard.js                 # Entry point
-├── contexts/
-│   └── ThemeContext.js                   # Theme management (dark/light)
 ├── components/
-│   ├── CustomerSuperPanel.js            # Main panel component with theme support
-│   ├── MegaMenu.js                      # Navigation menu (persistent)
-│   ├── GlobalHeader.js                  # Section header with theme toggle
+│   ├── CustomerSuperPanel.js            # Main panel component
+│   ├── MegaMenu.js                      # Navigation menu
+│   ├── GlobalHeader.js                  # Section header
 │   └── sections/                        # All section components
 │       ├── DashboardHome.js
 │       ├── PriceCharts.js
@@ -111,7 +92,7 @@ assets/js/src/
 │       ├── SalesMetrics.js
 │       └── Advertisements.js
 └── styles/
-    ├── customer-dashboard.scss          # Main styles with CSS variables
+    ├── customer-dashboard.scss          # Main styles
     └── sections/
         ├── _common.scss                 # Common section styles
         ├── _dashboard-home.scss         # Dashboard specific styles

@@ -4,69 +4,21 @@
  * Modern, professional UI inspired by YouTube, Steam, and ChatGPT
  */
 
-// Light Mode Variables
-:root,
-[data-theme="light"] {
-	--primary-color: #2563eb;
-	--primary-color-rgb: 37, 99, 235;
-	--secondary-color: #64748b;
-	--success-color: #10b981;
-	--warning-color: #f59e0b;
-	--danger-color: #ef4444;
-	--bg-primary: #ffffff;
-	--bg-secondary: #f8fafc;
-	--bg-tertiary: #f1f5f9;
-	--text-primary: #1e293b;
-	--text-secondary: #64748b;
-	--border-color: #e2e8f0;
-	--shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-	--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-	--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-	--primary-bg-light: rgba(37, 99, 235, 0.1);
-	--primary-bg-hover: rgba(37, 99, 235, 0.15);
-	--primary-border-hover: rgba(37, 99, 235, 0.3);
-}
-
-// Dark Mode Variables
-[data-theme="dark"] {
-	--primary-color: #3b82f6;
-	--primary-color-rgb: 59, 130, 246;
-	--secondary-color: #94a3b8;
-	--success-color: #10b981;
-	--warning-color: #f59e0b;
-	--danger-color: #ef4444;
-	--bg-primary: #0f172a;
-	--bg-secondary: #1e293b;
-	--bg-tertiary: #334155;
-	--text-primary: #f1f5f9;
-	--text-secondary: #94a3b8;
-	--border-color: #334155;
-	--shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-	--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-	--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
-	--primary-bg-light: rgba(59, 130, 246, 0.1);
-	--primary-bg-hover: rgba(59, 130, 246, 0.15);
-	--primary-border-hover: rgba(59, 130, 246, 0.3);
-}
-
-// SCSS Variables (for use in this file)
-$primary-color: var(--primary-color);
-$secondary-color: var(--secondary-color);
-$success-color: var(--success-color);
-$warning-color: var(--warning-color);
-$danger-color: var(--danger-color);
-$bg-primary: var(--bg-primary);
-$bg-secondary: var(--bg-secondary);
-$bg-tertiary: var(--bg-tertiary);
-$text-primary: var(--text-primary);
-$text-secondary: var(--text-secondary);
-$border-color: var(--border-color);
-$shadow-sm: var(--shadow-sm);
-$shadow-md: var(--shadow-md);
-$shadow-lg: var(--shadow-lg);
-$primary-bg-light: var(--primary-bg-light);
-$primary-bg-hover: var(--primary-bg-hover);
-$primary-border-hover: var(--primary-border-hover);
+// Variables
+$primary-color: #2563eb;
+$secondary-color: #64748b;
+$success-color: #10b981;
+$warning-color: #f59e0b;
+$danger-color: #ef4444;
+$bg-primary: #ffffff;
+$bg-secondary: #f8fafc;
+$bg-tertiary: #f1f5f9;
+$text-primary: #1e293b;
+$text-secondary: #64748b;
+$border-color: #e2e8f0;
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 $transition: all 0.2s ease;
 
 // Loading State
@@ -108,23 +60,20 @@ $transition: all 0.2s ease;
 	* {
 		box-sizing: border-box;
 	}
-	
-	// Smooth scrolling
-	scroll-behavior: smooth;
 }
 
 // Mega Menu
 .tabesh-mega-menu {
 	position: fixed;
 	top: 0;
-	width: 280px;
+	width: 320px;
 	height: 100vh;
 	background: $bg-primary;
 	border-left: 1px solid $border-color;
 	display: flex;
 	flex-direction: column;
 	transform: translateX(100%);
-	transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	transition: transform 0.3s ease;
 	z-index: 1000;
 	box-shadow: $shadow-lg;
 	
@@ -156,11 +105,10 @@ $transition: all 0.2s ease;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		background: $bg-primary;
 		
 		h2 {
 			margin: 0;
-			font-size: 18px;
+			font-size: 20px;
 			font-weight: 600;
 			color: $text-primary;
 		}
@@ -170,18 +118,13 @@ $transition: all 0.2s ease;
 			border: none;
 			cursor: pointer;
 			padding: 8px;
-			border-radius: 8px;
+			border-radius: 6px;
 			transition: $transition;
 			color: $text-secondary;
 			
 			&:hover {
 				background: $bg-tertiary;
 				color: $text-primary;
-			}
-			
-			svg {
-				width: 20px;
-				height: 20px;
 			}
 		}
 	}
@@ -192,29 +135,29 @@ $transition: all 0.2s ease;
 		padding: 16px;
 		
 		.menu-category {
-			margin-bottom: 20px;
+			margin-bottom: 24px;
 			
 			.category-title {
-				font-size: 11px;
+				font-size: 12px;
 				font-weight: 600;
 				text-transform: uppercase;
 				color: $text-secondary;
-				margin: 0 0 8px 0;
-				padding: 0 12px;
+				margin: 0 0 12px 0;
+				padding: 0 8px;
 				letter-spacing: 0.5px;
 			}
 			
 			.category-items {
 				display: flex;
 				flex-direction: column;
-				gap: 2px;
+				gap: 4px;
 			}
 			
 			.menu-item {
 				display: flex;
 				align-items: center;
 				gap: 12px;
-				padding: 10px 12px;
+				padding: 12px 12px;
 				background: transparent;
 				border: none;
 				border-radius: 8px;
@@ -227,8 +170,8 @@ $transition: all 0.2s ease;
 				width: 100%;
 				
 				svg {
-					width: 18px;
-					height: 18px;
+					width: 20px;
+					height: 20px;
 					flex-shrink: 0;
 				}
 				
@@ -238,9 +181,8 @@ $transition: all 0.2s ease;
 				}
 				
 				&.is-active {
-					background: $primary-bg-hover;
+					background: rgba($primary-color, 0.1);
 					color: $primary-color;
-					font-weight: 600;
 				}
 			}
 		}
@@ -249,7 +191,6 @@ $transition: all 0.2s ease;
 	.mega-menu-footer {
 		padding: 16px;
 		border-top: 1px solid $border-color;
-		background: $bg-primary;
 		
 		.user-info {
 			display: flex;
@@ -257,11 +198,10 @@ $transition: all 0.2s ease;
 			align-items: center;
 			
 			.user-avatar {
-				width: 40px;
-				height: 40px;
+				width: 44px;
+				height: 44px;
 				border-radius: 50%;
 				overflow: hidden;
-				border: 2px solid $border-color;
 				
 				img {
 					width: 100%;
@@ -274,27 +214,37 @@ $transition: all 0.2s ease;
 				flex: 1;
 				display: flex;
 				flex-direction: column;
-				overflow: hidden;
 				
 				.user-name {
-					font-size: 13px;
+					font-size: 14px;
 					font-weight: 600;
 					color: $text-primary;
-					white-space: nowrap;
-					overflow: hidden;
-					text-overflow: ellipsis;
 				}
 				
 				.user-email {
-					font-size: 11px;
+					font-size: 12px;
 					color: $text-secondary;
-					white-space: nowrap;
-					overflow: hidden;
-					text-overflow: ellipsis;
 				}
 			}
 		}
 	}
+}
+
+.mega-menu-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 999;
+	backdrop-filter: blur(4px);
+	animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+	from { opacity: 0; }
+	to { opacity: 1; }
 }
 
 // Workspace
@@ -303,16 +253,6 @@ $transition: all 0.2s ease;
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-	
-	// When menu is open, push workspace to make room
-	&.menu-open {
-		margin-right: 280px; // RTL
-		
-		@media (max-width: 768px) {
-			margin-right: 0;
-		}
-	}
 }
 
 // Global Header
@@ -392,16 +332,6 @@ $transition: all 0.2s ease;
 				color: $text-primary;
 			}
 			
-			&.theme-toggle {
-				svg {
-					transition: transform 0.3s ease;
-				}
-				
-				&:hover svg {
-					transform: rotate(20deg);
-				}
-			}
-			
 			svg {
 				width: 20px;
 				height: 20px;
@@ -428,106 +358,6 @@ $transition: all 0.2s ease;
 	flex: 1;
 	padding: 24px;
 	overflow-y: auto;
-	animation: fadeIn 0.3s ease;
-}
-
-// Smooth Animations
-@keyframes fadeIn {
-	from {
-		opacity: 0;
-		transform: translateY(10px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
-}
-
-@keyframes slideIn {
-	from {
-		transform: translateX(-20px);
-		opacity: 0;
-	}
-	to {
-		transform: translateX(0);
-		opacity: 1;
-	}
-}
-
-@keyframes scaleIn {
-	from {
-		transform: scale(0.95);
-		opacity: 0;
-	}
-	to {
-		transform: scale(1);
-		opacity: 1;
-	}
-}
-
-// Responsive Design
-@media (max-width: 1024px) {
-	.tabesh-workspace.menu-open {
-		margin-right: 0;
-	}
-	
-	.tabesh-mega-menu {
-		width: 260px;
-	}
-}
-
-@media (max-width: 768px) {
-	.tabesh-mega-menu {
-		width: 280px;
-		z-index: 1001;
-	}
-	
-	.tabesh-workspace.menu-open {
-		margin-right: 0;
-	}
-	
-	.tabesh-global-header {
-		padding: 12px 16px;
-		
-		.header-title h1 {
-			font-size: 18px;
-		}
-		
-		.header-title svg {
-			width: 20px;
-			height: 20px;
-		}
-	}
-	
-	.tabesh-content {
-		padding: 16px;
-	}
-}
-
-@media (max-width: 480px) {
-	.tabesh-mega-menu {
-		width: 100%;
-		max-width: 320px;
-	}
-	
-	.tabesh-global-header {
-		.header-title h1 {
-			font-size: 16px;
-		}
-		
-		.header-action-btn {
-			padding: 8px;
-			
-			svg {
-				width: 18px;
-				height: 18px;
-			}
-		}
-	}
-	
-	.tabesh-content {
-		padding: 12px;
-	}
 }
 
 // Import section styles

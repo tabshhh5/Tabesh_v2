@@ -58,62 +58,75 @@ const MegaMenu = ( { sections, activeSection, onSectionChange, isOpen, onToggle 
 	};
 
 	return (
-		<div className={ `tabesh-mega-menu ${ isOpen ? 'is-open' : '' } ${ isRTL ? 'is-rtl' : 'is-ltr' }` }>
-			<div className="mega-menu-header">
-				<h2>{ __( 'پنل مشتریان', 'tabesh-v2' ) }</h2>
-				<button
-					className="menu-close-btn"
-					onClick={ onToggle }
-					aria-label={ __( 'بستن منو', 'tabesh-v2' ) }
-				>
-					<Icon icon={ icons.close } />
-				</button>
-			</div>
+		<>
+			<div className={ `tabesh-mega-menu ${ isOpen ? 'is-open' : '' } ${ isRTL ? 'is-rtl' : 'is-ltr' }` }>
+				<div className="mega-menu-header">
+					<h2>{ __( 'پنل مشتریان', 'tabesh-v2' ) }</h2>
+					<button
+						className="menu-close-btn"
+						onClick={ onToggle }
+						aria-label={ __( 'بستن منو', 'tabesh-v2' ) }
+					>
+						<Icon icon={ icons.close } />
+					</button>
+				</div>
 
-			<div className="mega-menu-content">
-				{ menuCategories.map( ( category ) => (
-					<div key={ category.id } className="menu-category">
-						<h3 className="category-title">{ category.title }</h3>
-						<div className="category-items">
-							{ category.items.map( ( sectionId ) => {
-								const section = sections[ sectionId ];
-								if ( ! section ) return null;
+				<div className="mega-menu-content">
+					{ menuCategories.map( ( category ) => (
+						<div key={ category.id } className="menu-category">
+							<h3 className="category-title">{ category.title }</h3>
+							<div className="category-items">
+								{ category.items.map( ( sectionId ) => {
+									const section = sections[ sectionId ];
+									if ( ! section ) return null;
 
-								return (
-									<button
-										key={ section.id }
-										className={ `menu-item ${ activeSection === section.id ? 'is-active' : '' }` }
-										onClick={ () => onSectionChange( section.id ) }
-									>
-										<Icon icon={ getIcon( section.icon ) } />
-										<span>{ section.title }</span>
-									</button>
-								);
-							} ) }
+									return (
+										<button
+											key={ section.id }
+											className={ `menu-item ${ activeSection === section.id ? 'is-active' : '' }` }
+											onClick={ () => onSectionChange( section.id ) }
+										>
+											<Icon icon={ getIcon( section.icon ) } />
+											<span>{ section.title }</span>
+										</button>
+									);
+								} ) }
+							</div>
 						</div>
-					</div>
-				) ) }
-			</div>
+					) ) }
+				</div>
 
-			<div className="mega-menu-footer">
-				<div className="user-info">
-					<div className="user-avatar">
-						<img 
-							src={ window.tabeshCustomerDashboard?.user?.avatarUrl || '' } 
-							alt={ window.tabeshCustomerDashboard?.user?.name || '' }
-						/>
-					</div>
-					<div className="user-details">
-						<span className="user-name">
-							{ window.tabeshCustomerDashboard?.user?.name || __( 'کاربر', 'tabesh-v2' ) }
-						</span>
-						<span className="user-email">
-							{ window.tabeshCustomerDashboard?.user?.email || '' }
-						</span>
+				<div className="mega-menu-footer">
+					<div className="user-info">
+						<div className="user-avatar">
+							<img 
+								src={ window.tabeshCustomerDashboard?.user?.avatarUrl || '' } 
+								alt={ window.tabeshCustomerDashboard?.user?.name || '' }
+							/>
+						</div>
+						<div className="user-details">
+							<span className="user-name">
+								{ window.tabeshCustomerDashboard?.user?.name || __( 'کاربر', 'tabesh-v2' ) }
+							</span>
+							<span className="user-email">
+								{ window.tabeshCustomerDashboard?.user?.email || '' }
+							</span>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+
+			{ isOpen && (
+				<div 
+					className="mega-menu-overlay"
+					onClick={ onToggle }
+					role="button"
+					tabIndex={ 0 }
+					onKeyDown={ ( e ) => e.key === 'Escape' && onToggle() }
+					aria-label={ __( 'بستن منو', 'tabesh-v2' ) }
+				/>
+			) }
+		</>
 	);
 };
 

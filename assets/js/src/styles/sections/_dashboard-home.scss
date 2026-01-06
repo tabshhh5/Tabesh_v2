@@ -16,42 +16,28 @@
 			padding: 20px;
 			display: flex;
 			gap: 16px;
-			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-			animation: scaleIn 0.4s ease;
-			
-			// Staggered animation
-			&:nth-child(1) { animation-delay: 0s; }
-			&:nth-child(2) { animation-delay: 0.1s; }
-			&:nth-child(3) { animation-delay: 0.2s; }
-			&:nth-child(4) { animation-delay: 0.3s; }
+			transition: $transition;
 			
 			&:hover {
-				transform: translateY(-4px);
-				box-shadow: $shadow-lg;
-				border-color: $primary-border-hover;
+				transform: translateY(-2px);
+				box-shadow: $shadow-md;
 			}
 			
 			.stat-icon {
 				width: 48px;
 				height: 48px;
-				background: $primary-bg-light;
+				background: rgba($primary-color, 0.1);
 				border-radius: 12px;
 				display: flex;
 				align-items: center;
 				justify-content: center;
 				color: $primary-color;
 				flex-shrink: 0;
-				transition: all 0.3s ease;
 				
 				svg {
 					width: 24px;
 					height: 24px;
 				}
-			}
-			
-			&:hover .stat-icon {
-				transform: scale(1.1) rotate(5deg);
-				background: $primary-bg-hover;
 			}
 			
 			.stat-content {
@@ -131,7 +117,7 @@
 				transition: $transition;
 				
 				&:hover {
-					background: $bg-tertiary;
+					background: darken($bg-secondary, 3%);
 					cursor: pointer;
 				}
 				
@@ -196,7 +182,8 @@
 				font-weight: 500;
 				
 				&:hover {
-					background: $bg-tertiary;
+					background: darken($bg-secondary, 3%);
+					border-color: darken($border-color, 10%);
 				}
 				
 				&.primary {
@@ -205,7 +192,7 @@
 					border-color: $primary-color;
 					
 					&:hover {
-						filter: brightness(0.9);
+						background: darken($primary-color, 10%);
 					}
 				}
 				
