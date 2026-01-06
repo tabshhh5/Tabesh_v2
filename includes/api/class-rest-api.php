@@ -732,14 +732,12 @@ class Rest_Api {
 		if ( isset( $settings['auth'] ) && is_array( $settings['auth'] ) ) {
 			$sanitized['auth'] = array(
 				'otp_enabled'        => ! empty( $settings['auth']['otp_enabled'] ),
-				'otp_provider'       => sanitize_text_field( $settings['auth']['otp_provider'] ?? 'melipayamak' ),
 				'otp_length'         => absint( $settings['auth']['otp_length'] ?? 5 ),
 				'otp_expiry'         => absint( $settings['auth']['otp_expiry'] ?? 120 ),
 				'replace_woocommerce' => ! empty( $settings['auth']['replace_woocommerce'] ),
 				'require_name'       => ! empty( $settings['auth']['require_name'] ),
 				'allow_corporate'    => ! empty( $settings['auth']['allow_corporate'] ),
 				'auto_create_user'   => ! empty( $settings['auth']['auto_create_user'] ),
-				'min_mobile_length'  => absint( $settings['auth']['min_mobile_length'] ?? 11 ),
 			);
 
 			// Sanitize melipayamak sub-settings.
@@ -751,12 +749,10 @@ class Rest_Api {
 				}
 				
 				$sanitized['auth']['melipayamak'] = array(
-					'username'      => sanitize_text_field( $settings['auth']['melipayamak']['username'] ?? '' ),
+					'username'   => sanitize_text_field( $settings['auth']['melipayamak']['username'] ?? '' ),
 					// Store password as-is to preserve exact characters required by API.
-					'password'      => $password,
-					'sender_number' => sanitize_text_field( $settings['auth']['melipayamak']['sender_number'] ?? '' ),
-					'pattern_id'    => sanitize_text_field( $settings['auth']['melipayamak']['pattern_id'] ?? '' ),
-					'wsdl_url'      => esc_url_raw( $settings['auth']['melipayamak']['wsdl_url'] ?? 'https://rest.payamak-panel.com/api/SendSMS/SendByBaseNumber2' ),
+					'password'   => $password,
+					'pattern_id' => sanitize_text_field( $settings['auth']['melipayamak']['pattern_id'] ?? '' ),
 				);
 			}
 		}
@@ -779,7 +775,6 @@ class Rest_Api {
 							'label'   => sanitize_text_field( $item['label'] ?? '' ),
 							'icon'    => sanitize_text_field( $item['icon'] ?? '' ),
 							'enabled' => ! empty( $item['enabled'] ),
-							'order'   => absint( $item['order'] ?? 0 ),
 						);
 					}
 				}
