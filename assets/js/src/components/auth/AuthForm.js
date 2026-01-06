@@ -4,33 +4,6 @@ import apiFetch from '@wordpress/api-fetch';
 import OTPInput from './OTPInput';
 import './auth-form.scss';
 
-// Constants for digit normalization
-const PERSIAN_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
-const ARABIC_DIGITS = '٠١٢٣٤٥٦٧٨٩';
-const ENGLISH_DIGITS = '0123456789';
-
-/**
- * Normalize Persian/Arabic digits to English.
- * 
- * @param {string} value Input value.
- * @return {string} Normalized value.
- */
-const normalizePersianDigits = (value) => {
-	if (!value) return '';
-	
-	return value.split('').map(char => {
-		const persianIndex = PERSIAN_DIGITS.indexOf(char);
-		if (persianIndex !== -1) {
-			return ENGLISH_DIGITS[persianIndex];
-		}
-		const arabicIndex = ARABIC_DIGITS.indexOf(char);
-		if (arabicIndex !== -1) {
-			return ENGLISH_DIGITS[arabicIndex];
-		}
-		return char;
-	}).join('');
-};
-
 /**
  * Modern Authentication Form Component.
  * 
@@ -66,18 +39,6 @@ const AuthForm = () => {
 	const backgroundImageUrl = authSettings.backgroundImageUrl || '';
 	const animationEnabled = authSettings.animationEnabled !== false;
 	const formAnimation = authSettings.formAnimation || 'slideUp';
-
-	/**
-	 * Handle mobile number input change with digit normalization.
-	 * 
-	 * @param {Event} e Input change event.
-	 */
-	const handleMobileChange = (e) => {
-		const normalizedValue = normalizePersianDigits(e.target.value);
-		// Only allow digits and limit to 11 characters
-		const cleanValue = normalizedValue.replace(/\D/g, '').slice(0, 11);
-		setMobile(cleanValue);
-	};
 
 	/**
 	 * Handle mobile number submission.
@@ -142,11 +103,6 @@ const AuthForm = () => {
 	const handleOtpVerification = async (otpValue) => {
 		setLoading(true);
 		setMessage({ text: '', type: '' });
-		
-		// Store OTP value in state to fix registration error when new users
-		// complete name/lastname fields after OTP verification. Without this,
-		// the registration form would have an empty OTP value when submitting.
-		setOtp(otpValue);
 
 		const data = {
 			mobile,
@@ -323,34 +279,33 @@ const AuthForm = () => {
 						</label>
 						<input
 							type="text"
-							id="mobile"
-							value={mobile}
-							onChange={handleMobileChange}
-							placeholder="09xxxxxxxxx"
-							pattern="09[0-9]{9}"
-							maxLength="11"
-							inputMode="numeric"
-							dir="ltr"
-							autoComplete="tel"
-							required
-							disabled={loading}
-							className="tabesh-input"
-						/>
-					</div>
+									id="mobile"
+									value={mobile}
+									onChange={(e) => setMobile(e.target.value)}
+									placeholder="09xxxxxxxxx"
+									pattern="09[0-9]{9}"
+									maxLength="11"
+									inputMode="numeric"
+									dir="ltr"
+									required
+									disabled={loading}
+									className="tabesh-input"
+								/>
+							</div>
 
-					<button
-						type="submit"
-						className="tabesh-btn tabesh-btn-primary"
-						disabled={loading}
-					>
-						{loading ? (
-							<>
-								<span className="tabesh-spinner-small"></span>
-								{__('در حال ارسال...', 'tabesh-v2')}
-							</>
-						) : (
-							<>
-								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+							<button
+								type="submit"
+								className="tabesh-btn tabesh-btn-primary"
+								disabled={loading}
+							>
+								{loading ? (
+									<>
+										<span className="tabesh-spinner-small"></span>
+										{__('در حال ارسال...', 'tabesh-v2')}
+									</>
+								) : (
+									<>
+										<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
 											<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
 										</svg>
 										{__('دریافت کد تأیید', 'tabesh-v2')}
