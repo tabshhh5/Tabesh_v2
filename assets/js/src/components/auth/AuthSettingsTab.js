@@ -15,7 +15,7 @@ const AuthSettingsTab = () => {
 	const [saving, setSaving] = useState(false);
 	const [message, setMessage] = useState({ text: '', type: '' });
 	
-	// Settings state
+	// Settings state - using snake_case to match backend API
 	const [settings, setSettings] = useState({
 		// Template
 		template: 'minimal',
@@ -46,15 +46,15 @@ const AuthSettingsTab = () => {
 		animationEnabled: true,
 		formAnimation: 'slideUp',
 		
-		// OTP Settings
-		otpLength: 5,
-		otpExpiry: 120,
+		// OTP Settings - using snake_case to match backend
+		otp_length: 5,
+		otp_expiry: 120,
 		autoSubmitOtp: true,
 		
-		// Registration
-		requireName: true,
-		allowCorporate: true,
-		autoCreateUser: true,
+		// Registration - using snake_case to match backend
+		require_name: true,
+		allow_corporate: true,
+		auto_create_user: true,
 	});
 
 	/**
@@ -157,12 +157,12 @@ const AuthSettingsTab = () => {
 				backgroundImageUrl: '',
 				animationEnabled: true,
 				formAnimation: 'slideUp',
-				otpLength: 5,
-				otpExpiry: 120,
+				otp_length: 5,
+				otp_expiry: 120,
 				autoSubmitOtp: true,
-				requireName: true,
-				allowCorporate: true,
-				autoCreateUser: true,
+				require_name: true,
+				allow_corporate: true,
+				auto_create_user: true,
 			});
 			setMessage({
 				text: __('تنظیمات به حالت پیش‌فرض بازگشت. برای ذخیره کلیک کنید.', 'tabesh-v2'),
@@ -420,8 +420,8 @@ const AuthSettingsTab = () => {
 							<PanelRow>
 								<SelectControl
 									label={__('تعداد ارقام کد', 'tabesh-v2')}
-									value={settings.otpLength}
-									onChange={(value) => updateSetting('otpLength', parseInt(value))}
+									value={settings.otp_length}
+									onChange={(value) => updateSetting('otp_length', parseInt(value))}
 									options={[
 										{ label: '4', value: 4 },
 										{ label: '5', value: 5 },
@@ -433,8 +433,8 @@ const AuthSettingsTab = () => {
 							<PanelRow>
 								<RangeControl
 									label={__('مدت اعتبار (ثانیه)', 'tabesh-v2')}
-									value={settings.otpExpiry}
-									onChange={(value) => updateSetting('otpExpiry', value)}
+									value={settings.otp_expiry}
+									onChange={(value) => updateSetting('otp_expiry', value)}
 									min={60}
 									max={600}
 									step={30}
@@ -455,8 +455,8 @@ const AuthSettingsTab = () => {
 							<PanelRow>
 								<ToggleControl
 									label={__('ایجاد خودکار کاربر', 'tabesh-v2')}
-									checked={settings.autoCreateUser}
-									onChange={(value) => updateSetting('autoCreateUser', value)}
+									checked={settings.auto_create_user}
+									onChange={(value) => updateSetting('auto_create_user', value)}
 									help={__('کاربران جدید به صورت خودکار ثبت‌نام شوند', 'tabesh-v2')}
 								/>
 							</PanelRow>
@@ -464,16 +464,16 @@ const AuthSettingsTab = () => {
 							<PanelRow>
 								<ToggleControl
 									label={__('نام و نام خانوادگی اجباری', 'tabesh-v2')}
-									checked={settings.requireName}
-									onChange={(value) => updateSetting('requireName', value)}
+									checked={settings.require_name}
+									onChange={(value) => updateSetting('require_name', value)}
 								/>
 							</PanelRow>
 
 							<PanelRow>
 								<ToggleControl
 									label={__('فعال‌سازی ثبت‌نام حقوقی', 'tabesh-v2')}
-									checked={settings.allowCorporate}
-									onChange={(value) => updateSetting('allowCorporate', value)}
+									checked={settings.allow_corporate}
+									onChange={(value) => updateSetting('allow_corporate', value)}
 									help={__('امکان ثبت‌نام به عنوان شخص حقوقی', 'tabesh-v2')}
 								/>
 							</PanelRow>
