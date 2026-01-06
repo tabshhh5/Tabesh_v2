@@ -194,8 +194,10 @@ class Customer_Dashboard_Shortcode {
 	 * @return void
 	 */
 	public function enqueue_dashboard_assets() {
-		// Always enqueue when this method is called (shortcode is being used).
-		// No need to check context since the shortcode itself controls rendering.
+		// Check if we're in the right context.
+		if ( ! is_singular() && ! is_page() ) {
+			return;
+		}
 
 		$asset_file = TABESH_V2_PLUGIN_DIR . 'assets/js/build/customer-dashboard.asset.php';
 
