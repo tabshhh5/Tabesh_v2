@@ -7,7 +7,6 @@ import ProductParametersTab from '../components/ProductParametersTab';
 import PricingSettingsTab from '../components/PricingSettingsTab';
 import SMSSettingsTab from '../components/SMSSettingsTab';
 import LoadingSpinner from '../components/LoadingSpinner';
-import AuthSettingsTab from '../components/auth/AuthSettingsTab';
 import {
 	FirewallSettingsTab,
 	FileSettingsTab,
@@ -118,11 +117,6 @@ const SettingsPanel = () => {
 					onChange={ handleSettingsChange }
 				/>
 			),
-		},
-		{
-			id: 'auth',
-			title: __( 'ورود و ثبت‌نام', 'tabesh-v2' ),
-			content: <AuthSettingsTab />,
 		},
 		{
 			id: 'firewall',
