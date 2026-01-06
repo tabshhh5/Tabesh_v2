@@ -29,12 +29,6 @@ class Dashboard_Integration {
 		
 		// Replace WooCommerce account menu.
 		add_action( 'woocommerce_before_account_navigation', array( $this, 'maybe_hide_woocommerce_menu' ), 1 );
-		
-		// Override template for dashboard pages to render blank page.
-		add_filter( 'template_include', array( $this, 'dashboard_blank_template' ), 999 );
-		
-		// Add custom styles to hide header/footer on dashboard pages.
-		add_action( 'wp_head', array( $this, 'add_dashboard_page_styles' ), 999 );
 	}
 
 	/**
@@ -56,7 +50,7 @@ class Dashboard_Integration {
 		$dashboard_page_id = $dashboard_settings['dashboard_page_id'] ?? 0;
 
 		// Check if we're on the dashboard page by slug.
-		$current_url = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+		$current_url = $_SERVER['REQUEST_URI'] ?? '';
 		$is_dashboard_url = false;
 
 		// Check by URL slug.
@@ -249,136 +243,5 @@ class Dashboard_Integration {
 		}
 
 		return $orders_data;
-	}
-
-	/**
-	 * Override template for dashboard pages to render blank page.
-	 *
-	 * @param string $template Path to the template.
-	 * @return string Modified template path.
-	 */
-	public function dashboard_blank_template( $template ) {
-		global $tabesh_is_dashboard_page;
-		
-		// Check if this is a dashboard page.
-		if ( ! empty( $tabesh_is_dashboard_page ) ) {
-			// Use our blank template.
-			$blank_template = TABESH_V2_PLUGIN_DIR . 'templates/dashboard-blank.php';
-			
-			// If our template exists, use it.
-			if ( file_exists( $blank_template ) ) {
-				return $blank_template;
-			}
-		}
-		
-		return $template;
-	}
-
-	/**
-	 * Add custom styles to hide header/footer on dashboard pages.
-	 *
-	 * @return void
-	 */
-	public function add_dashboard_page_styles() {
-		global $tabesh_is_dashboard_page;
-		
-		// Only add styles on dashboard pages.
-		if ( empty( $tabesh_is_dashboard_page ) ) {
-			return;
-		}
-		
-		// Add inline styles to an existing WordPress style handle.
-		// We use 'wp-block-library' as it's always loaded on the frontend.
-		$custom_css = '
-			/* Hide all theme headers, footers, and sidebars */
-			body.tabesh-dashboard-blank-page {
-				margin: 0 !important;
-				padding: 0 !important;
-				overflow-x: hidden;
-			}
-			
-			/* Hide common theme elements */
-			body.tabesh-dashboard-blank-page header,
-			body.tabesh-dashboard-blank-page .site-header,
-			body.tabesh-dashboard-blank-page .header,
-			body.tabesh-dashboard-blank-page #header,
-			body.tabesh-dashboard-blank-page .masthead,
-			body.tabesh-dashboard-blank-page footer,
-			body.tabesh-dashboard-blank-page .site-footer,
-			body.tabesh-dashboard-blank-page .footer,
-			body.tabesh-dashboard-blank-page #footer,
-			body.tabesh-dashboard-blank-page .sidebar,
-			body.tabesh-dashboard-blank-page aside,
-			body.tabesh-dashboard-blank-page #sidebar,
-			body.tabesh-dashboard-blank-page .widget-area,
-			body.tabesh-dashboard-blank-page nav.navigation,
-			body.tabesh-dashboard-blank-page .breadcrumbs,
-			body.tabesh-dashboard-blank-page .site-navigation,
-			body.tabesh-dashboard-blank-page #site-navigation {
-				display: none !important;
-			}
-			
-			/* Ensure main content takes full width */
-			body.tabesh-dashboard-blank-page .site-content,
-			body.tabesh-dashboard-blank-page #content,
-			body.tabesh-dashboard-blank-page main,
-			body.tabesh-dashboard-blank-page .content-area {
-				width: 100% !important;
-				max-width: 100% !important;
-				margin: 0 !important;
-				padding: 0 !important;
-			}
-			
-			/* Remove any container padding/margins */
-			body.tabesh-dashboard-blank-page .container,
-			body.tabesh-dashboard-blank-page .site-main {
-				max-width: 100% !important;
-				width: 100% !important;
-				padding: 0 !important;
-				margin: 0 !important;
-			}
-			
-			/* Ensure dashboard wrapper fills screen */
-			body.tabesh-dashboard-blank-page .tabesh-customer-dashboard-wrapper,
-			body.tabesh-dashboard-blank-page .tabesh-auth-container {
-				min-height: 100vh;
-				width: 100%;
-			}
-			
-			/* For authentication pages, center the form */
-			body.tabesh-dashboard-blank-page .tabesh-auth-container {
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				background: #f8fafc;
-				padding: 20px;
-			}
-			
-			/* Full screen dashboard */
-			body.tabesh-dashboard-blank-page .tabesh-super-panel {
-				position: fixed;
-				top: 0;
-				left: 0;
-				right: 0;
-				bottom: 0;
-				width: 100vw;
-				height: 100vh;
-				overflow: hidden;
-			}
-		';
-		
-		// Check if wp-block-library is enqueued, otherwise use any available handle.
-		if ( wp_style_is( 'wp-block-library', 'enqueued' ) ) {
-			wp_add_inline_style( 'wp-block-library', $custom_css );
-		} else {
-			// Fallback: output styles directly in head as last resort.
-			add_action(
-				'wp_head',
-				function () use ( $custom_css ) {
-					echo '<style type="text/css">' . $custom_css . '</style>';
-				},
-				999
-			);
-		}
 	}
 }
