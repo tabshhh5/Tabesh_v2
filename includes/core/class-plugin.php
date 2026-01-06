@@ -111,12 +111,6 @@ class Plugin {
 		// Initialize REST API.
 		$this->rest_api = new \Tabesh_v2\Api\Rest_Api();
 
-		// Initialize Dashboard Integration.
-		new \Tabesh_v2\Helpers\Dashboard_Integration();
-
-		// Initialize Auth Handler.
-		new \Tabesh_v2\Helpers\Auth_Handler();
-
 		// Initialize Customer Dashboard Shortcode.
 		new \Tabesh_v2\Shortcodes\Customer_Dashboard_Shortcode();
 
