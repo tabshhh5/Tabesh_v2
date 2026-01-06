@@ -235,6 +235,7 @@
 			
 			&:hover {
 				background: $bg-tertiary;
+				border-color: darken($border-color, 10%);
 			}
 		}
 	}
