@@ -6,6 +6,7 @@ import AISettingsTab from '../components/AISettingsTab';
 import ProductParametersTab from '../components/ProductParametersTab';
 import PricingSettingsTab from '../components/PricingSettingsTab';
 import SMSSettingsTab from '../components/SMSSettingsTab';
+import OTPSettingsTab from '../components/OTPSettingsTab';
 import LoadingSpinner from '../components/LoadingSpinner';
 import {
 	FirewallSettingsTab,
@@ -78,6 +79,11 @@ const SettingsPanel = () => {
 	}
 
 	const tabs = [
+		{
+			id: 'otp',
+			title: __( 'ورود و ثبت نام', 'tabesh-v2' ),
+			content: <OTPSettingsTab />,
+		},
 		{
 			id: 'ai',
 			title: __( 'تنظیمات هوش مصنوعی', 'tabesh-v2' ),

@@ -26,7 +26,7 @@ class Database {
 	 *
 	 * @var string
 	 */
-	private $db_version = '1.3.0';
+	private $db_version = '1.4.0';
 
 	/**
 	 * Constructor.
@@ -74,6 +74,10 @@ class Database {
 		$pricing_service_binding_restrictions_table = $this->wpdb->prefix . 'tabesh_book_pricing_service_binding_restrictions';
 		$pricing_size_limits_table = $this->wpdb->prefix . 'tabesh_book_pricing_size_limits';
 		$pricing_license_table = $this->wpdb->prefix . 'tabesh_book_pricing_license';
+
+		// OTP and authentication tables.
+		$otp_codes_table = $this->wpdb->prefix . 'tabesh_otp_codes';
+		$rate_limit_table = $this->wpdb->prefix . 'tabesh_rate_limit';
 
 		$sql = array();
 
@@ -342,6 +346,34 @@ class Database {
 			UNIQUE KEY license_type_id (license_type_id)
 		) {$charset_collate};";
 
+		// Create OTP codes table (کدهای یکبار مصرف).
+		$sql[] = "CREATE TABLE IF NOT EXISTS {$otp_codes_table} (
+			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			phone_number varchar(20) NOT NULL,
+			otp_code varchar(10) NOT NULL,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			expires_at datetime NOT NULL,
+			verified tinyint(1) NOT NULL DEFAULT 0,
+			attempts int(11) NOT NULL DEFAULT 0,
+			PRIMARY KEY (id),
+			KEY phone_number (phone_number),
+			KEY expires_at (expires_at),
+			KEY verified (verified)
+		) {$charset_collate};";
+
+		// Create rate limit table (محدودیت تعداد درخواست).
+		$sql[] = "CREATE TABLE IF NOT EXISTS {$rate_limit_table} (
+			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			identifier varchar(100) NOT NULL,
+			action_type varchar(50) NOT NULL,
+			request_count int(11) NOT NULL DEFAULT 1,
+			first_request_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			last_request_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			UNIQUE KEY identifier_action (identifier, action_type),
+			KEY last_request_at (last_request_at)
+		) {$charset_collate};";
+
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 		foreach ( $sql as $query ) {
@@ -378,6 +410,8 @@ class Database {
 			$this->wpdb->prefix . 'tabesh_book_pricing_service_binding_restrictions',
 			$this->wpdb->prefix . 'tabesh_book_pricing_size_limits',
 			$this->wpdb->prefix . 'tabesh_book_pricing_license',
+			$this->wpdb->prefix . 'tabesh_otp_codes',
+			$this->wpdb->prefix . 'tabesh_rate_limit',
 		);
 
 		foreach ( $tables as $table ) {
@@ -556,5 +590,23 @@ class Database {
 	 */
 	public function get_pricing_license_table() {
 		return $this->wpdb->prefix . 'tabesh_book_pricing_license';
+	}
+
+	/**
+	 * Get OTP codes table name.
+	 *
+	 * @return string
+	 */
+	public function get_otp_codes_table() {
+		return $this->wpdb->prefix . 'tabesh_otp_codes';
+	}
+
+	/**
+	 * Get rate limit table name.
+	 *
+	 * @return string
+	 */
+	public function get_rate_limit_table() {
+		return $this->wpdb->prefix . 'tabesh_rate_limit';
 	}
 }
