@@ -1,0 +1,300 @@
+/* Tabesh Authentication Styles */
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+body.tabesh-auth-page {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	direction: rtl;
+}
+
+.tabesh-auth-container {
+	width: 100%;
+	max-width: 450px;
+	margin: 0 auto;
+}
+
+.tabesh-auth-card {
+	background: #ffffff;
+	border-radius: 16px;
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+	padding: 40px;
+	animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.tabesh-auth-header {
+	text-align: center;
+	margin-bottom: 32px;
+}
+
+.tabesh-auth-header h1 {
+	font-size: 28px;
+	font-weight: 700;
+	color: #1a1a1a;
+	margin-bottom: 8px;
+}
+
+.tabesh-auth-header p {
+	font-size: 14px;
+	color: #666;
+}
+
+.tabesh-auth-error {
+	background: #fee;
+	border: 1px solid #fcc;
+	border-radius: 8px;
+	padding: 12px 16px;
+	margin-bottom: 20px;
+	color: #c00;
+	font-size: 14px;
+	text-align: center;
+}
+
+.tabesh-auth-form {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.tabesh-form-group {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.tabesh-form-group label {
+	font-size: 14px;
+	font-weight: 600;
+	color: #333;
+}
+
+.tabesh-form-group input {
+	padding: 14px 16px;
+	border: 2px solid #e0e0e0;
+	border-radius: 8px;
+	font-size: 16px;
+	transition: all 0.2s;
+	background: #fafafa;
+}
+
+.tabesh-form-group input:focus {
+	outline: none;
+	border-color: #667eea;
+	background: #ffffff;
+}
+
+.tabesh-form-group input:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.tabesh-btn {
+	padding: 14px 24px;
+	border: none;
+	border-radius: 8px;
+	font-size: 16px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s;
+	text-align: center;
+}
+
+.tabesh-btn-primary {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: #ffffff;
+}
+
+.tabesh-btn-primary:hover:not(:disabled) {
+	transform: translateY(-2px);
+	box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.tabesh-btn-primary:active:not(:disabled) {
+	transform: translateY(0);
+}
+
+.tabesh-btn-primary:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.tabesh-btn-link {
+	background: none;
+	border: none;
+	color: #667eea;
+	font-size: 14px;
+	cursor: pointer;
+	padding: 8px;
+	transition: color 0.2s;
+}
+
+.tabesh-btn-link:hover:not(:disabled) {
+	color: #764ba2;
+	text-decoration: underline;
+}
+
+.tabesh-btn-link:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.tabesh-otp-info,
+.tabesh-register-info {
+	text-align: center;
+	padding: 16px;
+	background: #f8f9fa;
+	border-radius: 8px;
+	margin-bottom: 20px;
+}
+
+.tabesh-otp-info p,
+.tabesh-register-info p {
+	font-size: 14px;
+	color: #666;
+	line-height: 1.6;
+}
+
+.tabesh-otp-info strong {
+	color: #333;
+	font-weight: 600;
+}
+
+.tabesh-auth-actions {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 12px;
+}
+
+.tabesh-timer {
+	font-size: 14px;
+	color: #999;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	body.tabesh-auth-page {
+		padding: 16px;
+	}
+
+	.tabesh-auth-card {
+		padding: 28px 24px;
+	}
+
+	.tabesh-auth-header h1 {
+		font-size: 24px;
+	}
+
+	.tabesh-form-group input {
+		font-size: 16px; /* Prevent zoom on iOS */
+	}
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+	body.tabesh-auth-page {
+		background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+	}
+
+	.tabesh-auth-card {
+		background: #2a2a3e;
+	}
+
+	.tabesh-auth-header h1 {
+		color: #ffffff;
+	}
+
+	.tabesh-auth-header p {
+		color: #b0b0b0;
+	}
+
+	.tabesh-form-group label {
+		color: #e0e0e0;
+	}
+
+	.tabesh-form-group input {
+		background: #1a1a2e;
+		border-color: #444;
+		color: #ffffff;
+	}
+
+	.tabesh-form-group input:focus {
+		background: #2a2a3e;
+		border-color: #667eea;
+	}
+
+	.tabesh-otp-info,
+	.tabesh-register-info {
+		background: #1a1a2e;
+	}
+
+	.tabesh-otp-info p,
+	.tabesh-register-info p {
+		color: #b0b0b0;
+	}
+
+	.tabesh-otp-info strong {
+		color: #ffffff;
+	}
+
+	.tabesh-timer {
+		color: #888;
+	}
+}
+
+/* RTL Support */
+[dir="ltr"] .tabesh-form-group input {
+	text-align: left;
+}
+
+/* Accessibility */
+.tabesh-form-group input:focus-visible {
+	outline: 2px solid #667eea;
+	outline-offset: 2px;
+}
+
+/* Loading state */
+.tabesh-btn:disabled {
+	position: relative;
+}
+
+.tabesh-btn:disabled::after {
+	content: '';
+	position: absolute;
+	width: 16px;
+	height: 16px;
+	top: 50%;
+	left: 50%;
+	margin-left: -8px;
+	margin-top: -8px;
+	border: 2px solid rgba(255, 255, 255, 0.3);
+	border-top-color: #ffffff;
+	border-radius: 50%;
+	animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
