@@ -1,6 +1,9 @@
 import { __ } from '@wordpress/i18n';
+import { useTheme } from './ThemeProvider';
 
 const Header = ({ user, onMenuToggle, onSidebarToggle }) => {
+	const { theme, toggleTheme, isDark } = useTheme();
+
 	return (
 		<header className="tabesh-header">
 			<div className="tabesh-header-left">
@@ -17,6 +20,15 @@ const Header = ({ user, onMenuToggle, onSidebarToggle }) => {
 			</div>
 
 			<div className="tabesh-header-right">
+				<button
+					className="tabesh-icon-btn"
+					onClick={toggleTheme}
+					aria-label={__('Toggle theme', 'tabesh-v2')}
+					title={isDark ? __('Switch to light mode', 'tabesh-v2') : __('Switch to dark mode', 'tabesh-v2')}
+				>
+					<span className={`dashicons ${isDark ? 'dashicons-admin-appearance' : 'dashicons-admin-customizer'}`}></span>
+				</button>
+
 				<button
 					className="tabesh-icon-btn"
 					onClick={onMenuToggle}

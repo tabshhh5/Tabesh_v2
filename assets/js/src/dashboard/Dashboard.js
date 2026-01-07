@@ -1,5 +1,6 @@
 import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { ThemeProvider } from './ThemeProvider';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import MegaMenu from './MegaMenu';
@@ -63,36 +64,38 @@ const Dashboard = () => {
 	};
 
 	return (
-		<div className="tabesh-dashboard">
-			<Header
-				user={user}
-				onMenuToggle={() => setIsMegaMenuOpen(!isMegaMenuOpen)}
-				onSidebarToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-			/>
+		<ThemeProvider>
+			<div className="tabesh-dashboard">
+				<Header
+					user={user}
+					onMenuToggle={() => setIsMegaMenuOpen(!isMegaMenuOpen)}
+					onSidebarToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+				/>
 
-			<div className="tabesh-dashboard-content">
-				{isSidebarOpen && (
-					<Sidebar
-						user={user}
-						activeView={activeView}
-						onViewChange={setActiveView}
-						role={getUserRole()}
-					/>
-				)}
+				<div className="tabesh-dashboard-content">
+					{isSidebarOpen && (
+						<Sidebar
+							user={user}
+							activeView={activeView}
+							onViewChange={setActiveView}
+							role={getUserRole()}
+						/>
+					)}
 
-				<Workspace>
-					{renderRolePanel()}
-				</Workspace>
+					<Workspace>
+						{renderRolePanel()}
+					</Workspace>
 
-				{isMegaMenuOpen && (
-					<MegaMenu
-						user={user}
-						role={getUserRole()}
-						onClose={() => setIsMegaMenuOpen(false)}
-					/>
-				)}
+					{isMegaMenuOpen && (
+						<MegaMenu
+							user={user}
+							role={getUserRole()}
+							onClose={() => setIsMegaMenuOpen(false)}
+						/>
+					)}
+				</div>
 			</div>
-		</div>
+		</ThemeProvider>
 	);
 };
 
