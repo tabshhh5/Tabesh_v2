@@ -405,8 +405,8 @@ class Auth_Controller {
 			return $redirect_to;
 		}
 
-		// Don't redirect admins accessing admin area.
-		if ( user_can( $current_user, 'manage_options' ) && is_admin() ) {
+		// Don't redirect admins if they're trying to access admin area.
+		if ( user_can( $current_user, 'manage_options' ) && strpos( $redirect_to, 'wp-admin' ) !== false ) {
 			return $redirect_to;
 		}
 
