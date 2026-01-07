@@ -46,6 +46,7 @@ const OTPSettingsTab = () => {
 			}
 		} catch (err) {
 			console.error('Failed to load settings:', err);
+			setError(__('Failed to load settings. Please refresh the page and try again.', 'tabesh-v2'));
 		}
 	};
 

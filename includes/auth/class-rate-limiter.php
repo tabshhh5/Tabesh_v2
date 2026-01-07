@@ -156,9 +156,10 @@ class Rate_Limiter {
 	private function cleanup_old_entries( $time_window ) {
 		$cutoff_time = gmdate( 'Y-m-d H:i:s', time() - $time_window );
 
+		// Use wpdb->prepare for safe SQL with table name already validated in constructor.
 		$this->wpdb->query(
 			$this->wpdb->prepare(
-				"DELETE FROM {$this->table_name} WHERE last_request_at < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"DELETE FROM `{$this->table_name}` WHERE last_request_at < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$cutoff_time
 			)
 		);

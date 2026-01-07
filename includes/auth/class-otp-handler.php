@@ -105,28 +105,30 @@ class OTP_Handler {
 	private function generate_otp() {
 		try {
 			// Use random_bytes for cryptographic security.
-			$bytes = random_bytes( ceil( $this->otp_length / 2 ) );
-			$otp = substr( bin2hex( $bytes ), 0, $this->otp_length );
+			$max = (int) pow( 10, $this->otp_length ) - 1;
+			$min = (int) pow( 10, $this->otp_length - 1 );
 			
-			// Ensure all numeric.
-			$otp = preg_replace( '/[^0-9]/', '', $otp );
+			// Generate random number in range.
+			$bytes = random_bytes( 4 );
+			$random = abs( unpack( 'l', $bytes )[1] );
+			$otp = $min + ( $random % ( $max - $min + 1 ) );
 			
-			// If not enough digits, pad with random numbers.
-			while ( strlen( $otp ) < $this->otp_length ) {
-				$otp .= wp_rand( 0, 9 );
-			}
-			
-			return substr( $otp, 0, $this->otp_length );
+			return str_pad( (string) $otp, $this->otp_length, '0', STR_PAD_LEFT );
 		} catch ( \Exception $e ) {
 			// Fallback to openssl_random_pseudo_bytes.
-			$bytes = openssl_random_pseudo_bytes( ceil( $this->otp_length / 2 ), $strong );
+			$bytes = openssl_random_pseudo_bytes( 4, $strong );
 			if ( $strong ) {
-				$otp = substr( bin2hex( $bytes ), 0, $this->otp_length );
-				return preg_replace( '/[^0-9]/', wp_rand( 0, 9 ), $otp );
+				$random = abs( unpack( 'l', $bytes )[1] );
+				$max = (int) pow( 10, $this->otp_length ) - 1;
+				$min = (int) pow( 10, $this->otp_length - 1 );
+				$otp = $min + ( $random % ( $max - $min + 1 ) );
+				return str_pad( (string) $otp, $this->otp_length, '0', STR_PAD_LEFT );
 			}
 			
-			// Last resort fallback.
-			return str_pad( (string) wp_rand( 0, pow( 10, $this->otp_length ) - 1 ), $this->otp_length, '0', STR_PAD_LEFT );
+			// Last resort fallback - use wp_rand.
+			$max = (int) pow( 10, $this->otp_length ) - 1;
+			$min = (int) pow( 10, $this->otp_length - 1 );
+			return (string) wp_rand( $min, $max );
 		}
 	}
 
