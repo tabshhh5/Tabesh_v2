@@ -62,6 +62,9 @@ class Auth_Controller {
 		// Handle template redirect.
 		add_action( 'template_redirect', array( $this, 'handle_template_redirect' ) );
 
+		// WooCommerce redirects.
+		$this->setup_woocommerce_redirects();
+
 		// Schedule cleanup cron job.
 		if ( ! wp_next_scheduled( 'tabesh_v2_cleanup_expired_otps' ) ) {
 			wp_schedule_event( time(), 'hourly', 'tabesh_v2_cleanup_expired_otps' );
@@ -357,5 +360,78 @@ class Auth_Controller {
 			'success' => true,
 			'message' => __( 'Login successful.', 'tabesh-v2' ),
 		);
+	}
+
+	/**
+	 * Setup WooCommerce redirects to custom panel.
+	 *
+	 * @return void
+	 */
+	private function setup_woocommerce_redirects() {
+		$settings = get_option( 'tabesh_v2_settings', array() );
+		
+		// Check if WooCommerce redirects are enabled.
+		if ( ! isset( $settings['panel']['redirect_woocommerce'] ) || ! $settings['panel']['redirect_woocommerce'] ) {
+			return;
+		}
+
+		// Redirect WooCommerce login to our panel.
+		add_filter( 'woocommerce_login_redirect', array( $this, 'redirect_after_login' ), 10, 2 );
+		
+		// Redirect WooCommerce registration to our panel.
+		add_filter( 'woocommerce_registration_redirect', array( $this, 'redirect_after_login' ), 10, 2 );
+		
+		// Redirect WordPress login to our panel.
+		add_filter( 'login_redirect', array( $this, 'redirect_after_login' ), 10, 3 );
+		
+		// Redirect WooCommerce my-account pages to our panel.
+		add_action( 'template_redirect', array( $this, 'redirect_my_account_to_panel' ), 5 );
+	}
+
+	/**
+	 * Redirect after login to custom panel.
+	 *
+	 * @param string $redirect_to Redirect URL.
+	 * @param mixed  $user User object or requested redirect.
+	 * @param mixed  $user_obj User object (for login_redirect hook).
+	 * @return string Modified redirect URL.
+	 */
+	public function redirect_after_login( $redirect_to, $user = null, $user_obj = null ) {
+		// Use $user_obj if available (from login_redirect hook), otherwise use $user.
+		$current_user = $user_obj instanceof \WP_User ? $user_obj : $user;
+		
+		// If not a valid user object, return original redirect.
+		if ( ! $current_user instanceof \WP_User ) {
+			return $redirect_to;
+		}
+
+		// Don't redirect admins accessing admin area.
+		if ( user_can( $current_user, 'manage_options' ) && is_admin() ) {
+			return $redirect_to;
+		}
+
+		// Redirect to custom panel.
+		return $this->get_panel_url();
+	}
+
+	/**
+	 * Redirect WooCommerce my-account pages to custom panel.
+	 *
+	 * @return void
+	 */
+	public function redirect_my_account_to_panel() {
+		// Check if WooCommerce is active.
+		if ( ! function_exists( 'is_account_page' ) ) {
+			return;
+		}
+
+		// Check if we're on a WooCommerce my-account page.
+		if ( ! is_account_page() || is_user_logged_in() === false ) {
+			return;
+		}
+
+		// Redirect to custom panel.
+		wp_safe_redirect( $this->get_panel_url() );
+		exit;
 	}
 }
