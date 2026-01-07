@@ -50,6 +50,20 @@ class Plugin {
 	private $rest_api;
 
 	/**
+	 * Auth API instance.
+	 *
+	 * @var \Tabesh_v2\Api\Auth_Api
+	 */
+	private $auth_api;
+
+	/**
+	 * Auth Controller instance.
+	 *
+	 * @var \Tabesh_v2\Auth\Auth_Controller
+	 */
+	private $auth_controller;
+
+	/**
 	 * Get plugin instance.
 	 *
 	 * @return Plugin
@@ -110,6 +124,12 @@ class Plugin {
 
 		// Initialize REST API.
 		$this->rest_api = new \Tabesh_v2\Api\Rest_Api();
+
+		// Initialize Auth API.
+		$this->auth_api = new \Tabesh_v2\Api\Auth_Api();
+
+		// Initialize Auth Controller.
+		$this->auth_controller = new \Tabesh_v2\Auth\Auth_Controller();
 
 		// Initialize Admin (only in admin area).
 		if ( is_admin() ) {
@@ -188,7 +208,7 @@ class Plugin {
 	 */
 	public function maybe_upgrade_database() {
 		$current_db_version = get_option( 'tabesh_v2_db_version', '0.0.0' );
-		$required_db_version = '1.1.0';
+		$required_db_version = '1.4.0';
 
 		if ( version_compare( $current_db_version, $required_db_version, '<' ) ) {
 			$database = new Database();
