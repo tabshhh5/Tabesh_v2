@@ -88,7 +88,7 @@ class Auth_Controller {
 	 */
 	public function add_rewrite_rules() {
 		$settings = get_option( 'tabesh_v2_settings', array() );
-		$panel_url = $settings['panel_url'] ?? 'panel';
+		$panel_url = $settings['panel']['url'] ?? 'panel';
 
 		// Remove leading/trailing slashes.
 		$panel_url = trim( $panel_url, '/' );
@@ -247,7 +247,7 @@ class Auth_Controller {
 	 */
 	private function get_panel_url( $path = '' ) {
 		$settings = get_option( 'tabesh_v2_settings', array() );
-		$panel_url = $settings['panel_url'] ?? 'panel';
+		$panel_url = $settings['panel']['url'] ?? 'panel';
 
 		$url = home_url( '/' . trim( $panel_url, '/' ) );
 
@@ -267,9 +267,9 @@ class Auth_Controller {
 	public function request_otp( $phone_number ) {
 		// Get settings.
 		$settings = get_option( 'tabesh_v2_settings', array() );
-		$max_requests = $settings['otp_rate_limit_max'] ?? 3;
-		$time_window = $settings['otp_rate_limit_window'] ?? 60;
-		$min_interval = $settings['otp_min_interval'] ?? 120;
+		$max_requests = $settings['otp']['rate_limit_max'] ?? 3;
+		$time_window = $settings['otp']['rate_limit_window'] ?? 60;
+		$min_interval = $settings['otp']['min_interval'] ?? 120;
 
 		// Check rate limit by IP.
 		$ip = $_SERVER['REMOTE_ADDR'] ?? '';

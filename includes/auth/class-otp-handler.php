@@ -88,13 +88,13 @@ class OTP_Handler {
 
 		// Load settings from WordPress options.
 		$settings = get_option( 'tabesh_v2_settings', array() );
-		$this->api_username = $settings['melipayamak_username'] ?? '';
-		$this->api_password = $settings['melipayamak_password'] ?? '';
-		$this->sender_number = $settings['melipayamak_sender'] ?? '';
-		$this->body_id = $settings['melipayamak_body_id'] ?? '';
-		$this->otp_length = $settings['otp_length'] ?? 6;
-		$this->otp_validity = $settings['otp_validity'] ?? 5;
-		$this->max_attempts = $settings['otp_max_attempts'] ?? 5;
+		$this->api_username = $settings['melipayamak']['username'] ?? '';
+		$this->api_password = $settings['melipayamak']['password'] ?? '';
+		$this->sender_number = $settings['melipayamak']['sender'] ?? '';
+		$this->body_id = $settings['melipayamak']['body_id'] ?? '';
+		$this->otp_length = $settings['otp']['length'] ?? 6;
+		$this->otp_validity = $settings['otp']['validity'] ?? 5;
+		$this->max_attempts = $settings['otp']['max_attempts'] ?? 5;
 	}
 
 	/**

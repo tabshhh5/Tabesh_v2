@@ -106,6 +106,25 @@ class Settings_Panel {
 				'log_messages'           => true,
 				'max_retries'            => 3,
 			),
+			'melipayamak'       => array(
+				'username'      => '',
+				'password'      => '',
+				'sender'        => '',
+				'body_id'       => '',
+			),
+			'otp'               => array(
+				'length'                => 6,
+				'validity'              => 5,
+				'max_attempts'          => 5,
+				'rate_limit_max'        => 3,
+				'rate_limit_window'     => 60,
+				'min_interval'          => 120,
+			),
+			'panel'             => array(
+				'url'                   => 'panel',
+				'redirect_woocommerce'  => true,
+				'redirect_wordpress'    => false,
+			),
 			'firewall'          => array(
 				'enabled'                 => true,
 				'rate_limiting'           => true,
